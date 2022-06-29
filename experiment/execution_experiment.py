@@ -13,7 +13,7 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper
 
-from evaluation.experiment import concerto_d_g5k, generate_transitions_time
+from experiment import concerto_d_g5k
 
 
 finished_nodes = []
@@ -34,14 +34,14 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
     compute_results(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir))
 
     # Finish reconf for assembly name if its over
-    concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num)
-    if exists(f"concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+    # concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
+    if exists(f"/home/anomond/{version_concerto_name}/concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         print("reconf finished")
         finished_nodes.append(node_num)
 
 
 def compute_results(assembly_name: str, timestamp_log_file: str):
-    with open(f"evaluation/experiment/results_experiment/logs_files_assemblies/{timestamp_log_file}", "r") as f:
+    with open(f"/home/anomond/evaluation/experiment/results_experiment/logs_files_assemblies/{timestamp_log_file}", "r") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -83,17 +83,21 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
     expe_time_start = time.time()
     uptimes_nodes = [list(uptimes) for uptimes in uptimes_nodes_tuples]
     all_threads = []
+
     print("UPTIMES TO TREAT")
     for node_num, uptimes in enumerate(uptimes_nodes):
         print(f"node_num: {node_num}, uptimes: {uptimes}")
     finished_nodes.clear()
+
     while any(len(uptimes) > 0 for uptimes in uptimes_nodes):
+
         # Find the next reconf to launch (closest in time)
         node_num, next_uptime = find_next_uptime(uptimes_nodes)
         if node_num in finished_nodes:
             print(f"{node_num} finished its reconfiguration, clearing all subsequent uptimes")
             uptimes_nodes[node_num].clear()
         elif next_uptime[0] <= time.time() - expe_time_start:
+
             # Init the thread that will handle the reconf
             duration = next_uptime[1]
             dep_num = None if node_num == 0 else node_num - 1
@@ -127,9 +131,11 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(version_concerto_name, uptimes_params_nodes, transitions_times, cluster, experiment_num):
+def launch_experiment(version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
     # Provision infrastructure
     print("------ Provisionning infrastructure --------")
+    with open(uptimes_file_name) as f:
+        uptimes_params_nodes = json.load(f)
     params, uptimes_nodes = uptimes_params_nodes
     print(params)
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
@@ -140,10 +146,9 @@ def launch_experiment(version_concerto_name, uptimes_params_nodes, transitions_t
     # TODO: Mettre synchrone/asynchrone/Muse
     # TODO: Mettre les deux expériences (cf présentation) (donc ce qui est mesuré dans les deux expériences)
     # TODO: générer les fichiers en amont et uniquement passer leurs chemin au ParamSweeper
-    hash_file, reconf_config_file = generate_transitions_time_file(transitions_times, uptimes_nodes)
 
     # Reinitialize finished configuration states
-    reinitialize_finished_config_state(uptimes_nodes)
+    reinitialize_finished_config_state(uptimes_nodes, version_concerto_name)
 
     # Deploy zenoh routers
     print("------- Deploy zenoh routers -------")
@@ -170,114 +175,77 @@ def launch_experiment(version_concerto_name, uptimes_params_nodes, transitions_t
             "current_down_time": time.time(),
         }
 
-    schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes, reconf_config_file, experiment_num)
+    schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes, transitions_times_file_name, experiment_num)
 
     for name in nodes_names:
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
 
     # Save results
-    save_results(cluster, hash_file, params, reconf_config_file, uptimes_nodes, experiment_num)
+    save_results(version_concerto_name, cluster, params, transitions_times_file_name, uptimes_file_name, experiment_num)
 
     print("------ End of experiment ---------")
 
 
-def save_results(cluster, hash_file, params, reconf_config_file, uptimes_nodes, expe_num):
+def save_results(version_concerto_name, cluster, params, transitions_times_file_name, uptimes_file_name, expe_num):
     # Dans le nom: timestamp
-    reconfig_config_file_path = "_".join(map(str, params))
-    reconfig_config_file_path += f"_{hash_file}_"
-    reconfig_config_file_path += cluster
-    reconfig_config_file_path += f"_expe_{expe_num}"
-    full_path = f"evaluation/experiment/results_experiment/results_{reconfig_config_file_path}"
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    os.makedirs("/home/anomond/results", exist_ok=True)
+    full_path = f"/home/anomond/results/results_{timestamp}"
     print(f"Saving results in {full_path}")
     with open(full_path, "w") as f:
-        json.dump(results, f, indent=4)
+        results_to_dump = {
+            "parameters": {
+                "version_concerto_name": version_concerto_name,
+                "params": params,
+                "transitions_times_file_name": transitions_times_file_name,
+                "uptimes_file_name": uptimes_file_name,
+                "expe_num": expe_num,
+                "cluster": cluster,
+            },
+            "results": results
+        }
+        json.dump(results_to_dump, f, indent=4)
+
     # Save config expe + results
-    datetime_now_formatted = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    dir_to_save_path = f"/home/anomond/all_expe_results/{reconfig_config_file_path}_{datetime_now_formatted}"
-    os.makedirs(dir_to_save_path)
-    # Save uptimes
-    with open(f"{dir_to_save_path}/uptimes.json", "w") as f:
-        json.dump({
-            "params": params,
-            "uptimes": uptimes_nodes
-        }, f)
-    # Save transitions time
-    shutil.copy(reconf_config_file, f"{dir_to_save_path}/transitions_times.json")
-    # Save experience results
-    shutil.copy(full_path, f"{dir_to_save_path}/results_{reconfig_config_file_path}.json")
-    # Save file with finished reconfigurations
-    shutil.copytree("concerto/finished_reconfigurations", f"{dir_to_save_path}/finished_reconfigurations")
+    shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/finished_reconfigurations_{timestamp}")
 
 
-def reinitialize_finished_config_state(uptimes_nodes):
+def reinitialize_finished_config_state(version_concerto_name, uptimes_nodes):
     print("------- Removing previous finished_configurations files -------")
-    path_server = f"concerto/finished_reconfigurations/server_assembly"
+    path_server = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/server_assembly"
     if exists(path_server):
         print(f"Removing {path_server}")
         os.remove(path_server)
     for i in range(len(uptimes_nodes) - 1):
-        path_dep = f"concerto/finished_reconfigurations/dep_assembly_{i}"
+        path_dep = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/dep_assembly_{i}"
         if exists(path_dep):
             print(f"Removing {path_dep}")
             os.remove(path_dep)
 
 
-def generate_transitions_time_file(transitions_times, uptimes_nodes):
-    print("------ Creating configuration file for reconfiguration programs --------")
-    transitions_to_dump = {"server": dict(transitions_times[0])}
-    for dep_num in range(1, len(uptimes_nodes)):
-        transitions_to_dump[f"dep{dep_num - 1}"] = dict(transitions_times[dep_num])
-    hash_file = str(abs(hash(transitions_times)))[:4]
-    reconf_config_file = f"evaluation/experiment/generated_transitions_time/configuration_{hash_file}.json"
-    with open(reconf_config_file, "w") as f:
-        json.dump({"nb_deps_tot": len(uptimes_nodes) - 1, "transitions_time": transitions_to_dump}, f, indent=4)
-    print(f"Config file saved in {reconf_config_file}")
-    return hash_file, reconf_config_file
+def create_and_run_sweeper():
+    version_concerto_name = "concerto-decentralized-synchrone"
 
-
-def get_uptimes_to_test():
-    """
-    Remplir manuellement le chemin du fichier avec les uptimes, et les taux retournés
-    """
-    with open(f"evaluation/experiment/generated_covering_taux/2022-06-26_14-50-58/uptimes.json") as f:
-        loaded_uptimes = json.load(f)
-
-    for params, values in loaded_uptimes.items():
-        for perc, uptimes_nodes in values.items():
-            li = []
-            for uptimes_node in uptimes_nodes:
-                li += tuple(tuple(uptime) for uptime in uptimes_node),
-            values[perc] = tuple(li)
-
-    return [
-        ((30, 30, 12, (0.02, 0.05)), loaded_uptimes[str((30, 30, 12))][str((0.02, 0.05))]),
-        ((30, 30, 12, (0.20, 0.30)), loaded_uptimes[str((30, 30, 12))][str((0.20, 0.30))]),
-        ((30, 30, 12, (0.50, 0.60)), loaded_uptimes[str((30, 30, 12))][str((0.50, 0.60))]),
-        ((30, 60, 12, (0.02, 0.05)), loaded_uptimes[str((30, 60, 12))][str((0.02, 0.05))]),
-        ((30, 60, 12, (0.20, 0.30)), loaded_uptimes[str((30, 60, 12))][str((0.20, 0.30))]),
-        ((30, 60, 12, (0.50, 0.60)), loaded_uptimes[str((30, 60, 12))][str((0.50, 0.60))]),
+    uptimes_to_test = [
+        "/home/anomond/parameters/uptimes/uptimes-30-30-12-0_02-0_05.json",
+        "/home/anomond/parameters/uptimes/uptimes-30-30-12-0_2-0_3.json",
+        "/home/anomond/parameters/uptimes/uptimes-30-30-12-0_5-0_6.json",
     ]
 
-
-def create_and_run_sweeper():
-    # Generate transitions
-    nb_generations = 4
-    max_deps = 20
-    transitions_times_list = generate_transitions_time.generate_transitions_times(max_deps, nb_generations)
-
-    clusters_list = ["uvb"]
-    uptimes_to_test = get_uptimes_to_test()
-    version_concerto_name = "concerto-decentralized-synchrone"
+    transitions_times_list = [
+        "/home/anomond/parameters/transitions_times/transitions_times-1-30-0.json",
+        "/home/anomond/parameters/transitions_times/transitions_times-1-30-1.json"
+    ]
 
     sweeps = sweep({
         "uptimes": uptimes_to_test,
         "transitions_times": transitions_times_list,
-        "cluster": clusters_list,
-        "experiment_num": [1, 2]
+        "cluster": ["uvb"],
+        "experiment_num": [1]
     })
 
     sweeper = ParamSweeper(
-        persistence_dir=str(Path("evaluation/experiment/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path("experiment/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:

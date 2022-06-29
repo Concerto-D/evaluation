@@ -31,12 +31,12 @@ def reserve_node_for_deployment(cluster: str):
     return roles, networks, provider
 
 
-def reserve_node_for_controller(cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
     _ = en.init_logging()
     site = get_cluster_site(cluster)
     base_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
     conf = (
-        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name="controller")
+        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name=job_name)
                   .add_network_conf(base_network)
     )
     conf = conf.add_machine(
@@ -52,7 +52,7 @@ def reserve_node_for_controller(cluster: str, walltime: str = '01:00:00', reserv
     return roles, networks
 
 
-def reserve_nodes_for_concerto_d(nb_concerto_d_nodes: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
     """
     TODO: voir pour les restriction des ressources (pour approcher des ressources d'une OU (raspberry ou autre))
     """
@@ -63,7 +63,7 @@ def reserve_nodes_for_concerto_d(nb_concerto_d_nodes: int, nb_zenoh_routers: int
     # TODO: faire les réservations en avance pour toutes les expés (master + noeuds de l'expé), en amont dans un autre
     # script (voir aussi script Maverick + voir si on peut retrouver le provider depuis la conf).
     conf = (
-        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name="concerto-d")
+        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name=job_name)
                   .add_network_conf(concerto_d_network)
     )
     conf = conf.add_machine(
@@ -89,18 +89,18 @@ def reserve_nodes_for_concerto_d(nb_concerto_d_nodes: int, nb_zenoh_routers: int
 
     provider = en.G5k(conf)
     roles, networks = provider.init()
-    roles = en.sync_info(roles, networks)
-
-    netem = en.NetemHTB()
-    netem.add_constraints(
-        src=roles["zenoh_routers"],
-        dest=roles[f"concerto_d"],
-        delay="0ms",
-        rate="200kbit",
-        symetric=True,
-    )
-    netem.deploy()
-    netem.validate()
+    # roles = en.sync_info(roles, networks)
+    #
+    # netem = en.NetemHTB()
+    # netem.add_constraints(
+    #     src=roles["zenoh_routers"],
+    #     dest=roles[f"concerto_d"],
+    #     delay="0ms",
+    #     rate="200kbit",
+    #     symetric=True,
+    # )
+    # netem.deploy()
+    # netem.validate()
     return roles, networks
 
 
@@ -117,11 +117,13 @@ def put_assemblies_configuration_file(role_controller, configuration_file_path: 
         print(a.results)
 
 
-def put_uptimes_file(role_controller, uptimes_dir_path: str, uptimes_file_name: str):
+def put_uptimes_file(role_controller, uptimes_src: str, uptimes_dst: str):
     with en.actions(roles=role_controller) as a:
         home_dir = "/home/anomond"
-        a.file(path=f"{home_dir}/concertonode/{uptimes_dir_path}", state="directory")
-        a.copy(src=f"{uptimes_dir_path}/{uptimes_file_name}", dest=f"{home_dir}/concertonode/{uptimes_dir_path}/{uptimes_file_name}")
+        a.file(path=f"{home_dir}/parameters", state="directory")
+        a.file(path=f"{home_dir}/parameters/uptimes", state="directory")
+        a.file(path=f"{home_dir}/parameters/transitions_times", state="directory")
+        a.copy(src=f"{uptimes_src}", dest=f"{home_dir}/{uptimes_dst}")
         print(a.results)
 
 
@@ -132,27 +134,35 @@ def initiate_concerto_d_dir(role_controller):
     with en.actions(roles=role_controller) as a:
         home_dir = "/home/anomond"
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
-        a.git(dest=f"{home_dir}/concertonode",
+        a.git(dest=f"{home_dir}/concerto-decentralized",
               repo="git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
               accept_hostkey=True)
-        a.pip(chdir=f"{home_dir}/concertonode",
-              requirements=f"{home_dir}/concertonode/requirements.txt",
-              virtualenv=f"{home_dir}/concertonode/venv")
-        a.file(path=f"{home_dir}/concertonode/evaluation/experiment/generated_covering_taux", state="directory")
-        a.file(path=f"{home_dir}/concertonode/evaluation/experiment/generated_transitions_time", state="directory")
-        a.file(path=f"{home_dir}/concertonode/evaluation/experiment/results_experiment", state="directory")
-        a.file(path=f"{home_dir}/concertonode/evaluation/experiment/results_experiment/logs_files_assemblies", state="directory")
-        # Reset reprise_configs dir
-        a.file(path=f"{home_dir}/concertonode/concerto/reprise_configs", state="absent")
-        a.file(path=f"{home_dir}/concertonode/concerto/reprise_configs", state="directory")
-        # Reset logs dir
-        a.file(path=f"{home_dir}/concertonode/concerto/logs", state="absent")
-        a.file(path=f"{home_dir}/concertonode/concerto/logs", state="directory")
-        a.file(path=f"{home_dir}/concertonode/concerto/archives_reprises", state="directory")
-        # Reset finished_reconfigurations dir
-        a.file(path=f"{home_dir}/concertonode/concerto/finished_reconfigurations", state="absent")
-        a.file(path=f"{home_dir}/concertonode/concerto/finished_reconfigurations", state="directory")
+        a.git(dest=f"{home_dir}/concerto-decentralized-synchrone",
+              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized-synchrone.git",
+              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              accept_hostkey=True)
+        for concertonode in ["concerto-decentralized", "concerto-decentralized-synchrone"]:
+            a.pip(chdir=f"{home_dir}/{concertonode}",
+                  requirements=f"{home_dir}/{concertonode}/requirements.txt",
+                  virtualenv=f"{home_dir}/{concertonode}/venv")
+            # Reset reprise_configs dir
+            a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="absent")
+            a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="directory")
+            # Reset logs dir
+            a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="absent")
+            a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="directory")
+            a.file(path=f"{home_dir}/{concertonode}/concerto/archives_reprises", state="directory")
+            # Reset finished_reconfigurations dir
+            a.file(path=f"{home_dir}/{concertonode}/concerto/finished_reconfigurations", state="absent")
+            a.file(path=f"{home_dir}/{concertonode}/concerto/finished_reconfigurations", state="directory")
+        a.git(dest=f"{home_dir}/evaluation",
+              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/evaluation.git",
+              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              accept_hostkey=True)
+
+        a.file(path=f"{home_dir}/evaluation/experiment/results_experiment", state="directory")
+        a.file(path=f"{home_dir}/evaluation/experiment/results_experiment/logs_files_assemblies", state="directory")
         print(a.results)
 
 
@@ -179,7 +189,7 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_str = " ".join(command_args)
     home_dir = "/home/anomond"
     with en.actions(roles=role_node) as a:
-        a.shell(chdir=f"{home_dir}/concertonode", command=command_str)
+        a.shell(chdir=f"{home_dir}", command=command_str)
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout):
@@ -195,11 +205,11 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
         return f"finished_reconfigurations/{assembly_name.replace(str(dep_num), '')}_assembly_{dep_num}"
 
 
-def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num):
+def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
     home_dir = "/home/anomond"
     with en.actions(roles=role_node) as a:
         a.fetch(
-            src=f"{home_dir}/concertonode/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
             dest=f"concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
             flat="yes",
             fail_on_missing="no"
@@ -213,11 +223,11 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
         return f"dep{dep_num}_{timestamp_log_file}.yaml"
 
 
-def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str):
+def fetch_times_log_file(role_node, version_concerto_name, assembly_name, dep_num, timestamp_log_file: str):
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            dest=f"evaluation/experiment/results_experiment/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
+            dest=f"/home/anomond/evaluation/experiment/results_experiment/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             flat="yes"
         )
 
