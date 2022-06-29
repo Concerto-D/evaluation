@@ -150,10 +150,11 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
     reinitialize_finished_config_state(uptimes_nodes, version_concerto_name)
 
     # Deploy zenoh routers
-    print("------- Deploy zenoh routers -------")
-    max_uptime_value = compute_end_reconfiguration_time(uptimes_nodes)
-    concerto_d_g5k.install_zenoh_router(roles["zenoh_routers"])
-    concerto_d_g5k.execute_zenoh_routers(roles["zenoh_routers"], max_uptime_value)
+    if version_concerto_name == "concerto-decentralized":
+        print("------- Deploy zenoh routers -------")
+        max_uptime_value = compute_end_reconfiguration_time(uptimes_nodes)
+        concerto_d_g5k.install_zenoh_router(roles["zenoh_routers"])
+        concerto_d_g5k.execute_zenoh_routers(roles["zenoh_routers"], max_uptime_value)
 
     # Reset results logs
     for assembly_name in results.keys():
