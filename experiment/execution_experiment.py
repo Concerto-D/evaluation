@@ -135,11 +135,10 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
     # Provision infrastructure
     print("------ Provisionning infrastructure --------")
     with open(uptimes_file_name) as f:
-        uptimes_params_nodes = json.load(f)
-    params, uptimes_nodes = uptimes_params_nodes
-    print(params)
+        uptimes_nodes = json.load(f)
+
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d("concerto-d-test", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
     print(roles, networks)
 
     # Create transitions time file
@@ -181,12 +180,12 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
 
     # Save results
-    save_results(version_concerto_name, cluster, params, transitions_times_file_name, uptimes_file_name, experiment_num)
+    save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num)
 
     print("------ End of experiment ---------")
 
 
-def save_results(version_concerto_name, cluster, params, transitions_times_file_name, uptimes_file_name, expe_num):
+def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num):
     # Dans le nom: timestamp
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     os.makedirs("/home/anomond/results", exist_ok=True)
@@ -196,7 +195,6 @@ def save_results(version_concerto_name, cluster, params, transitions_times_file_
         results_to_dump = {
             "parameters": {
                 "version_concerto_name": version_concerto_name,
-                "params": params,
                 "transitions_times_file_name": transitions_times_file_name,
                 "uptimes_file_name": uptimes_file_name,
                 "expe_num": expe_num,
