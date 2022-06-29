@@ -175,10 +175,10 @@ def install_zenoh_router(roles_zenoh_router: List):
 
 def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, experiment_num: int):
     command_args = []
-    command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd)/{version_concerto_name}")  # Set PYTHONPATH (equivalent of source source_dir.sh)
-    command_args.append(f"{version_concerto_name}/venv/bin/python3")               # Execute inside the python virtualenv
+    command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd)")  # Set PYTHONPATH (equivalent of source source_dir.sh)
+    command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
     assembly_name = "server" if dep_num is None else "dep"
-    command_args.append(f"evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
+    command_args.append(f"../evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
     if dep_num is not None:
         command_args.append(str(dep_num))  # If it's a dependency
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
@@ -189,7 +189,7 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_str = " ".join(command_args)
     home_dir = "/home/anomond"
     with en.actions(roles=role_node) as a:
-        a.shell(chdir=f"{home_dir}", command=command_str)
+        a.shell(chdir=f"{home_dir}/{version_concerto_name}", command=command_str)
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout):
@@ -205,15 +205,15 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
         return f"finished_reconfigurations/{assembly_name.replace(str(dep_num), '')}_assembly_{dep_num}"
 
 
-def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
-    home_dir = "/home/anomond"
-    with en.actions(roles=role_node) as a:
-        a.fetch(
-            src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            dest=f"concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            flat="yes",
-            fail_on_missing="no"
-        )
+# def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
+#     home_dir = "/home/anomond"
+#     with en.actions(roles=role_node) as a:
+#         a.fetch(
+#             src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+#             dest=f"concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+#             flat="yes",
+#             fail_on_missing="no"
+#         )
 
 
 def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
@@ -223,20 +223,10 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
         return f"dep{dep_num}_{timestamp_log_file}.yaml"
 
 
-def fetch_times_log_file(role_node, version_concerto_name, assembly_name, dep_num, timestamp_log_file: str):
+def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str):
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             dest=f"/home/anomond/evaluation/experiment/results_experiment/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             flat="yes"
         )
-
-
-def get_logs_from_concerto_d_node(roles_sites, logs_assembly_names: List[str]):
-    """
-    Need one role per site to gather the logs
-    """
-    home_dir = "/home/anomond"
-    with en.actions(roles=roles_sites) as a:
-        for assembly_name in logs_assembly_names:
-            a.fetch(src=f"{home_dir}/concertonode/concerto/logs/logs_{assembly_name}.txt", dest=f"concerto/remote_logs/logs_{assembly_name}.txt", flat="yes")
