@@ -213,9 +213,9 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
 
 def reinitialize_reconf_files(version_concerto_name):
     log.debug("------- Removing previous finished_configurations files -------")
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations")
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache")
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs")
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", ignore_errors=True)
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache", ignore_errors=True)
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs", ignore_errors=True)
 
 
 def get_normal_parameters():
