@@ -6,8 +6,8 @@ from experiment import concerto_d_g5k
 def get_normal_parameters():
     job_name_concerto = "concerto-d"
     job_name_controller = "controller"
-    walltime = "08:30:00"
-    reservation = "2022-06-26 16:00:00"
+    walltime = "13:30:00"
+    reservation = None
     nb_concerto_nodes = 13
     nb_zenoh_routers = 0
     return job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers
