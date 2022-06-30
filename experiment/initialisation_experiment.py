@@ -9,7 +9,7 @@ def main():
     cluster = "uvb"
     deployment_node, networks, provider = concerto_d_g5k.reserve_node_for_deployment(cluster)
     concerto_d_g5k.initiate_concerto_d_dir(deployment_node["deployment"])
-
+    version_concerto_name = "concerto-decentralized-synchrone"
     uptimes_dir_path_list = [
         ("experiment_files/parameters/uptimes/uptimes-30-30-2-0_98-1.json", "parameters/uptimes/uptimes-30-30-2-0_98-1.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_2-0_3.json", "parameters/uptimes/uptimes-30-30-12-0_2-0_3.json"),
@@ -18,9 +18,10 @@ def main():
         ("experiment_files/parameters/transitions_times/mock_transitions_times-1-30-deps2.json", "parameters/transitions_times/mock_transitions_times-1-30-deps2.json"),
         ("experiment_files/parameters/transitions_times/transitions_times-1-30-deps12-0.json", "parameters/transitions_times/transitions_times-1-30-deps12-0.json"),
         ("experiment_files/parameters/transitions_times/transitions_times-1-30-deps12-1.json", "parameters/transitions_times/transitions_times-1-30-deps12-1.json"),
+        ("inventory.yaml", f"{version_concerto_name}/inventory.yaml"),
     ]
     for src, dst in uptimes_dir_path_list:
-        concerto_d_g5k.put_uptimes_file(deployment_node["deployment"], src, dst)
+        concerto_d_g5k.put_file(deployment_node["deployment"], src, dst)
 
     provider.destroy()
 

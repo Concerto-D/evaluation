@@ -117,7 +117,7 @@ def put_assemblies_configuration_file(role_controller, configuration_file_path: 
         print(a.results)
 
 
-def put_uptimes_file(role_controller, uptimes_src: str, uptimes_dst: str):
+def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
     with en.actions(roles=role_controller) as a:
         home_dir = "/home/anomond"
         a.file(path=f"{home_dir}/parameters", state="directory")
