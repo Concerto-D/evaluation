@@ -208,7 +208,8 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
-    shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/finished_reconfigurations_{timestamp}")
+    if exists(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"):
+        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/finished_reconfigurations_{timestamp}")
 
 
 def reinitialize_reconf_files(version_concerto_name):
