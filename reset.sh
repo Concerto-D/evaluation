@@ -1,3 +1,3 @@
 #!/usr/bin/bash
-rm -rf experiment/sweep_test
+rm -rf experiment/sweeps_test
 rm experiment_logs/*
