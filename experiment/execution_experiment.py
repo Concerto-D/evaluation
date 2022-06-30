@@ -236,7 +236,7 @@ def get_normal_parameters():
 
 def get_test_parameters():
     uptimes_to_test = [
-        "/home/anomond/parameters/uptimes/uptimes-30-30-12-1-1.json"
+        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json"
     ]
 
     transitions_times_list = [
@@ -251,7 +251,7 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     sweeps = sweep({
         "uptimes": uptimes_to_test,
         "transitions_times": transitions_times_list,
-        "cluster": ["uvb"],
+        "cluster": ["econome"],
         "experiment_num": [1]
     })
     log.debug("--- All experiments to treat: ---")

@@ -6,7 +6,7 @@ def main():
     Script d'initialisation à exécuter avant de lancer le controller d'expérience
     TODO: cannot find the same provider
     """
-    cluster = "uvb"
+    cluster = "econome"
     deployment_node, networks, provider = concerto_d_g5k.reserve_node_for_deployment(cluster)
     concerto_d_g5k.initiate_concerto_d_dir(deployment_node["deployment"])
     uptimes_dir_path_list = [
