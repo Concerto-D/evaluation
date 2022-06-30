@@ -3,6 +3,7 @@ import logging
 import math
 import os
 import shutil
+import sys
 import time
 import traceback
 from datetime import datetime
@@ -138,15 +139,15 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
+def launch_experiment(is_normal, version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
     # Provision infrastructure
-    log = logging.getLogger(__name__)
     log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:
         uptimes_nodes = json.load(f)
 
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d("concerto-d-test", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
+    suffix = "-test" if not is_normal else ""
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(f"concerto-d{suffix}", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
     log.debug(roles, networks)
 
     # Create transitions time file
@@ -230,10 +231,7 @@ def reinitialize_finished_config_state(version_concerto_name, uptimes_nodes):
             os.remove(path_dep)
 
 
-def create_and_run_sweeper():
-
-    version_concerto_name = "concerto-decentralized-synchrone"
-
+def get_normal_parameters():
     uptimes_to_test = [
         "/home/anomond/parameters/uptimes/uptimes-30-30-12-0_02-0_05.json",
         "/home/anomond/parameters/uptimes/uptimes-30-30-12-0_2-0_3.json",
@@ -245,6 +243,24 @@ def create_and_run_sweeper():
         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-1.json"
     ]
 
+    return uptimes_to_test, transitions_times_list
+
+
+def get_test_parameters():
+    uptimes_to_test = [
+        "/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json"
+    ]
+
+    transitions_times_list = [
+        "/home/anomond/parameters/transitions_times/mock_transitions_times-1-30-deps2.json"
+    ]
+
+    return uptimes_to_test, transitions_times_list
+
+
+def create_and_run_sweeper(is_normal, uptimes_to_test, transitions_times_list):
+    version_concerto_name = "concerto-decentralized-synchrone"
+
     sweeps = sweep({
         "uptimes": uptimes_to_test,
         "transitions_times": transitions_times_list,
@@ -255,14 +271,15 @@ def create_and_run_sweeper():
     for k in sweeps:
         log.debug(k)
     log.debug("----------------------------------")
+    suffix = "_test" if not is_normal else ""
     sweeper = ParamSweeper(
-        persistence_dir=str(Path("experiment/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"experiment/sweeps{suffix}").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
-            launch_experiment(version_concerto_name, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
+            launch_experiment(is_normal, version_concerto_name, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
             sweeper.done(parameter)
         except Exception as e:
             sweeper.skip(parameter)
@@ -276,4 +293,9 @@ def create_and_run_sweeper():
 
 
 if __name__ == '__main__':
-    create_and_run_sweeper()
+    is_normal = len(sys.argv) > 1 and sys.argv[1] == "normal"
+    if is_normal:
+        uptimes_to_test, transitions_times_list = get_normal_parameters()
+    else:
+        uptimes_to_test, transitions_times_list = get_test_parameters()
+    create_and_run_sweeper(is_normal, uptimes_to_test, transitions_times_list)

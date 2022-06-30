@@ -1,4 +1,26 @@
+import sys
+
 from experiment import concerto_d_g5k
+
+
+def get_normal_parameters():
+    job_name_concerto = "concerto-d"
+    job_name_controller = "controller"
+    walltime = "08:30:00"
+    reservation = "2022-06-26 16:00:00"
+    nb_concerto_nodes = 13
+    nb_zenoh_routers = 0
+    return job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers
+
+
+def get_test_parameters():
+    job_name_concerto = "concerto-d-test"
+    job_name_controller = "controller-test"
+    walltime = "01:00:00"
+    reservation = None
+    nb_concerto_nodes = 3
+    nb_zenoh_routers = 0
+    return job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers
 
 
 def main():
@@ -6,15 +28,24 @@ def main():
     # Mettre à jour python-grid5000 n'a pas l'air d'être une bonne solution car la version d'enoslib utilise une
     # version specific de python-grid5000
     # TODO: à signaler: même avec verify_ssl ça ne suffit pas il faut mettre le user et le mdp sur le front-end
+    is_normal = len(sys.argv) > 1 and sys.argv[1] == "normal"
     cluster = "uvb"
-    walltime = "08:30:00"
-    reservation = "2022-06-26 16:00:00"
-    job_name_concerto_d = "concerto-d"
-    job_name_concerto_d_test = "concerto-d-test"
-    job_name_controller = "controller"
-    job_name_controller_test = "controller-test"
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto_d_test, nb_concerto_d_nodes=13, nb_zenoh_routers=1, cluster=cluster, walltime=walltime)
-    concerto_d_g5k.reserve_node_for_controller(job_name_controller_test, cluster, walltime=walltime)
+    if is_normal:
+        job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers = get_normal_parameters()
+    else:
+        job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers = get_test_parameters()
+    # walltime = "01:00:00"
+    # reservation = "2022-06-26 16:00:00"
+    # job_name_concerto_d = "concerto-d"
+    # job_name_concerto_d_test = "concerto-d-test"
+    # job_name_controller = "controller"
+    # job_name_controller_test = "controller-test"
+    # job_name_concerto = job_name_concerto_d_test if is_test else job_name_concerto_d
+    # job_name_cont = job_name_controller_test if is_test else job_name_controller
+    # nb_concerto_nodes = 2 if is_test else 13
+    # nb_zenoh_routers = 0
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
+    concerto_d_g5k.reserve_node_for_controller(job_name_controller, cluster, walltime=walltime, reservation=reservation)
     create_inventory_from_roles(roles)
 
 

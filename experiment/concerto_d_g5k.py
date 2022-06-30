@@ -149,6 +149,9 @@ def initiate_concerto_d_dir(role_controller):
             # Reset reprise_configs dir
             a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="absent")
             a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="directory")
+            # Reset communication_cache dir
+            a.file(path=f"{home_dir}/{concertonode}/concerto/communication_cache", state="absent")
+            a.file(path=f"{home_dir}/{concertonode}/concerto/communication_cache", state="directory")
             # Reset logs dir
             a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="absent")
             a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="directory")
