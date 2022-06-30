@@ -211,15 +211,15 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
         return f"finished_reconfigurations/{assembly_name.replace(str(dep_num), '')}_assembly_{dep_num}"
 
 
-# def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
-#     home_dir = "/home/anomond"
-#     with en.actions(roles=role_node) as a:
-#         a.fetch(
-#             src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-#             dest=f"concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-#             flat="yes",
-#             fail_on_missing="no"
-#         )
+def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
+    home_dir = "/home/anomond"
+    with en.actions(roles=role_node) as a:
+        a.fetch(
+            src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            dest=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            flat="yes",
+            fail_on_missing="no"
+        )
 
 
 def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
