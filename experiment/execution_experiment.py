@@ -1,5 +1,4 @@
 import json
-import logging
 import math
 import os
 import shutil
@@ -14,6 +13,7 @@ from typing import List
 
 import yaml
 from execo_engine import sweep, ParamSweeper
+from log_experiment import log
 
 from experiment import concerto_d_g5k
 
@@ -21,12 +21,6 @@ from experiment import concerto_d_g5k
 finished_nodes = []
 results = {}
 sleeping_times_nodes = {}
-
-os.makedirs("experiment_logs", exist_ok=True)
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-logging.basicConfig(filename=f"experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 
 
 def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num):

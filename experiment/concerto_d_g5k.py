@@ -166,6 +166,9 @@ def initiate_concerto_d_dir(role_controller):
 
         a.file(path=f"{home_dir}/evaluation/experiment/results_experiment", state="directory")
         a.file(path=f"{home_dir}/evaluation/experiment/results_experiment/logs_files_assemblies", state="directory")
+        # Reset logs
+        a.file(path=f"{home_dir}/evaluation/experiment_logs", state="absent")
+        a.file(path=f"{home_dir}/evaluation/experiment_logs", state="directory")
         print(a.results)
 
 
