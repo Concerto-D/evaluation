@@ -1,4 +1,5 @@
 import json
+import logging
 import math
 import os
 import shutil
@@ -20,6 +21,12 @@ finished_nodes = []
 results = {}
 sleeping_times_nodes = {}
 
+os.makedirs("experiment_logs", exist_ok=True)
+timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+logging.basicConfig(filename=f"experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+
 
 def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num):
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -36,7 +43,7 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
     # Finish reconf for assembly name if its over
     # concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
     if exists(f"/home/anomond/{version_concerto_name}/concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
-        print("reconf finished")
+        log.debug("reconf finished")
         finished_nodes.append(node_num)
 
 
@@ -79,14 +86,14 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
     qui prennent un peu de temps)
     TODO: à changer ? loader un json via yaml.load
     """
-    print("SCHEDULING START")
+    log.debug("SCHEDULING START")
     expe_time_start = time.time()
     uptimes_nodes = [list(uptimes) for uptimes in uptimes_nodes_tuples]
     all_threads = []
 
-    print("UPTIMES TO TREAT")
+    log.debug("UPTIMES TO TREAT")
     for node_num, uptimes in enumerate(uptimes_nodes):
-        print(f"node_num: {node_num}, uptimes: {uptimes}")
+        log.debug(f"node_num: {node_num}, uptimes: {uptimes}")
     finished_nodes.clear()
 
     while any(len(uptimes) > 0 for uptimes in uptimes_nodes):
@@ -94,7 +101,7 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
         # Find the next reconf to launch (closest in time)
         node_num, next_uptime = find_next_uptime(uptimes_nodes)
         if node_num in finished_nodes:
-            print(f"{node_num} finished its reconfiguration, clearing all subsequent uptimes")
+            log.debug(f"{node_num} finished its reconfiguration, clearing all subsequent uptimes")
             uptimes_nodes[node_num].clear()
         elif next_uptime[0] <= time.time() - expe_time_start:
 
@@ -111,14 +118,14 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
         else:
             # Wait until its time to launch the reconf
             n = (expe_time_start + next_uptime[0]) - time.time()
-            print(f"sleeping {n} seconds")
+            log.debug(f"sleeping {n} seconds")
             time.sleep(n)
 
     # Wait for non finished threads
     for th in all_threads:
         th.join()
 
-    print("ALL UPTIMES HAVE BEEN PROCESSED")
+    log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
 
 
 def compute_end_reconfiguration_time(uptimes_nodes):
@@ -133,13 +140,14 @@ def compute_end_reconfiguration_time(uptimes_nodes):
 
 def launch_experiment(version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
     # Provision infrastructure
-    print("------ Provisionning infrastructure --------")
+    log = logging.getLogger(__name__)
+    log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:
         uptimes_nodes = json.load(f)
 
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
     roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d("concerto-d-test", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
-    print(roles, networks)
+    log.debug(roles, networks)
 
     # Create transitions time file
     # TODO: Mettre synchrone/asynchrone/Muse
@@ -151,7 +159,7 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
 
     # Deploy zenoh routers
     if version_concerto_name == "concerto-decentralized":
-        print("------- Deploy zenoh routers -------")
+        log.debug("------- Deploy zenoh routers -------")
         max_uptime_value = compute_end_reconfiguration_time(uptimes_nodes)
         concerto_d_g5k.install_zenoh_router(roles["zenoh_routers"])
         concerto_d_g5k.execute_zenoh_routers(roles["zenoh_routers"], max_uptime_value)
@@ -167,7 +175,7 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
         }
 
     # Run experiment
-    print("------- Run experiment ----------")
+    log.debug("------- Run experiment ----------")
     nodes_names = ["server"] + [f"dep{i}" for i in range(len(uptimes_nodes) - 1)]
     for name in nodes_names:
         sleeping_times_nodes[name] = {
@@ -183,7 +191,7 @@ def launch_experiment(version_concerto_name, uptimes_file_name, transitions_time
     # Save results
     save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num)
 
-    print("------ End of experiment ---------")
+    log.debug("------ End of experiment ---------")
 
 
 def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num):
@@ -191,7 +199,7 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     os.makedirs("/home/anomond/results", exist_ok=True)
     full_path = f"/home/anomond/results/results_{timestamp}"
-    print(f"Saving results in {full_path}")
+    log.debug(f"Saving results in {full_path}")
     with open(full_path, "w") as f:
         results_to_dump = {
             "parameters": {
@@ -210,19 +218,20 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
 
 
 def reinitialize_finished_config_state(version_concerto_name, uptimes_nodes):
-    print("------- Removing previous finished_configurations files -------")
+    log.debug("------- Removing previous finished_configurations files -------")
     path_server = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/server_assembly"
     if exists(path_server):
-        print(f"Removing {path_server}")
+        log.debug(f"Removing {path_server}")
         os.remove(path_server)
     for i in range(len(uptimes_nodes) - 1):
         path_dep = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/dep_assembly_{i}"
         if exists(path_dep):
-            print(f"Removing {path_dep}")
+            log.debug(f"Removing {path_dep}")
             os.remove(path_dep)
 
 
 def create_and_run_sweeper():
+
     version_concerto_name = "concerto-decentralized-synchrone"
 
     uptimes_to_test = [
@@ -242,19 +251,25 @@ def create_and_run_sweeper():
         "cluster": ["uvb"],
         "experiment_num": [1]
     })
-
+    log.debug("--- All experiments to treat: ---")
+    for k in sweeps:
+        log.debug(k)
+    log.debug("----------------------------------")
     sweeper = ParamSweeper(
         persistence_dir=str(Path("experiment/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
         try:
-            print("----- Launching experiment ---------")
+            log.debug("----- Launching experiment ---------")
             launch_experiment(version_concerto_name, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
             sweeper.done(parameter)
         except Exception as e:
             sweeper.skip(parameter)
-            print("Experiment FAILED")
+            log.debug("Experiment FAILED")
+            log.exception(e)
+            log.debug(e)
+            log.debug(f"Skipping experiment with parameters {parameter}")
             traceback.print_exc()
         finally:
             parameter = sweeper.get_next()
