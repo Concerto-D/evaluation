@@ -149,7 +149,7 @@ def launch_experiment(is_normal, version_concerto_name, uptimes_file_name, trans
     # TODO: générer les fichiers en amont et uniquement passer leurs chemin au ParamSweeper
 
     # Reinitialize finished configuration states
-    reinitialize_finished_config_state(uptimes_nodes, version_concerto_name)
+    reinitialize_reconf_files(version_concerto_name)
 
     # Deploy zenoh routers
     if version_concerto_name == "concerto-decentralized":
@@ -211,17 +211,11 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
     shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/finished_reconfigurations_{timestamp}")
 
 
-def reinitialize_finished_config_state(version_concerto_name, uptimes_nodes):
+def reinitialize_reconf_files(version_concerto_name):
     log.debug("------- Removing previous finished_configurations files -------")
-    path_server = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/server_assembly"
-    if exists(path_server):
-        log.debug(f"Removing {path_server}")
-        os.remove(path_server)
-    for i in range(len(uptimes_nodes) - 1):
-        path_dep = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations/dep_assembly_{i}"
-        if exists(path_dep):
-            log.debug(f"Removing {path_dep}")
-            os.remove(path_dep)
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations")
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache")
+    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs")
 
 
 def get_normal_parameters():
@@ -241,11 +235,11 @@ def get_normal_parameters():
 
 def get_test_parameters():
     uptimes_to_test = [
-        "/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json"
+        "/home/anomond/parameters/uptimes/uptimes-30-30-12-1-1.json"
     ]
 
     transitions_times_list = [
-        "/home/anomond/parameters/transitions_times/mock_transitions_times-1-30-deps2.json"
+        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json"
     ]
 
     return uptimes_to_test, transitions_times_list

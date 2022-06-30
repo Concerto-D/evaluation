@@ -12,6 +12,7 @@ def main():
     version_concerto_name = "concerto-decentralized-synchrone"
     uptimes_dir_path_list = [
         ("experiment_files/parameters/uptimes/uptimes-30-30-2-0_98-1.json", "parameters/uptimes/uptimes-30-30-2-0_98-1.json"),
+        ("experiment_files/parameters/uptimes/uptimes-30-30-12-1-1.json", "parameters/uptimes/uptimes-30-30-12-1-1.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_2-0_3.json", "parameters/uptimes/uptimes-30-30-12-0_2-0_3.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_02-0_05.json", "parameters/uptimes/uptimes-30-30-12-0_02-0_05.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_5-0_6.json", "parameters/uptimes/uptimes-30-30-12-0_5-0_6.json"),

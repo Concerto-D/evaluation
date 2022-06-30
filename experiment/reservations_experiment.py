@@ -18,7 +18,7 @@ def get_test_parameters():
     job_name_controller = "controller-test"
     walltime = "01:00:00"
     reservation = None
-    nb_concerto_nodes = 3
+    nb_concerto_nodes = 13
     nb_zenoh_routers = 1
     return job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers
 
