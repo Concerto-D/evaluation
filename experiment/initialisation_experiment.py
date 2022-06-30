@@ -14,8 +14,8 @@ def main():
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_2-0_3.json", "parameters/uptimes/uptimes-30-30-12-0_2-0_3.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_02-0_05.json", "parameters/uptimes/uptimes-30-30-12-0_02-0_05.json"),
         ("experiment_files/parameters/uptimes/uptimes-30-30-12-0_5-0_6.json", "parameters/uptimes/uptimes-30-30-12-0_5-0_6.json"),
-        ("experiment_files/parameters/transitions_times/transitions_times-1-30-0.json", "parameters/transitions_times/transitions_times-1-30-0.json"),
-        ("experiment_files/parameters/transitions_times/transitions_times-1-30-1.json", "parameters/transitions_times/transitions_times-1-30-1.json"),
+        ("experiment_files/parameters/transitions_times/transitions_times-1-30-deps12-0.json", "parameters/transitions_times/transitions_times-1-30-deps12-0.json"),
+        ("experiment_files/parameters/transitions_times/transitions_times-1-30-deps12-1.json", "parameters/transitions_times/transitions_times-1-30-deps12-1.json"),
     ]
     for src, dst in uptimes_dir_path_list:
         concerto_d_g5k.put_uptimes_file(deployment_node["deployment"], src, dst)

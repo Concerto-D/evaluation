@@ -241,8 +241,8 @@ def create_and_run_sweeper():
     ]
 
     transitions_times_list = [
-        "/home/anomond/parameters/transitions_times/transitions_times-1-30-0.json",
-        "/home/anomond/parameters/transitions_times/transitions_times-1-30-1.json"
+        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json",
+        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-1.json"
     ]
 
     sweeps = sweep({
