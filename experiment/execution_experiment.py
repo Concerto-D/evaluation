@@ -43,6 +43,7 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
 
     # Finish reconf for assembly name if its over
     # concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
+    log.debug(f"Looking at /home/anomond/{version_concerto_name}/concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}")
     if exists(f"/home/anomond/{version_concerto_name}/concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         log.debug("reconf finished")
         finished_nodes.append(node_num)
