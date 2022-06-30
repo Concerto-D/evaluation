@@ -251,8 +251,7 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(is_normal, uptimes_to_test, transitions_times_list):
-    version_concerto_name = "concerto-decentralized-synchrone"
+def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, transitions_times_list):
 
     sweeps = sweep({
         "uptimes": uptimes_to_test,
@@ -286,9 +285,10 @@ def create_and_run_sweeper(is_normal, uptimes_to_test, transitions_times_list):
 
 
 if __name__ == '__main__':
-    is_normal = len(sys.argv) > 1 and sys.argv[1] == "normal"
+    version_concerto_name = sys.argv[1]
+    is_normal = len(sys.argv) > 2 and sys.argv[2] == "normal"
     if is_normal:
         uptimes_to_test, transitions_times_list = get_normal_parameters()
     else:
         uptimes_to_test, transitions_times_list = get_test_parameters()
-    create_and_run_sweeper(is_normal, uptimes_to_test, transitions_times_list)
+    create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, transitions_times_list)
