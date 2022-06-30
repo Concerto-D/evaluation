@@ -7,7 +7,7 @@ from concerto.debug_logger import log
 
 from concerto import time_logger
 from concerto.time_logger import TimeToSave
-from evaluation.synthetic_use_case.assemblies.server_assembly import ServerAssembly
+from synthetic_use_case.assemblies.server_assembly import ServerAssembly
 import yaml
 
 

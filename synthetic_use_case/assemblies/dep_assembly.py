@@ -1,5 +1,5 @@
 from concerto.assembly import Assembly
-from evaluation.synthetic_use_case.assemblies.dep import Dep
+from synthetic_use_case.assemblies.dep import Dep
 
 
 class DepAssembly(Assembly):

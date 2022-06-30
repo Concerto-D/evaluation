@@ -5,7 +5,7 @@ from typing import Tuple, Dict, Optional
 
 from concerto import time_logger
 from concerto.time_logger import TimeToSave
-from evaluation.synthetic_use_case.assemblies.dep_assembly import DepAssembly
+from synthetic_use_case.assemblies.dep_assembly import DepAssembly
 import yaml
 
 
