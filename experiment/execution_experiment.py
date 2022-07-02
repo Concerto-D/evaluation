@@ -221,9 +221,9 @@ def reinitialize_reconf_files(version_concerto_name):
 
 def get_normal_parameters():
     uptimes_to_test = [
-        # "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
+        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
-        # "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
+        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
     ]
 
     transitions_times_list = [
