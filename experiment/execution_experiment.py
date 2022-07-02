@@ -139,8 +139,8 @@ def launch_experiment(is_normal, version_concerto_name, uptimes_file_name, trans
         uptimes_nodes = json.load(f)
 
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    suffix = "-test" if not is_normal else ""
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(f"concerto-d{suffix}", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
+    suffix = "-sync" if version_concerto_name == "concerto-decentralized-synchrone" else ""
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(f"concerto-d-long{suffix}", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
     log.debug(roles, networks)
 
     # Create transitions time file
