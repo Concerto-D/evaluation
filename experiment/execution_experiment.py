@@ -221,8 +221,6 @@ def reinitialize_reconf_files(version_concerto_name):
 
 def get_normal_parameters():
     uptimes_to_test = [
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
     ]
 
@@ -260,7 +258,7 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     log.debug("----------------------------------")
     suffix = "_test" if not is_normal else ""
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"experiment/sweeps{suffix}").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"experiment/sweeps{suffix}{version_concerto_name}").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
