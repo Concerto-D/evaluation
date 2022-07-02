@@ -251,7 +251,7 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     sweeps = sweep({
         "uptimes": uptimes_to_test,
         "transitions_times": transitions_times_list,
-        "cluster": ["econome"],
+        "cluster": ["uvb"],
         "experiment_num": [1]
     })
     log.debug("--- All experiments to treat: ---")
