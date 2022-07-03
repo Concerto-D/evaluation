@@ -231,7 +231,7 @@ def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_t
 
     # Save config expe + results
     if exists(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"):
-        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/finished_reconfigurations_{timestamp}")
+        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
 def reinitialize_reconf_files(version_concerto_name):
