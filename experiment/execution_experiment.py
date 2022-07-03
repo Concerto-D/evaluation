@@ -132,7 +132,7 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(is_normal, version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
+def launch_experiment(is_normal, version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
     # Provision infrastructure
     log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:
@@ -183,18 +183,40 @@ def launch_experiment(is_normal, version_concerto_name, uptimes_file_name, trans
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
 
     # Save results
-    save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num)
+    save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num)
 
     log.debug("------ End of experiment ---------")
 
 
-def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num):
+def build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num):
+    file_name = "results"
+    file_name += "_synchrone" if "synchrone" in version_concerto_name else "_asynchrone"
+
+    if "1-30-deps12-0" in transitions_times_file_name:
+        file_name += "_T0"
+    else:
+        file_name += "_T1"
+
+    if "0_02-0_05" in uptimes_file_name:
+        file_name += "_perc-2-5"
+    if "0_2-0_3" in uptimes_file_name:
+        file_name += "_perc-20-30"
+    if "0_5-0_6" in uptimes_file_name:
+        file_name += "_perc-50-60"
+
+    file_name += f"_expe_{expe_num}.json"
+
+    return file_name
+
+
+def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num):
     # Dans le nom: timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    os.makedirs("/home/anomond/results", exist_ok=True)
-    full_path = f"/home/anomond/results/results_{timestamp}"
-    log.debug(f"Saving results in {full_path}")
-    with open(full_path, "w") as f:
+    log.debug(f"Saving results in dir {dir_to_save_expe}")
+
+    # File name
+    file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num)
+
+    with open(f"{dir_to_save_expe}/{file_name}", "w") as f:
         results_to_dump = {
             "parameters": {
                 "version_concerto_name": version_concerto_name,
@@ -258,6 +280,12 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     for k in sweeps:
         log.debug(k)
     log.debug("----------------------------------")
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    os.makedirs("/home/anomond/results", exist_ok=True)
+    dir_to_save_expe = f"/home/anomond/results/results_{timestamp}"
+    os.makedirs(dir_to_save_expe, exist_ok=True)
+
     suffix = "_test" if not is_normal else ""
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"experiment/sweeps{suffix}{version_concerto_name}").resolve()), sweeps=sweeps, save_sweeps=True
@@ -266,7 +294,7 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
-            launch_experiment(is_normal, version_concerto_name, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
+            launch_experiment(is_normal, version_concerto_name, dir_to_save_expe, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
             sweeper.done(parameter)
         except Exception as e:
             sweeper.skip(parameter)
