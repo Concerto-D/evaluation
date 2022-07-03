@@ -16,7 +16,7 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str]]:
     with open(config_file_path, "r") as f:
         loaded_config = yaml.safe_load(f)
     uptime_duration = float(args[2])
-    sleep_when_blocked = args[3] == 2
+    sleep_when_blocked = args[3] == "2"
     timestamp_log_dir = args[4] if len(args) > 4 else None
     return loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir
 
