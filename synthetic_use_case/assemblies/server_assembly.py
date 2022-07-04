@@ -10,9 +10,9 @@ class ServerAssembly(Assembly):
     remote_component_names = set()   # Filled on __init__
     remote_assemblies_names = set()  # Filled on __init__
 
-    def __init__(self, reconf_config_dict, sleep_when_blocked=True):
+    def __init__(self, reconf_config_dict, sleep_when_blocked=True, timeout=False):
         Assembly.__init__(self, "server_assembly", self.components_types, self.remote_component_names,
-                          self.remote_assemblies_names, reconf_config_dict, sleep_when_blocked)
+                          self.remote_assemblies_names, reconf_config_dict, sleep_when_blocked, timeout=timeout)
         server_params = reconf_config_dict['transitions_time']['server']
         self.server = Server(nb_deps=reconf_config_dict['nb_deps_tot'], **server_params)
 

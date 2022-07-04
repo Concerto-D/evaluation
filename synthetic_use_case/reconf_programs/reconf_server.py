@@ -40,8 +40,8 @@ def update(sc):
     sc.wait_all()
 
 
-def execute_reconf(config_dict, duration, sleep_when_blocked=True):
-    sc = ServerAssembly(config_dict, sleep_when_blocked=sleep_when_blocked)
+def execute_reconf(config_dict, duration, sleep_when_blocked=True, timeout=False):
+    sc = ServerAssembly(config_dict, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
     sc.set_verbosity(2)
     deploy(sc, config_dict["nb_deps_tot"])
     update(sc)
@@ -58,5 +58,5 @@ if __name__ == '__main__':
     logging.basicConfig(filename="concerto/logs/logs_server.txt", format='%(asctime)s %(message)s', filemode="a+")
     log.debug(f"Working directory: {os.getcwd()}")
     log.debug(f"Python path: {sys.path}")
-    execute_reconf(config_dict, duration, sleep_when_blocked=sleep_when_blocked)
+    execute_reconf(config_dict, duration, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
     time_logger.log_time_value(TimeToSave.SLEEP_TIME)
