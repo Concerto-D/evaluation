@@ -9,7 +9,7 @@ from synthetic_use_case.assemblies.dep_assembly import DepAssembly
 import yaml
 
 
-def get_assembly_parameters(args) -> Tuple[int, Dict, float, bool, Optional[str]]:
+def get_assembly_parameters(args) -> Tuple[int, Dict, float, bool, Optional[str], bool]:
     dep_num = int(args[1])
     config_file_path = args[2]
     with open(config_file_path, "r") as f:
@@ -17,7 +17,8 @@ def get_assembly_parameters(args) -> Tuple[int, Dict, float, bool, Optional[str]
     uptime_duration = float(args[3])
     sleep_when_blocked = args[4] == "2"
     timestamp_log_dir = args[5] if len(args) > 5 else None
-    return dep_num, loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir
+    timeout = args[6] == "True"
+    return dep_num, loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir, timeout
 
 
 def deploy(sc, dep_num):
@@ -36,9 +37,9 @@ def update(sc, dep_num):
     sc.wait_all()
 
 
-def execute_reconf(dep_num, config_dict, duration, sleep_when_blocked=True):
+def execute_reconf(dep_num, config_dict, duration, sleep_when_blocked=True, timeout=False):
     # TODO: où on commence à voir le temps de reconf ? Avant la création de l'assembly ou après
-    sc = DepAssembly(dep_num, config_dict, sleep_when_blocked=sleep_when_blocked)
+    sc = DepAssembly(dep_num, config_dict, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
     sc.set_verbosity(2)
     deploy(sc, dep_num)
     update(sc, dep_num)
@@ -47,10 +48,10 @@ def execute_reconf(dep_num, config_dict, duration, sleep_when_blocked=True):
 
 if __name__ == '__main__':
     # TODO: avoir une fonction globale pour gérer reconf_dep et reconf_server + créer tous les dirs (pour une exécution en locale)
-    dep_num, config_dict, duration, sleep_when_blocked, timestamp_log_dir = get_assembly_parameters(sys.argv)
+    dep_num, config_dict, duration, sleep_when_blocked, timestamp_log_dir, timeout = get_assembly_parameters(sys.argv)
     time_logger.init_time_log_dir(f"dep{dep_num}", timestamp_log_dir=timestamp_log_dir)
     time_logger.log_time_value(TimeToSave.UP_TIME)
     os.makedirs("concerto/logs", exist_ok=True)
     logging.basicConfig(filename=f"concerto/logs/logs_dep{dep_num}.txt", format='%(asctime)s %(message)s', filemode="a+")
-    execute_reconf(dep_num, config_dict, duration, sleep_when_blocked=sleep_when_blocked)
+    execute_reconf(dep_num, config_dict, duration, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
     time_logger.log_time_value(TimeToSave.SLEEP_TIME)

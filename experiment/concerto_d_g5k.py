@@ -179,7 +179,7 @@ def install_zenoh_router(roles_zenoh_router: List):
         print(a.results)
 
 
-def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, experiment_num: int):
+def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, experiment_num: int, timeout):
     command_args = []
     command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source source_dir.sh)
     command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
@@ -191,6 +191,7 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(experiment_num))
     command_args.append(timestamp_log_file)
+    command_args.append(timeout)
 
     command_str = " ".join(command_args)
     home_dir = "/home/anomond"

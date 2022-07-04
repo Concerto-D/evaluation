@@ -23,12 +23,12 @@ results = {}
 sleeping_times_nodes = {}
 
 
-def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num):
+def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num, timeout):
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     # Execute reconf
     sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
-    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_name, reconf_config_file_path, duration, timestamp_log_dir, dep_num, experiment_num)
+    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_name, reconf_config_file_path, duration, timestamp_log_dir, dep_num, experiment_num, timeout)
     sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
 
     # Fetch and compute results
@@ -74,7 +74,7 @@ def find_next_uptime(uptimes_nodes):
     return min_uptime
 
 
-def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes_tuples: List, reconfig_config_file_path, experiment_num):
+def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes_tuples: List, reconfig_config_file_path, experiment_num, timeout):
     """
     TODO: Faire une liste ordonnée globale pour tous les assemblies, puis attendre (enlever les calculs
     qui prennent un peu de temps)
@@ -103,7 +103,7 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
             duration = next_uptime[1]
             dep_num = None if node_num == 0 else node_num - 1
             assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-            thread = Thread(target=execute_reconf_in_g5k, args=(roles, version_concerto_name, assembly_name, reconfig_config_file_path, duration, dep_num, node_num, experiment_num))
+            thread = Thread(target=execute_reconf_in_g5k, args=(roles, version_concerto_name, assembly_name, reconfig_config_file_path, duration, dep_num, node_num, experiment_num, timeout))
 
             # Start reconf and remove it from uptimes
             thread.start()
@@ -132,7 +132,7 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(is_normal, version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num):
+def launch_experiment(version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
     # Provision infrastructure
     log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:
@@ -177,18 +177,18 @@ def launch_experiment(is_normal, version_concerto_name, dir_to_save_expe, uptime
             "current_down_time": time.time(),
         }
 
-    schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes, transitions_times_file_name, experiment_num)
+    schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes, transitions_times_file_name, experiment_num, timeout)
 
     for name in nodes_names:
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
 
     # Save results
-    save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num)
+    save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num, timeout)
 
     log.debug("------ End of experiment ---------")
 
 
-def build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num):
+def build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
     file_name = "results"
     file_name += "_synchrone" if "synchrone" in version_concerto_name else "_asynchrone"
 
@@ -197,6 +197,8 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
     else:
         file_name += "_T1"
 
+    if "1-1" in uptimes_file_name:
+        file_name += "_perc-1-1"
     if "0_02-0_05" in uptimes_file_name:
         file_name += "_perc-2-5"
     if "0_2-0_3" in uptimes_file_name:
@@ -204,17 +206,51 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
     if "0_5-0_6" in uptimes_file_name:
         file_name += "_perc-50-60"
 
+    file_name += f"_timeout-{timeout}"
+
     file_name += f"_expe_{expe_num}.json"
 
     return file_name
 
 
-def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num):
+def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
     # File name
-    file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num)
+    file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num, timeout)
+
+    global_results = {}
+    reconf_dir_path = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"
+    if not exists(reconf_dir_path):
+        global_results["finished_reconf"] = False
+    else:
+        global_results["finished_reconf"] = len(os.listdir(reconf_dir_path)) == 13  # 12 deps + 1 server
+        for f in os.listdir(reconf_dir_path):
+            name = f.replace("_", "").replace("assembly", "")
+            results[name].update({"finished_reconf": True})
+
+    max_deploy_values = max(results.values(), key=lambda values: values["total_deploy_duration"])
+    max_deploy_time = max_deploy_values["total_deploy_duration"]
+
+    max_update_values = max(results.values(), key=lambda values: values["total_update_duration"])
+    max_update_time = max_update_values["total_update_duration"]
+
+    max_reconf_time = max_deploy_time + max_update_time
+
+    max_sleeping_values = max(results.values(), key=lambda values: values["total_sleeping_time"])
+    max_sleeping_time = max_sleeping_values["total_sleeping_time"]
+
+    max_execution_values = max(results.values(), key=lambda values: values["total_sleeping_time"] + values["total_uptime_duration"])
+    max_execution_time = max_execution_values["total_sleeping_time"] + max_execution_values["total_uptime_duration"]
+
+    global_results.update({
+        "max_deploy_time": round(max_deploy_time, 2),
+        "max_update_time": round(max_update_time, 2),
+        "max_reconf_time": round(max_reconf_time, 2),
+        "max_sleeping_time": round(max_sleeping_time, 2),
+        "max_execution_time": round(max_execution_time, 2),
+    })
 
     with open(f"{dir_to_save_expe}/{file_name}", "w") as f:
         results_to_dump = {
@@ -225,13 +261,14 @@ def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_t
                 "expe_num": expe_num,
                 "cluster": cluster,
             },
-            "results": results
+            "global_results": global_results,
+            "results": results,
         }
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
     if exists(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"):
-        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"/home/anomond/results/{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
 def reinitialize_reconf_files(version_concerto_name):
@@ -269,14 +306,9 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, transitions_times_list):
+def create_and_run_sweeper(version_concerto_name, params_to_sweep):
 
-    sweeps = sweep({
-        "uptimes": uptimes_to_test,
-        "transitions_times": transitions_times_list,
-        "cluster": ["uvb"],
-        "experiment_num": [1]
-    })
+    sweeps = sweep(params_to_sweep)
     log.debug("--- All experiments to treat: ---")
     for k in sweeps:
         log.debug(k)
@@ -287,15 +319,22 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
     dir_to_save_expe = f"/home/anomond/results/results_{timestamp}"
     os.makedirs(dir_to_save_expe, exist_ok=True)
 
-    suffix = "_test" if not is_normal else ""
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"experiment/sweeps{suffix}{version_concerto_name}").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"experiment/sweeps{version_concerto_name}").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
-            launch_experiment(is_normal, version_concerto_name, dir_to_save_expe, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
+            launch_experiment(
+                version_concerto_name,
+                dir_to_save_expe,
+                parameter["uptimes"],
+                parameter["transitions_times"],
+                parameter["cluster"],
+                parameter["experiment_num"],
+                parameter["timeout"]
+            )
             sweeper.done(parameter)
         except Exception as e:
             sweeper.skip(parameter)
@@ -310,9 +349,7 @@ def create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, tr
 
 if __name__ == '__main__':
     version_concerto_name = sys.argv[1]
-    is_normal = len(sys.argv) > 2 and sys.argv[2] == "normal"
-    if is_normal:
-        uptimes_to_test, transitions_times_list = get_normal_parameters()
-    else:
-        uptimes_to_test, transitions_times_list = get_test_parameters()
-    create_and_run_sweeper(version_concerto_name, is_normal, uptimes_to_test, transitions_times_list)
+    parameters_file = sys.argv[2]
+    with open(f"/home/anomond/parameters/{parameters_file}") as f:
+        params_to_sweep = json.load(f)
+    create_and_run_sweeper(version_concerto_name, params_to_sweep)

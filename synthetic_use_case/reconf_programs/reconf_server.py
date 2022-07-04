@@ -11,14 +11,15 @@ from synthetic_use_case.assemblies.server_assembly import ServerAssembly
 import yaml
 
 
-def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str]]:
+def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], bool]:
     config_file_path = args[1]
     with open(config_file_path, "r") as f:
         loaded_config = yaml.safe_load(f)
     uptime_duration = float(args[2])
     sleep_when_blocked = args[3] == "2"
     timestamp_log_dir = args[4] if len(args) > 4 else None
-    return loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir
+    timeout = args[5] == "True"
+    return loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir, timeout
 
 
 def deploy(sc, nb_deps_tot):
@@ -50,7 +51,7 @@ def execute_reconf(config_dict, duration, sleep_when_blocked=True):
 if __name__ == '__main__':
     # TODO Voir si loader la config file prend du temps (comme pour loader
     # le state), car on log the uptime après
-    config_dict, duration, sleep_when_blocked, timestamp_log_dir = get_assembly_parameters(sys.argv)
+    config_dict, duration, sleep_when_blocked, timestamp_log_dir, timeout = get_assembly_parameters(sys.argv)
     time_logger.init_time_log_dir("server", timestamp_log_dir=timestamp_log_dir)
     time_logger.log_time_value(TimeToSave.UP_TIME)
     os.makedirs("concerto/logs", exist_ok=True)
