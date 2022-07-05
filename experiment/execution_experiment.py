@@ -132,15 +132,14 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
+def launch_experiment(job_name, version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
     # Provision infrastructure
     log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:
         uptimes_nodes = json.load(f)
 
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    suffix = "-sync" if version_concerto_name == "concerto-decentralized-synchrone" else ""
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(f"concerto-d-long{suffix}", nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
     log.debug(roles, networks)
 
     # Create transitions time file
@@ -306,7 +305,7 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(version_concerto_name, params_to_sweep):
+def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep):
 
     sweeps = sweep(params_to_sweep)
     log.debug("--- All experiments to treat: ---")
@@ -327,6 +326,7 @@ def create_and_run_sweeper(version_concerto_name, params_to_sweep):
         try:
             log.debug("----- Launching experiment ---------")
             launch_experiment(
+                job_name,
                 version_concerto_name,
                 dir_to_save_expe,
                 parameter["uptimes"],
@@ -348,8 +348,9 @@ def create_and_run_sweeper(version_concerto_name, params_to_sweep):
 
 
 if __name__ == '__main__':
-    version_concerto_name = sys.argv[1]
-    parameters_file = sys.argv[2]
+    job_name = sys.argv[1]
+    version_concerto_name = sys.argv[2]
+    parameters_file = sys.argv[3]
     with open(f"/home/anomond/parameters/{parameters_file}") as f:
         params_to_sweep = json.load(f)
-    create_and_run_sweeper(version_concerto_name, params_to_sweep)
+    create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep)
