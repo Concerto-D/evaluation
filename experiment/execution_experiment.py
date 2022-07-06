@@ -351,18 +351,28 @@ if __name__ == '__main__':
     job_name = sys.argv[1]
     version_concerto_name = sys.argv[2]
     # parameters_file = sys.argv[3]
-    parameters_files = [
-        "configuration_expe_1.json",
-        "configuration_asynchrone_expe_2.json",
-        "configuration_asynchrone_expe_3.json"
-    ]
     if version_concerto_name == "concerto-decentralized":
+        parameters_files = [
+            "last_results_all.json",
+            "last_results_all.json",
+            "last_results_async.json",
+            "last_results_async.json",
+            "last_results_async.json",
+            "last_results_async_2.json",
+            "last_results_async_2.json"
+        ]
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
                 params_to_sweep = json.load(f)
             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
     else:
-        parameters_file = "configuration_expe_1.json"
-        with open(f"/home/anomond/parameters/{parameters_file}") as f:
-            params_to_sweep = json.load(f)
-        create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
+        parameters_files = [
+            "last_results_all.json",
+            "last_results_all.json",
+            "last_results_sync.json",
+            "last_results_sync_2.json"
+        ]
+        for parameters_file in parameters_files:
+            with open(f"/home/anomond/parameters/{parameters_file}") as f:
+                params_to_sweep = json.load(f)
+            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
