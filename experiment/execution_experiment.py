@@ -305,7 +305,7 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep):
+def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file):
 
     sweeps = sweep(params_to_sweep)
     log.debug("--- All experiments to treat: ---")
@@ -319,7 +319,7 @@ def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep):
     os.makedirs(dir_to_save_expe, exist_ok=True)
 
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"experiment/sweeps{version_concerto_name}").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"experiment/sweeps{version_concerto_name}{parameters_file}").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
@@ -350,7 +350,19 @@ def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep):
 if __name__ == '__main__':
     job_name = sys.argv[1]
     version_concerto_name = sys.argv[2]
-    parameters_file = sys.argv[3]
-    with open(f"/home/anomond/parameters/{parameters_file}") as f:
-        params_to_sweep = json.load(f)
-    create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep)
+    # parameters_file = sys.argv[3]
+    parameters_files = [
+        "configuration_expe_1.json",
+        "configuration_asynchrone_expe_2.json",
+        "configuration_asynchrone_expe_3.json"
+    ]
+    if version_concerto_name == "concerto-decentralized":
+        for parameters_file in parameters_files:
+            with open(f"/home/anomond/parameters/{parameters_file}") as f:
+                params_to_sweep = json.load(f)
+            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
+    else:
+        parameters_file = "configuration_expe_1.json"
+        with open(f"/home/anomond/parameters/{parameters_file}") as f:
+            params_to_sweep = json.load(f)
+        create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
