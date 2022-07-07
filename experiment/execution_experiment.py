@@ -353,8 +353,8 @@ if __name__ == '__main__':
     # parameters_file = sys.argv[3]
     if version_concerto_name == "concerto-decentralized":
         parameters_files = [
-            "last_results_all.json",
-            "last_results_async.json",
+            "last_results_async_0.json",
+            "last_results_async_1.json",
             "last_results_async_2.json",
         ]
         for parameters_file in parameters_files:
@@ -363,8 +363,9 @@ if __name__ == '__main__':
             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
     else:
         parameters_files = [
-            "last_results_all.json",
-            "last_results_sync.json",
+            "last_results_async_0.json",
+            "last_results_async_1.json",
+            "last_results_async_2.json",
         ]
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
