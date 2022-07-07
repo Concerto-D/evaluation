@@ -363,9 +363,10 @@ if __name__ == '__main__':
             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
     else:
         parameters_files = [
-            "last_results_async_0.json",
-            "last_results_async_1.json",
-            "last_results_async_2.json",
+            "last_results_sync_0.json",
+            "last_results_sync_1.json",
+            "last_results_sync_2.json",
+            "last_results_sync_3.json",
         ]
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
