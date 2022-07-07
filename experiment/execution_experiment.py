@@ -354,12 +354,8 @@ if __name__ == '__main__':
     if version_concerto_name == "concerto-decentralized":
         parameters_files = [
             "last_results_all.json",
-            "last_results_all.json",
-            "last_results_async.json",
-            "last_results_async.json",
             "last_results_async.json",
             "last_results_async_2.json",
-            "last_results_async_2.json"
         ]
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
@@ -368,9 +364,7 @@ if __name__ == '__main__':
     else:
         parameters_files = [
             "last_results_all.json",
-            "last_results_all.json",
             "last_results_sync.json",
-            "last_results_sync_2.json"
         ]
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
