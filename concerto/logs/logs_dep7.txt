@@ -1,0 +1,67 @@
+2022-07-03 13:42:15,148 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:15,148 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_dep_assembly_7.json -----'[0m'
+2022-07-03 13:42:15,148 Loading inventory from inventory.yaml
+2022-07-03 13:42:15,152 Loading communication cache from concerto/communication_cache/dep_assembly_7.json
+2022-07-03 13:42:15,161  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5008
+ * Running on http://172.26.185.201:5008 (Press CTRL+C to quit)
+2022-07-03 13:42:15,162 [13:42:15:162] Current instruction: Type.ADD_0
+2022-07-03 13:42:15,163 [13:42:15:163] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:15,163 Request: is_conn_synced(dep7, server, serviceu_ip7, ip, CONN)
+2022-07-03 13:42:15,177 Result: False
+2022-07-03 13:42:15,177 [13:42:15:177] Is conn synced between dep7 and server ? (for ip and serviceu_ip7): False
+2022-07-03 13:42:15,177 [35m[dep7] Ending transition '_init'[0m
+2022-07-03 13:42:15,229 API Request: is_conn_synced server dep7 ip serviceu_ip7 CONN
+2022-07-03 13:42:15,229 API Response: True
+2022-07-03 13:42:15,230 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep7/ip/serviceu_ip7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,233 API Request: is_conn_synced server dep7 ip serviceu_ip7 CONN
+2022-07-03 13:42:15,233 API Response: True
+2022-07-03 13:42:15,234 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep7/ip/serviceu_ip7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,237 API Request: is_conn_synced server dep7 service serviceu7 CONN
+2022-07-03 13:42:15,238 API Response: False
+2022-07-03 13:42:15,238 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep7/service/serviceu7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,241 API Request: is_conn_synced server dep7 service serviceu7 CONN
+2022-07-03 13:42:15,241 API Response: False
+2022-07-03 13:42:15,241 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep7/service/serviceu7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,277 [13:42:15:277] Connection already done: Waiting connection from server
+2022-07-03 13:42:15,278 Request: is_conn_synced(dep7, server, serviceu_ip7, ip, CONN)
+2022-07-03 13:42:15,285 Result: True
+2022-07-03 13:42:15,285 [13:42:15:285] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:15,285 Request: is_conn_synced(dep7, server, serviceu7, service, CONN)
+2022-07-03 13:42:15,293 Result: True
+2022-07-03 13:42:15,293 [13:42:15:293] Is conn synced between dep7 and server ? (for service and serviceu7): True
+2022-07-03 13:42:15,294 [13:42:15:294] Current instruction: Type.PUSH_B_3
+2022-07-03 13:42:15,294 [35m[dep7] Queing behavior 'deploy'[0m
+2022-07-03 13:42:15,294 [13:42:15:294] Current instruction: Type.WAIT_ALL_4
+2022-07-03 13:42:15,294 Need to process dep7_undeployed__init for idocks_to_place
+2022-07-03 13:42:15,294 [35m[dep7] Entering place 'undeployed'[0m
+2022-07-03 13:42:15,294 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,294 odocks to deal with []
+2022-07-03 13:42:15,294 [35m[dep7] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:15,345 API Request: is_conn_synced server dep7 service serviceu7 CONN
+2022-07-03 13:42:15,345 API Response: True
+2022-07-03 13:42:15,345 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep7/service/serviceu7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,347 API Request: is_conn_synced server dep7 service serviceu7 CONN
+2022-07-03 13:42:15,347 API Response: True
+2022-07-03 13:42:15,347 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep7/service/serviceu7/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,395 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,395 odocks to deal with [<concerto.place.Dock object at 0x7f2dfd53f070>]
+2022-07-03 13:42:15,395 [35m[dep7] Leaving place 'undeployed'[0m
+2022-07-03 13:42:15,395 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:15,395 [35m[dep7] Starting transition 'install'[0m
+2022-07-03 13:42:15,395 [35m[dep7] allocating resources[0m
+2022-07-03 13:42:16,997 [35m[dep7] got IP 123.124.1.7[0m
+2022-07-03 13:42:16,998 [35m[dep7] finished allocation[0m
+2022-07-03 13:42:17,001 [35m[dep7] Ending transition 'install'[0m
+2022-07-03 13:42:17,102 Need to process dep7_installed_install for idocks_to_place
+2022-07-03 13:42:17,102 [35m[dep7] Entering place 'installed'[0m
+2022-07-03 13:42:17,102 [35m[dep7] Starting to use place dependency 'ip'[0m
+2022-07-03 13:42:17,102 Need to process installed for place_to_odocks
+2022-07-03 13:42:17,102 odocks to deal with [<concerto.place.Dock object at 0x7f2dfd53f8e0>]
+2022-07-03 13:42:17,102 [35m[dep7] Leaving place 'installed'[0m
+2022-07-03 13:42:17,103 Need to process Docker place: installed for start_transition
+2022-07-03 13:42:17,103 [35m[dep7] Starting transition 'run'[0m
+2022-07-03 13:42:17,103 [35m[dep7] preparing to run[0m
+2022-07-03 13:42:19,131 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep7/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,135 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep7/ip HTTP/1.1" 200 -

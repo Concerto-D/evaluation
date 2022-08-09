@@ -133,6 +133,8 @@ def compute_end_reconfiguration_time(uptimes_nodes):
 
 
 def launch_experiment(job_name, version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
+    # On peut préciser un job pour la nuit sans le considérer comme une réservation, mais il est considéré comme besteffort
+    # Voir si on peut se baser sur une réservation oarsub pour lancer les scripts enoslib
     # Provision infrastructure
     log.debug("------ Fetching infrastructure --------")
     with open(uptimes_file_name) as f:

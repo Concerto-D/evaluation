@@ -1,0 +1,89 @@
+2022-07-03 13:42:14,761 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:14,761 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_dep_assembly_4.json -----'[0m'
+2022-07-03 13:42:14,761 Loading inventory from inventory.yaml
+2022-07-03 13:42:14,765 Loading communication cache from concerto/communication_cache/dep_assembly_4.json
+2022-07-03 13:42:14,776 [13:42:14:776] Current instruction: Type.ADD_0
+2022-07-03 13:42:14,776 [13:42:14:776] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:14,779 Request: is_conn_synced(dep4, server, serviceu_ip4, ip, CONN)
+2022-07-03 13:42:14,780  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5005
+ * Running on http://172.26.185.201:5005 (Press CTRL+C to quit)
+2022-07-03 13:42:14,792 Result: False
+2022-07-03 13:42:14,792 [13:42:14:792] Is conn synced between dep4 and server ? (for ip and serviceu_ip4): False
+2022-07-03 13:42:14,792 [35m[dep4] Ending transition '_init'[0m
+2022-07-03 13:42:14,824 API Request: is_conn_synced server dep4 ip serviceu_ip4 CONN
+2022-07-03 13:42:14,824 API Response: True
+2022-07-03 13:42:14,825 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/server/dep4/ip/serviceu_ip4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,828 API Request: is_conn_synced server dep4 ip serviceu_ip4 CONN
+2022-07-03 13:42:14,828 API Response: True
+2022-07-03 13:42:14,830 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/server/dep4/ip/serviceu_ip4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,834 API Request: is_conn_synced server dep4 service serviceu4 CONN
+2022-07-03 13:42:14,835 API Response: False
+2022-07-03 13:42:14,835 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/server/dep4/service/serviceu4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,841 API Request: is_conn_synced server dep4 service serviceu4 CONN
+2022-07-03 13:42:14,842 API Response: False
+2022-07-03 13:42:14,842 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/server/dep4/service/serviceu4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,892 [13:42:14:892] Connection already done: Waiting connection from server
+2022-07-03 13:42:14,892 Request: is_conn_synced(dep4, server, serviceu_ip4, ip, CONN)
+2022-07-03 13:42:14,899 Result: True
+2022-07-03 13:42:14,899 [13:42:14:899] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:14,899 Request: is_conn_synced(dep4, server, serviceu4, service, CONN)
+2022-07-03 13:42:14,907 Result: True
+2022-07-03 13:42:14,907 [13:42:14:907] Is conn synced between dep4 and server ? (for service and serviceu4): True
+2022-07-03 13:42:14,907 [13:42:14:907] Current instruction: Type.PUSH_B_3
+2022-07-03 13:42:14,907 [35m[dep4] Queing behavior 'deploy'[0m
+2022-07-03 13:42:14,907 [13:42:14:907] Current instruction: Type.WAIT_ALL_4
+2022-07-03 13:42:14,907 Need to process dep4_undeployed__init for idocks_to_place
+2022-07-03 13:42:14,907 [35m[dep4] Entering place 'undeployed'[0m
+2022-07-03 13:42:14,907 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:14,907 odocks to deal with []
+2022-07-03 13:42:14,908 [35m[dep4] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:14,951 API Request: is_conn_synced server dep4 service serviceu4 CONN
+2022-07-03 13:42:14,952 API Response: True
+2022-07-03 13:42:14,953 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/server/dep4/service/serviceu4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,958 API Request: is_conn_synced server dep4 service serviceu4 CONN
+2022-07-03 13:42:14,959 API Response: True
+2022-07-03 13:42:14,959 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/server/dep4/service/serviceu4/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,008 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,008 odocks to deal with [<concerto.place.Dock object at 0x7f04a71248b0>]
+2022-07-03 13:42:15,008 [35m[dep4] Leaving place 'undeployed'[0m
+2022-07-03 13:42:15,008 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:15,008 [35m[dep4] Starting transition 'install'[0m
+2022-07-03 13:42:15,008 [35m[dep4] allocating resources[0m
+2022-07-03 13:42:19,161 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,163 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,317 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,320 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,462 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,464 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,599 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,602 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,728 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,730 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,859 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,861 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,990 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,992 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,119 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,121 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,243 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,246 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,368 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,369 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,491 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,493 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,609 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,611 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,728 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,730 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,845 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,847 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,965 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,967 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,085 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,086 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,208 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,212 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,354 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,357 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep4/ip HTTP/1.1" 200 -

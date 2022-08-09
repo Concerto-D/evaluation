@@ -1,0 +1,129 @@
+2022-07-03 13:42:15,272 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:15,272 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_dep_assembly_8.json -----'[0m'
+2022-07-03 13:42:15,272 Loading inventory from inventory.yaml
+2022-07-03 13:42:15,275 Loading communication cache from concerto/communication_cache/dep_assembly_8.json
+2022-07-03 13:42:15,287 [13:42:15:287] Current instruction: Type.ADD_0
+2022-07-03 13:42:15,289 [13:42:15:289] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:15,289 Request: is_conn_synced(dep8, server, serviceu_ip8, ip, CONN)
+2022-07-03 13:42:15,289  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5009
+ * Running on http://172.26.185.201:5009 (Press CTRL+C to quit)
+2022-07-03 13:42:15,301 Result: False
+2022-07-03 13:42:15,301 [13:42:15:301] Is conn synced between dep8 and server ? (for ip and serviceu_ip8): False
+2022-07-03 13:42:15,301 [35m[dep8] Ending transition '_init'[0m
+2022-07-03 13:42:15,350 API Request: is_conn_synced server dep8 ip serviceu_ip8 CONN
+2022-07-03 13:42:15,350 API Response: True
+2022-07-03 13:42:15,351 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep8/ip/serviceu_ip8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,353 API Request: is_conn_synced server dep8 ip serviceu_ip8 CONN
+2022-07-03 13:42:15,353 API Response: True
+2022-07-03 13:42:15,354 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep8/ip/serviceu_ip8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,357 API Request: is_conn_synced server dep8 service serviceu8 CONN
+2022-07-03 13:42:15,357 API Response: False
+2022-07-03 13:42:15,357 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep8/service/serviceu8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,359 API Request: is_conn_synced server dep8 service serviceu8 CONN
+2022-07-03 13:42:15,359 API Response: False
+2022-07-03 13:42:15,359 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep8/service/serviceu8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,402 [13:42:15:402] Connection already done: Waiting connection from server
+2022-07-03 13:42:15,402 Request: is_conn_synced(dep8, server, serviceu_ip8, ip, CONN)
+2022-07-03 13:42:15,408 Result: True
+2022-07-03 13:42:15,408 [13:42:15:408] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:15,408 Request: is_conn_synced(dep8, server, serviceu8, service, CONN)
+2022-07-03 13:42:15,414 Result: True
+2022-07-03 13:42:15,415 [13:42:15:415] Is conn synced between dep8 and server ? (for service and serviceu8): True
+2022-07-03 13:42:15,415 [13:42:15:415] Current instruction: Type.PUSH_B_3
+2022-07-03 13:42:15,415 [35m[dep8] Queing behavior 'deploy'[0m
+2022-07-03 13:42:15,415 [13:42:15:415] Current instruction: Type.WAIT_ALL_4
+2022-07-03 13:42:15,415 Need to process dep8_undeployed__init for idocks_to_place
+2022-07-03 13:42:15,415 [35m[dep8] Entering place 'undeployed'[0m
+2022-07-03 13:42:15,415 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,416 odocks to deal with []
+2022-07-03 13:42:15,416 [35m[dep8] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:15,463 API Request: is_conn_synced server dep8 service serviceu8 CONN
+2022-07-03 13:42:15,463 API Response: True
+2022-07-03 13:42:15,463 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep8/service/serviceu8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,465 API Request: is_conn_synced server dep8 service serviceu8 CONN
+2022-07-03 13:42:15,465 API Response: True
+2022-07-03 13:42:15,466 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep8/service/serviceu8/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,517 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,517 odocks to deal with [<concerto.place.Dock object at 0x7ff4a0ec3520>]
+2022-07-03 13:42:15,517 [35m[dep8] Leaving place 'undeployed'[0m
+2022-07-03 13:42:15,517 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:15,517 [35m[dep8] Starting transition 'install'[0m
+2022-07-03 13:42:15,517 [35m[dep8] allocating resources[0m
+2022-07-03 13:42:19,155 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,158 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,311 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,314 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,455 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,458 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,591 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,595 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,724 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,726 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,854 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,856 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,984 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,987 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,113 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,116 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,238 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,240 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,315 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,318 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,333 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,336 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,364 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,365 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,421 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,423 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,459 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,461 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,486 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,488 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,526 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,528 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,582 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,583 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,605 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,607 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,630 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,632 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,703 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,705 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,724 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,726 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,735 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,736 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,830 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,832 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,839 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,841 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,842 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,843 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,945 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,947 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:20,955 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,958 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,960 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,962 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,051 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,053 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:21,078 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,080 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,080 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,082 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,155 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,157 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:21,199 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,202 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,204 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,208 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,260 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,262 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -
+2022-07-03 13:42:21,333 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,335 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,350 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_nb_dependency_users/dep8/ip HTTP/1.1" 200 -
+2022-07-03 13:42:21,351 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,366 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_8/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,369 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_8/0?calling_assembly_name=dep_assembly_3 HTTP/1.1" 200 -

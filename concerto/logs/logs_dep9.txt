@@ -1,0 +1,85 @@
+2022-07-03 13:42:15,369 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:15,369 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_dep_assembly_9.json -----'[0m'
+2022-07-03 13:42:15,370 Loading inventory from inventory.yaml
+2022-07-03 13:42:15,372 Loading communication cache from concerto/communication_cache/dep_assembly_9.json
+2022-07-03 13:42:15,382 [13:42:15:382] Current instruction: Type.ADD_0
+2022-07-03 13:42:15,382 [13:42:15:382] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:15,384 Request: is_conn_synced(dep9, server, serviceu_ip9, ip, CONN)
+2022-07-03 13:42:15,385  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5010
+ * Running on http://172.26.185.201:5010 (Press CTRL+C to quit)
+2022-07-03 13:42:15,394 Result: False
+2022-07-03 13:42:15,394 [13:42:15:394] Is conn synced between dep9 and server ? (for ip and serviceu_ip9): False
+2022-07-03 13:42:15,394 [35m[dep9] Ending transition '_init'[0m
+2022-07-03 13:42:15,468 API Request: is_conn_synced server dep9 ip serviceu_ip9 CONN
+2022-07-03 13:42:15,469 API Response: True
+2022-07-03 13:42:15,469 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep9/ip/serviceu_ip9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,471 API Request: is_conn_synced server dep9 ip serviceu_ip9 CONN
+2022-07-03 13:42:15,471 API Response: True
+2022-07-03 13:42:15,472 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep9/ip/serviceu_ip9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,474 API Request: is_conn_synced server dep9 service serviceu9 CONN
+2022-07-03 13:42:15,475 API Response: False
+2022-07-03 13:42:15,475 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep9/service/serviceu9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,477 API Request: is_conn_synced server dep9 service serviceu9 CONN
+2022-07-03 13:42:15,477 API Response: False
+2022-07-03 13:42:15,477 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep9/service/serviceu9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,494 [13:42:15:494] Connection already done: Waiting connection from server
+2022-07-03 13:42:15,495 Request: is_conn_synced(dep9, server, serviceu_ip9, ip, CONN)
+2022-07-03 13:42:15,501 Result: True
+2022-07-03 13:42:15,501 [13:42:15:501] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:15,502 Request: is_conn_synced(dep9, server, serviceu9, service, CONN)
+2022-07-03 13:42:15,507 Result: True
+2022-07-03 13:42:15,507 [13:42:15:507] Is conn synced between dep9 and server ? (for service and serviceu9): True
+2022-07-03 13:42:15,507 [13:42:15:507] Current instruction: Type.PUSH_B_3
+2022-07-03 13:42:15,507 [35m[dep9] Queing behavior 'deploy'[0m
+2022-07-03 13:42:15,507 [13:42:15:507] Current instruction: Type.WAIT_ALL_4
+2022-07-03 13:42:15,507 Need to process dep9_undeployed__init for idocks_to_place
+2022-07-03 13:42:15,507 [35m[dep9] Entering place 'undeployed'[0m
+2022-07-03 13:42:15,507 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,508 odocks to deal with []
+2022-07-03 13:42:15,508 [35m[dep9] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:15,580 API Request: is_conn_synced server dep9 service serviceu9 CONN
+2022-07-03 13:42:15,580 API Response: True
+2022-07-03 13:42:15,580 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/server/dep9/service/serviceu9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,582 API Request: is_conn_synced server dep9 service serviceu9 CONN
+2022-07-03 13:42:15,582 API Response: True
+2022-07-03 13:42:15,582 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/server/dep9/service/serviceu9/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,608 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,608 odocks to deal with [<concerto.place.Dock object at 0x7fb487d14430>]
+2022-07-03 13:42:15,608 [35m[dep9] Leaving place 'undeployed'[0m
+2022-07-03 13:42:15,608 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:15,608 [35m[dep9] Starting transition 'install'[0m
+2022-07-03 13:42:15,608 [35m[dep9] allocating resources[0m
+2022-07-03 13:42:19,179 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,181 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,324 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,327 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,467 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,469 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,606 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,608 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,732 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,733 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,863 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,865 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,995 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,998 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,123 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,126 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,183 [35m[dep9] got IP 123.124.1.9[0m
+2022-07-03 13:42:20,184 [35m[dep9] finished allocation[0m
+2022-07-03 13:42:20,227 [35m[dep9] Ending transition 'install'[0m
+2022-07-03 13:42:20,249 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,251 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,328 Need to process dep9_installed_install for idocks_to_place
+2022-07-03 13:42:20,328 [35m[dep9] Entering place 'installed'[0m
+2022-07-03 13:42:20,328 [35m[dep9] Starting to use place dependency 'ip'[0m
+2022-07-03 13:42:20,328 Need to process installed for place_to_odocks
+2022-07-03 13:42:20,328 odocks to deal with [<concerto.place.Dock object at 0x7fb487d14700>]
+2022-07-03 13:42:20,328 [35m[dep9] Leaving place 'installed'[0m
+2022-07-03 13:42:20,328 Need to process Docker place: installed for start_transition
+2022-07-03 13:42:20,328 [35m[dep9] Starting transition 'run'[0m
+2022-07-03 13:42:20,328 [35m[dep9] preparing to run[0m
+2022-07-03 13:42:20,372 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -
+2022-07-03 13:42:20,374 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_nb_dependency_users/dep9/ip HTTP/1.1" 200 -

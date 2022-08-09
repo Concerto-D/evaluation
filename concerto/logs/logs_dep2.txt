@@ -1,0 +1,138 @@
+2022-07-03 13:42:14,595 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:14,596 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_dep_assembly_2.json -----'[0m'
+2022-07-03 13:42:14,596 Loading inventory from inventory.yaml
+2022-07-03 13:42:14,603 Loading communication cache from concerto/communication_cache/dep_assembly_2.json
+2022-07-03 13:42:14,613 [13:42:14:613] Current instruction: Type.ADD_0
+2022-07-03 13:42:14,614 [13:42:14:614] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:14,614 Request: is_conn_synced(dep2, server, serviceu_ip2, ip, CONN)
+2022-07-03 13:42:14,619  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5003
+ * Running on http://172.26.185.201:5003 (Press CTRL+C to quit)
+2022-07-03 13:42:14,630 Result: True
+2022-07-03 13:42:14,630 [13:42:14:630] Is conn synced between dep2 and server ? (for ip and serviceu_ip2): True
+2022-07-03 13:42:14,630 [13:42:14:630] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:14,630 Request: is_conn_synced(dep2, server, serviceu2, service, CONN)
+2022-07-03 13:42:14,639 Result: False
+2022-07-03 13:42:14,639 [13:42:14:639] Is conn synced between dep2 and server ? (for service and serviceu2): False
+2022-07-03 13:42:14,639 [35m[dep2] Ending transition '_init'[0m
+2022-07-03 13:42:14,679 API Request: is_conn_synced server dep2 ip serviceu_ip2 CONN
+2022-07-03 13:42:14,679 API Response: True
+2022-07-03 13:42:14,680 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/server/dep2/ip/serviceu_ip2/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,683 API Request: is_conn_synced server dep2 ip serviceu_ip2 CONN
+2022-07-03 13:42:14,683 API Response: True
+2022-07-03 13:42:14,684 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/server/dep2/ip/serviceu_ip2/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,687 API Request: is_conn_synced server dep2 service serviceu2 CONN
+2022-07-03 13:42:14,687 API Response: True
+2022-07-03 13:42:14,687 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/server/dep2/service/serviceu2/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,690 API Request: is_conn_synced server dep2 service serviceu2 CONN
+2022-07-03 13:42:14,690 API Response: True
+2022-07-03 13:42:14,691 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/server/dep2/service/serviceu2/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,741 [13:42:14:741] Connection already done: Waiting connection from server
+2022-07-03 13:42:14,742 Request: is_conn_synced(dep2, server, serviceu2, service, CONN)
+2022-07-03 13:42:14,752 Result: True
+2022-07-03 13:42:14,752 [13:42:14:752] Current instruction: Type.PUSH_B_3
+2022-07-03 13:42:14,752 [35m[dep2] Queing behavior 'deploy'[0m
+2022-07-03 13:42:14,752 [13:42:14:752] Current instruction: Type.WAIT_ALL_4
+2022-07-03 13:42:14,752 Need to process dep2_undeployed__init for idocks_to_place
+2022-07-03 13:42:14,752 [35m[dep2] Entering place 'undeployed'[0m
+2022-07-03 13:42:14,752 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:14,753 odocks to deal with []
+2022-07-03 13:42:14,753 [35m[dep2] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:14,853 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:14,853 odocks to deal with [<concerto.place.Dock object at 0x7f2f197e6df0>]
+2022-07-03 13:42:14,853 [35m[dep2] Leaving place 'undeployed'[0m
+2022-07-03 13:42:14,853 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:14,853 [35m[dep2] Starting transition 'install'[0m
+2022-07-03 13:42:14,854 [35m[dep2] allocating resources[0m
+2022-07-03 13:42:16,546 [35m[dep2] got IP 123.124.1.2[0m
+2022-07-03 13:42:16,546 [35m[dep2] finished allocation[0m
+2022-07-03 13:42:16,559 [35m[dep2] Ending transition 'install'[0m
+2022-07-03 13:42:16,659 Need to process dep2_installed_install for idocks_to_place
+2022-07-03 13:42:16,659 [35m[dep2] Entering place 'installed'[0m
+2022-07-03 13:42:16,660 [35m[dep2] Starting to use place dependency 'ip'[0m
+2022-07-03 13:42:16,660 Need to process installed for place_to_odocks
+2022-07-03 13:42:16,660 odocks to deal with [<concerto.place.Dock object at 0x7f2f197cf2e0>]
+2022-07-03 13:42:16,660 [35m[dep2] Leaving place 'installed'[0m
+2022-07-03 13:42:16,660 Need to process Docker place: installed for start_transition
+2022-07-03 13:42:16,660 [35m[dep2] Starting transition 'run'[0m
+2022-07-03 13:42:16,661 [35m[dep2] preparing to run[0m
+2022-07-03 13:42:18,931 127.0.0.1 - - [03/Jul/2022 13:42:18] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:18,934 127.0.0.1 - - [03/Jul/2022 13:42:18] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,044 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,048 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,158 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,161 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,193 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_nb_dependency_users/dep2/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,195 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_nb_dependency_users/dep2/ip HTTP/1.1" 200 -
+2022-07-03 13:42:19,269 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,271 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,385 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,389 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,498 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,500 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,610 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,612 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,720 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,723 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,834 [35m[dep2] running[0m
+2022-07-03 13:42:19,839 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,845 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,876 [35m[dep2] Ending transition 'run'[0m
+2022-07-03 13:42:19,959 127.0.0.1 - - [03/Jul/2022 13:42:19] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:19,963 127.0.0.1 - - [03/Jul/2022 13:42:19] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:19,976 Need to process dep2_running_run for idocks_to_place
+2022-07-03 13:42:19,976 [35m[dep2] Entering place 'running'[0m
+2022-07-03 13:42:19,977 [35m[dep2] Starting to use place dependency 'service'[0m
+2022-07-03 13:42:19,977 Need to process running for place_to_odocks
+2022-07-03 13:42:19,977 odocks to deal with []
+2022-07-03 13:42:19,977 [35m[dep2] Changing behavior to 'None'[0m
+2022-07-03 13:42:19,977 [35m[dep2] Going IDLE[0m
+2022-07-03 13:42:20,076 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,077 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,081 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,086 Result: ACTIVE
+2022-07-03 13:42:20,187 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,195 Result: ACTIVE
+2022-07-03 13:42:20,202 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,205 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,296 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,301 Result: ACTIVE
+2022-07-03 13:42:20,319 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,321 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,401 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,406 Result: ACTIVE
+2022-07-03 13:42:20,444 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,446 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,507 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,512 Result: ACTIVE
+2022-07-03 13:42:20,568 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,571 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,612 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,616 Result: ACTIVE
+2022-07-03 13:42:20,690 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,692 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,716 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,721 Result: ACTIVE
+2022-07-03 13:42:20,814 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,816 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:20,821 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,828 Result: ACTIVE
+2022-07-03 13:42:20,929 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:20,934 Result: ACTIVE
+2022-07-03 13:42:20,939 127.0.0.1 - - [03/Jul/2022 13:42:20] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:20,942 127.0.0.1 - - [03/Jul/2022 13:42:20] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,035 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:21,039 Result: ACTIVE
+2022-07-03 13:42:21,064 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,066 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,140 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:21,144 Result: ACTIVE
+2022-07-03 13:42:21,187 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,189 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,245 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:21,250 Result: ACTIVE
+2022-07-03 13:42:21,318 127.0.0.1 - - [03/Jul/2022 13:42:21] "HEAD /get_remote_component_state/dep_assembly_2/0 HTTP/1.1" 200 -
+2022-07-03 13:42:21,321 127.0.0.1 - - [03/Jul/2022 13:42:21] "GET /get_remote_component_state/dep_assembly_2/0?calling_assembly_name=dep_assembly_5 HTTP/1.1" 200 -
+2022-07-03 13:42:21,350 Request: get_remote_component_state(dep_assembly_11, 0)
+2022-07-03 13:42:21,356 Result: ACTIVE

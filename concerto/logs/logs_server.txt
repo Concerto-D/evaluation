@@ -1,0 +1,771 @@
+2022-07-03 13:42:14,172 Working directory: /home/aomond/implementations/evaluation
+2022-07-03 13:42:14,172 Python path: ['/home/aomond/implementations/evaluation/synthetic_use_case/reconf_programs', '/home/aomond/implementations/evaluation/$PYTHONPATH', '/home/aomond/implementations/evaluation/concerto-decentralized-synchrone', '/home/aomond/implementations/evaluation', '/mnt/c/Program Files/JetBrains/PyCharm 2021.3/plugins/python/helpers/pycharm_display', '/usr/lib/python38.zip', '/usr/lib/python3.8', '/usr/lib/python3.8/lib-dynload', '/home/aomond/implementations/evaluation/concerto-decentralized-synchrone/venv/lib/python3.8/site-packages', '/mnt/c/Program Files/JetBrains/PyCharm 2021.3/plugins/python/helpers/pycharm_matplotlib_backend']
+2022-07-03 13:42:14,173 '[33m'----- Previous config doesn't NOT exists, starting from zero ----'[0m'
+2022-07-03 13:42:14,173 '[33m'----- Searched in /home/aomond/implementations/evaluation/concerto/reprise_configs/saved_config_server_assembly.json -----'[0m'
+2022-07-03 13:42:14,173 Loading inventory from inventory.yaml
+2022-07-03 13:42:14,179 Loading communication cache from concerto/communication_cache/server_assembly.json
+2022-07-03 13:42:14,192 [13:42:14:192] Current instruction: Type.ADD_0
+2022-07-03 13:42:14,193 [13:42:14:193] Current instruction: Type.CONNECT_1
+2022-07-03 13:42:14,194 Request: is_conn_synced(server, dep0, ip, serviceu_ip0, CONN)
+2022-07-03 13:42:14,194  * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.26.185.201:5000 (Press CTRL+C to quit)
+2022-07-03 13:42:14,205 http://localhost:5001/is_conn_synced/server/dep0/ip/serviceu_ip0/CONN is not available at this moment
+2022-07-03 13:42:14,205 Result: False
+2022-07-03 13:42:14,206 [13:42:14:206] Is conn synced between server and dep0 ? (for serviceu_ip0 and ip): False
+2022-07-03 13:42:14,206 [35m[server] Ending transition '_init'[0m
+2022-07-03 13:42:14,307 [13:42:14:307] Connection already done: Waiting connection from dep0
+2022-07-03 13:42:14,307 Request: is_conn_synced(server, dep0, ip, serviceu_ip0, CONN)
+2022-07-03 13:42:14,309 http://localhost:5001/is_conn_synced/server/dep0/ip/serviceu_ip0/CONN is not available at this moment
+2022-07-03 13:42:14,310 Result: False
+2022-07-03 13:42:14,310 Need to process server_undeployed__init for idocks_to_place
+2022-07-03 13:42:14,310 [35m[server] Entering place 'undeployed'[0m
+2022-07-03 13:42:14,311 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:14,311 odocks to deal with []
+2022-07-03 13:42:14,311 [35m[server] Changing behavior to 'None'[0m
+2022-07-03 13:42:14,311 [35m[server] Going IDLE[0m
+2022-07-03 13:42:14,326 API Request: is_conn_synced dep0 server serviceu_ip0 ip CONN
+2022-07-03 13:42:14,326 API Response: True
+2022-07-03 13:42:14,327 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep0/server/serviceu_ip0/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,333 API Request: is_conn_synced dep0 server serviceu_ip0 ip CONN
+2022-07-03 13:42:14,334 API Response: True
+2022-07-03 13:42:14,335 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep0/server/serviceu_ip0/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,341 API Request: is_conn_synced dep0 server serviceu0 service CONN
+2022-07-03 13:42:14,341 API Response: False
+2022-07-03 13:42:14,342 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep0/server/serviceu0/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,345 API Request: is_conn_synced dep0 server serviceu0 service CONN
+2022-07-03 13:42:14,345 API Response: False
+2022-07-03 13:42:14,345 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep0/server/serviceu0/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,412 [13:42:14:411] Connection already done: Waiting connection from dep0
+2022-07-03 13:42:14,412 Request: is_conn_synced(server, dep0, ip, serviceu_ip0, CONN)
+2022-07-03 13:42:14,421 Result: True
+2022-07-03 13:42:14,422 [13:42:14:422] Current instruction: Type.CONNECT_2
+2022-07-03 13:42:14,422 Request: is_conn_synced(server, dep0, service, serviceu0, CONN)
+2022-07-03 13:42:14,432 API Request: is_conn_synced dep1 server serviceu_ip1 ip CONN
+2022-07-03 13:42:14,432 API Response: False
+2022-07-03 13:42:14,435 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep1/server/serviceu_ip1/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,435 Result: True
+2022-07-03 13:42:14,436 [13:42:14:436] Is conn synced between server and dep0 ? (for serviceu0 and service): True
+2022-07-03 13:42:14,436 [13:42:14:436] Current instruction: Type.CONNECT_3
+2022-07-03 13:42:14,437 Request: is_conn_synced(server, dep1, ip, serviceu_ip1, CONN)
+2022-07-03 13:42:14,439 API Request: is_conn_synced dep1 server serviceu_ip1 ip CONN
+2022-07-03 13:42:14,440 API Response: True
+2022-07-03 13:42:14,440 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep1/server/serviceu_ip1/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,449 API Request: is_conn_synced dep1 server serviceu1 service CONN
+2022-07-03 13:42:14,449 API Response: False
+2022-07-03 13:42:14,450 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep1/server/serviceu1/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,455 API Request: is_conn_synced dep0 server serviceu0 service CONN
+2022-07-03 13:42:14,455 API Response: True
+2022-07-03 13:42:14,455 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep0/server/serviceu0/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,456 Result: True
+2022-07-03 13:42:14,456 [13:42:14:456] Is conn synced between server and dep1 ? (for serviceu_ip1 and ip): True
+2022-07-03 13:42:14,457 [13:42:14:457] Current instruction: Type.CONNECT_4
+2022-07-03 13:42:14,457 Request: is_conn_synced(server, dep1, service, serviceu1, CONN)
+2022-07-03 13:42:14,459 API Request: is_conn_synced dep1 server serviceu1 service CONN
+2022-07-03 13:42:14,460 API Response: True
+2022-07-03 13:42:14,460 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep1/server/serviceu1/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,462 API Request: is_conn_synced dep0 server serviceu0 service CONN
+2022-07-03 13:42:14,467 API Response: True
+2022-07-03 13:42:14,467 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep0/server/serviceu0/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,472 Result: True
+2022-07-03 13:42:14,472 [13:42:14:472] Is conn synced between server and dep1 ? (for serviceu1 and service): True
+2022-07-03 13:42:14,472 [13:42:14:472] Current instruction: Type.CONNECT_5
+2022-07-03 13:42:14,472 Request: is_conn_synced(server, dep2, ip, serviceu_ip2, CONN)
+2022-07-03 13:42:14,473 http://localhost:5003/is_conn_synced/server/dep2/ip/serviceu_ip2/CONN is not available at this moment
+2022-07-03 13:42:14,473 Result: False
+2022-07-03 13:42:14,473 [13:42:14:473] Is conn synced between server and dep2 ? (for serviceu_ip2 and ip): False
+2022-07-03 13:42:14,574 [13:42:14:574] Connection already done: Waiting connection from dep2
+2022-07-03 13:42:14,574 Request: is_conn_synced(server, dep2, ip, serviceu_ip2, CONN)
+2022-07-03 13:42:14,575 http://localhost:5003/is_conn_synced/server/dep2/ip/serviceu_ip2/CONN is not available at this moment
+2022-07-03 13:42:14,576 Result: False
+2022-07-03 13:42:14,623 API Request: is_conn_synced dep2 server serviceu_ip2 ip CONN
+2022-07-03 13:42:14,623 API Response: True
+2022-07-03 13:42:14,624 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep2/server/serviceu_ip2/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,628 API Request: is_conn_synced dep2 server serviceu_ip2 ip CONN
+2022-07-03 13:42:14,628 API Response: True
+2022-07-03 13:42:14,629 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep2/server/serviceu_ip2/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,634 API Request: is_conn_synced dep2 server serviceu2 service CONN
+2022-07-03 13:42:14,634 API Response: False
+2022-07-03 13:42:14,634 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep2/server/serviceu2/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,637 API Request: is_conn_synced dep2 server serviceu2 service CONN
+2022-07-03 13:42:14,638 API Response: False
+2022-07-03 13:42:14,638 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep2/server/serviceu2/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,663 API Request: is_conn_synced dep3 server serviceu_ip3 ip CONN
+2022-07-03 13:42:14,664 API Response: False
+2022-07-03 13:42:14,666 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep3/server/serviceu_ip3/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,668 API Request: is_conn_synced dep3 server serviceu_ip3 ip CONN
+2022-07-03 13:42:14,668 API Response: False
+2022-07-03 13:42:14,669 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep3/server/serviceu_ip3/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,676 [13:42:14:676] Connection already done: Waiting connection from dep2
+2022-07-03 13:42:14,676 Request: is_conn_synced(server, dep2, ip, serviceu_ip2, CONN)
+2022-07-03 13:42:14,684 Result: True
+2022-07-03 13:42:14,685 [13:42:14:685] Current instruction: Type.CONNECT_6
+2022-07-03 13:42:14,685 Request: is_conn_synced(server, dep2, service, serviceu2, CONN)
+2022-07-03 13:42:14,692 Result: True
+2022-07-03 13:42:14,693 [13:42:14:693] Is conn synced between server and dep2 ? (for serviceu2 and service): True
+2022-07-03 13:42:14,693 [13:42:14:693] Current instruction: Type.CONNECT_7
+2022-07-03 13:42:14,693 Request: is_conn_synced(server, dep3, ip, serviceu_ip3, CONN)
+2022-07-03 13:42:14,704 Result: True
+2022-07-03 13:42:14,704 [13:42:14:704] Is conn synced between server and dep3 ? (for serviceu_ip3 and ip): True
+2022-07-03 13:42:14,704 [13:42:14:704] Current instruction: Type.CONNECT_8
+2022-07-03 13:42:14,704 Request: is_conn_synced(server, dep3, service, serviceu3, CONN)
+2022-07-03 13:42:14,714 Result: False
+2022-07-03 13:42:14,714 [13:42:14:714] Is conn synced between server and dep3 ? (for serviceu3 and service): False
+2022-07-03 13:42:14,745 API Request: is_conn_synced dep2 server serviceu2 service CONN
+2022-07-03 13:42:14,746 API Response: True
+2022-07-03 13:42:14,746 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep2/server/serviceu2/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,749 API Request: is_conn_synced dep2 server serviceu2 service CONN
+2022-07-03 13:42:14,750 API Response: True
+2022-07-03 13:42:14,750 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep2/server/serviceu2/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,772 API Request: is_conn_synced dep3 server serviceu_ip3 ip CONN
+2022-07-03 13:42:14,773 API Response: True
+2022-07-03 13:42:14,773 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep3/server/serviceu_ip3/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,776 API Request: is_conn_synced dep3 server serviceu_ip3 ip CONN
+2022-07-03 13:42:14,776 API Response: True
+2022-07-03 13:42:14,777 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep3/server/serviceu_ip3/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,780 API Request: is_conn_synced dep3 server serviceu3 service CONN
+2022-07-03 13:42:14,780 API Response: True
+2022-07-03 13:42:14,781 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep3/server/serviceu3/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,783 API Request: is_conn_synced dep3 server serviceu3 service CONN
+2022-07-03 13:42:14,784 API Response: True
+2022-07-03 13:42:14,784 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep3/server/serviceu3/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,785 API Request: is_conn_synced dep4 server serviceu_ip4 ip CONN
+2022-07-03 13:42:14,785 API Response: False
+2022-07-03 13:42:14,786 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep4/server/serviceu_ip4/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,790 API Request: is_conn_synced dep4 server serviceu_ip4 ip CONN
+2022-07-03 13:42:14,790 API Response: False
+2022-07-03 13:42:14,791 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep4/server/serviceu_ip4/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,814 [13:42:14:814] Connection already done: Waiting connection from dep3
+2022-07-03 13:42:14,815 Request: is_conn_synced(server, dep3, service, serviceu3, CONN)
+2022-07-03 13:42:14,822 Result: True
+2022-07-03 13:42:14,822 [13:42:14:822] Current instruction: Type.CONNECT_9
+2022-07-03 13:42:14,822 Request: is_conn_synced(server, dep4, ip, serviceu_ip4, CONN)
+2022-07-03 13:42:14,831 Result: True
+2022-07-03 13:42:14,832 [13:42:14:832] Is conn synced between server and dep4 ? (for serviceu_ip4 and ip): True
+2022-07-03 13:42:14,832 [13:42:14:832] Current instruction: Type.CONNECT_10
+2022-07-03 13:42:14,832 Request: is_conn_synced(server, dep4, service, serviceu4, CONN)
+2022-07-03 13:42:14,844 Result: False
+2022-07-03 13:42:14,844 [13:42:14:844] Is conn synced between server and dep4 ? (for serviceu4 and service): False
+2022-07-03 13:42:14,894 API Request: is_conn_synced dep4 server serviceu_ip4 ip CONN
+2022-07-03 13:42:14,895 API Response: True
+2022-07-03 13:42:14,895 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep4/server/serviceu_ip4/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,898 API Request: is_conn_synced dep4 server serviceu_ip4 ip CONN
+2022-07-03 13:42:14,898 API Response: True
+2022-07-03 13:42:14,898 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep4/server/serviceu_ip4/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,902 API Request: is_conn_synced dep4 server serviceu4 service CONN
+2022-07-03 13:42:14,902 API Response: True
+2022-07-03 13:42:14,902 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep4/server/serviceu4/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,905 API Request: is_conn_synced dep4 server serviceu4 service CONN
+2022-07-03 13:42:14,905 API Response: True
+2022-07-03 13:42:14,906 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep4/server/serviceu4/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,910 API Request: is_conn_synced dep5 server serviceu_ip5 ip CONN
+2022-07-03 13:42:14,910 API Response: False
+2022-07-03 13:42:14,910 127.0.0.1 - - [03/Jul/2022 13:42:14] "HEAD /is_conn_synced/dep5/server/serviceu_ip5/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,914 API Request: is_conn_synced dep5 server serviceu_ip5 ip CONN
+2022-07-03 13:42:14,914 API Response: False
+2022-07-03 13:42:14,914 127.0.0.1 - - [03/Jul/2022 13:42:14] "GET /is_conn_synced/dep5/server/serviceu_ip5/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:14,945 [13:42:14:944] Connection already done: Waiting connection from dep4
+2022-07-03 13:42:14,945 Request: is_conn_synced(server, dep4, service, serviceu4, CONN)
+2022-07-03 13:42:14,961 Result: True
+2022-07-03 13:42:14,961 [13:42:14:961] Current instruction: Type.CONNECT_11
+2022-07-03 13:42:14,962 Request: is_conn_synced(server, dep5, ip, serviceu_ip5, CONN)
+2022-07-03 13:42:14,972 Result: True
+2022-07-03 13:42:14,972 [13:42:14:972] Is conn synced between server and dep5 ? (for serviceu_ip5 and ip): True
+2022-07-03 13:42:14,972 [13:42:14:972] Current instruction: Type.CONNECT_12
+2022-07-03 13:42:14,972 Request: is_conn_synced(server, dep5, service, serviceu5, CONN)
+2022-07-03 13:42:14,983 Result: False
+2022-07-03 13:42:14,984 [13:42:14:984] Is conn synced between server and dep5 ? (for serviceu5 and service): False
+2022-07-03 13:42:15,023 API Request: is_conn_synced dep5 server serviceu_ip5 ip CONN
+2022-07-03 13:42:15,023 API Response: True
+2022-07-03 13:42:15,024 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep5/server/serviceu_ip5/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,028 API Request: is_conn_synced dep5 server serviceu_ip5 ip CONN
+2022-07-03 13:42:15,028 API Response: True
+2022-07-03 13:42:15,029 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep5/server/serviceu_ip5/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,032 API Request: is_conn_synced dep5 server serviceu5 service CONN
+2022-07-03 13:42:15,033 API Response: True
+2022-07-03 13:42:15,033 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep5/server/serviceu5/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,036 API Request: is_conn_synced dep5 server serviceu5 service CONN
+2022-07-03 13:42:15,036 API Response: True
+2022-07-03 13:42:15,036 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep5/server/serviceu5/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,045 API Request: is_conn_synced dep6 server serviceu_ip6 ip CONN
+2022-07-03 13:42:15,046 API Response: False
+2022-07-03 13:42:15,046 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep6/server/serviceu_ip6/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,049 API Request: is_conn_synced dep6 server serviceu_ip6 ip CONN
+2022-07-03 13:42:15,049 API Response: False
+2022-07-03 13:42:15,050 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep6/server/serviceu_ip6/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,084 [13:42:15:084] Connection already done: Waiting connection from dep5
+2022-07-03 13:42:15,085 Request: is_conn_synced(server, dep5, service, serviceu5, CONN)
+2022-07-03 13:42:15,099 Result: True
+2022-07-03 13:42:15,100 [13:42:15:100] Current instruction: Type.CONNECT_13
+2022-07-03 13:42:15,100 Request: is_conn_synced(server, dep6, ip, serviceu_ip6, CONN)
+2022-07-03 13:42:15,109 Result: True
+2022-07-03 13:42:15,109 [13:42:15:109] Is conn synced between server and dep6 ? (for serviceu_ip6 and ip): True
+2022-07-03 13:42:15,109 [13:42:15:109] Current instruction: Type.CONNECT_14
+2022-07-03 13:42:15,109 Request: is_conn_synced(server, dep6, service, serviceu6, CONN)
+2022-07-03 13:42:15,119 Result: False
+2022-07-03 13:42:15,119 [13:42:15:119] Is conn synced between server and dep6 ? (for serviceu6 and service): False
+2022-07-03 13:42:15,154 API Request: is_conn_synced dep6 server serviceu_ip6 ip CONN
+2022-07-03 13:42:15,154 API Response: True
+2022-07-03 13:42:15,154 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep6/server/serviceu_ip6/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,157 API Request: is_conn_synced dep6 server serviceu_ip6 ip CONN
+2022-07-03 13:42:15,157 API Response: True
+2022-07-03 13:42:15,157 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep6/server/serviceu_ip6/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,160 API Request: is_conn_synced dep6 server serviceu6 service CONN
+2022-07-03 13:42:15,161 API Response: True
+2022-07-03 13:42:15,161 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep6/server/serviceu6/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,163 API Request: is_conn_synced dep6 server serviceu6 service CONN
+2022-07-03 13:42:15,164 API Response: True
+2022-07-03 13:42:15,164 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep6/server/serviceu6/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,170 API Request: is_conn_synced dep7 server serviceu_ip7 ip CONN
+2022-07-03 13:42:15,170 API Response: False
+2022-07-03 13:42:15,171 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep7/server/serviceu_ip7/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,175 API Request: is_conn_synced dep7 server serviceu_ip7 ip CONN
+2022-07-03 13:42:15,175 API Response: False
+2022-07-03 13:42:15,176 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep7/server/serviceu_ip7/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,219 [13:42:15:219] Connection already done: Waiting connection from dep6
+2022-07-03 13:42:15,220 Request: is_conn_synced(server, dep6, service, serviceu6, CONN)
+2022-07-03 13:42:15,226 Result: True
+2022-07-03 13:42:15,226 [13:42:15:226] Current instruction: Type.CONNECT_15
+2022-07-03 13:42:15,226 Request: is_conn_synced(server, dep7, ip, serviceu_ip7, CONN)
+2022-07-03 13:42:15,235 Result: True
+2022-07-03 13:42:15,235 [13:42:15:235] Is conn synced between server and dep7 ? (for serviceu_ip7 and ip): True
+2022-07-03 13:42:15,235 [13:42:15:235] Current instruction: Type.CONNECT_16
+2022-07-03 13:42:15,235 Request: is_conn_synced(server, dep7, service, serviceu7, CONN)
+2022-07-03 13:42:15,242 Result: False
+2022-07-03 13:42:15,242 [13:42:15:242] Is conn synced between server and dep7 ? (for serviceu7 and service): False
+2022-07-03 13:42:15,280 API Request: is_conn_synced dep7 server serviceu_ip7 ip CONN
+2022-07-03 13:42:15,280 API Response: True
+2022-07-03 13:42:15,280 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep7/server/serviceu_ip7/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,283 API Request: is_conn_synced dep7 server serviceu_ip7 ip CONN
+2022-07-03 13:42:15,284 API Response: True
+2022-07-03 13:42:15,284 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep7/server/serviceu_ip7/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,287 API Request: is_conn_synced dep7 server serviceu7 service CONN
+2022-07-03 13:42:15,287 API Response: True
+2022-07-03 13:42:15,288 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep7/server/serviceu7/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,292 API Request: is_conn_synced dep7 server serviceu7 service CONN
+2022-07-03 13:42:15,292 API Response: True
+2022-07-03 13:42:15,293 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep7/server/serviceu7/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,296 API Request: is_conn_synced dep8 server serviceu_ip8 ip CONN
+2022-07-03 13:42:15,297 API Response: False
+2022-07-03 13:42:15,297 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep8/server/serviceu_ip8/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,299 API Request: is_conn_synced dep8 server serviceu_ip8 ip CONN
+2022-07-03 13:42:15,300 API Response: False
+2022-07-03 13:42:15,300 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep8/server/serviceu_ip8/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,343 [13:42:15:343] Connection already done: Waiting connection from dep7
+2022-07-03 13:42:15,343 Request: is_conn_synced(server, dep7, service, serviceu7, CONN)
+2022-07-03 13:42:15,348 Result: True
+2022-07-03 13:42:15,348 [13:42:15:348] Current instruction: Type.CONNECT_17
+2022-07-03 13:42:15,348 Request: is_conn_synced(server, dep8, ip, serviceu_ip8, CONN)
+2022-07-03 13:42:15,355 Result: True
+2022-07-03 13:42:15,355 [13:42:15:355] Is conn synced between server and dep8 ? (for serviceu_ip8 and ip): True
+2022-07-03 13:42:15,355 [13:42:15:355] Current instruction: Type.CONNECT_18
+2022-07-03 13:42:15,355 Request: is_conn_synced(server, dep8, service, serviceu8, CONN)
+2022-07-03 13:42:15,360 Result: False
+2022-07-03 13:42:15,360 [13:42:15:360] Is conn synced between server and dep8 ? (for serviceu8 and service): False
+2022-07-03 13:42:15,390 API Request: is_conn_synced dep9 server serviceu_ip9 ip CONN
+2022-07-03 13:42:15,390 API Response: False
+2022-07-03 13:42:15,390 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep9/server/serviceu_ip9/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,393 API Request: is_conn_synced dep9 server serviceu_ip9 ip CONN
+2022-07-03 13:42:15,393 API Response: False
+2022-07-03 13:42:15,393 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep9/server/serviceu_ip9/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,403 API Request: is_conn_synced dep8 server serviceu_ip8 ip CONN
+2022-07-03 13:42:15,404 API Response: True
+2022-07-03 13:42:15,404 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep8/server/serviceu_ip8/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,406 API Request: is_conn_synced dep8 server serviceu_ip8 ip CONN
+2022-07-03 13:42:15,407 API Response: True
+2022-07-03 13:42:15,407 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep8/server/serviceu_ip8/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,410 API Request: is_conn_synced dep8 server serviceu8 service CONN
+2022-07-03 13:42:15,410 API Response: True
+2022-07-03 13:42:15,411 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep8/server/serviceu8/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,413 API Request: is_conn_synced dep8 server serviceu8 service CONN
+2022-07-03 13:42:15,413 API Response: True
+2022-07-03 13:42:15,413 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep8/server/serviceu8/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,461 [13:42:15:461] Connection already done: Waiting connection from dep8
+2022-07-03 13:42:15,461 Request: is_conn_synced(server, dep8, service, serviceu8, CONN)
+2022-07-03 13:42:15,466 Result: True
+2022-07-03 13:42:15,467 [13:42:15:467] Current instruction: Type.CONNECT_19
+2022-07-03 13:42:15,467 Request: is_conn_synced(server, dep9, ip, serviceu_ip9, CONN)
+2022-07-03 13:42:15,472 Result: True
+2022-07-03 13:42:15,473 [13:42:15:473] Is conn synced between server and dep9 ? (for serviceu_ip9 and ip): True
+2022-07-03 13:42:15,473 [13:42:15:473] Current instruction: Type.CONNECT_20
+2022-07-03 13:42:15,473 Request: is_conn_synced(server, dep9, service, serviceu9, CONN)
+2022-07-03 13:42:15,478 Result: False
+2022-07-03 13:42:15,478 [13:42:15:478] Is conn synced between server and dep9 ? (for serviceu9 and service): False
+2022-07-03 13:42:15,497 API Request: is_conn_synced dep9 server serviceu_ip9 ip CONN
+2022-07-03 13:42:15,497 API Response: True
+2022-07-03 13:42:15,497 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep9/server/serviceu_ip9/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,500 API Request: is_conn_synced dep9 server serviceu_ip9 ip CONN
+2022-07-03 13:42:15,500 API Response: True
+2022-07-03 13:42:15,501 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep9/server/serviceu_ip9/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,503 API Request: is_conn_synced dep9 server serviceu9 service CONN
+2022-07-03 13:42:15,503 API Response: True
+2022-07-03 13:42:15,504 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep9/server/serviceu9/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,506 API Request: is_conn_synced dep9 server serviceu9 service CONN
+2022-07-03 13:42:15,506 API Response: True
+2022-07-03 13:42:15,506 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep9/server/serviceu9/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,519 API Request: is_conn_synced dep10 server serviceu_ip10 ip CONN
+2022-07-03 13:42:15,519 API Response: False
+2022-07-03 13:42:15,519 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep10/server/serviceu_ip10/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,521 API Request: is_conn_synced dep10 server serviceu_ip10 ip CONN
+2022-07-03 13:42:15,521 API Response: False
+2022-07-03 13:42:15,522 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep10/server/serviceu_ip10/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,578 [13:42:15:578] Connection already done: Waiting connection from dep9
+2022-07-03 13:42:15,579 Request: is_conn_synced(server, dep9, service, serviceu9, CONN)
+2022-07-03 13:42:15,583 Result: True
+2022-07-03 13:42:15,583 [13:42:15:583] Current instruction: Type.CONNECT_21
+2022-07-03 13:42:15,583 Request: is_conn_synced(server, dep10, ip, serviceu_ip10, CONN)
+2022-07-03 13:42:15,587 Result: True
+2022-07-03 13:42:15,587 [13:42:15:587] Is conn synced between server and dep10 ? (for serviceu_ip10 and ip): True
+2022-07-03 13:42:15,588 [13:42:15:588] Current instruction: Type.CONNECT_22
+2022-07-03 13:42:15,588 Request: is_conn_synced(server, dep10, service, serviceu10, CONN)
+2022-07-03 13:42:15,592 Result: False
+2022-07-03 13:42:15,592 [13:42:15:592] Is conn synced between server and dep10 ? (for serviceu10 and service): False
+2022-07-03 13:42:15,608 API Request: is_conn_synced dep11 server serviceu_ip11 ip CONN
+2022-07-03 13:42:15,608 API Response: False
+2022-07-03 13:42:15,609 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep11/server/serviceu_ip11/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,610 API Request: is_conn_synced dep11 server serviceu_ip11 ip CONN
+2022-07-03 13:42:15,610 API Response: False
+2022-07-03 13:42:15,611 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep11/server/serviceu_ip11/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,624 API Request: is_conn_synced dep10 server serviceu_ip10 ip CONN
+2022-07-03 13:42:15,625 API Response: True
+2022-07-03 13:42:15,625 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep10/server/serviceu_ip10/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,627 API Request: is_conn_synced dep10 server serviceu_ip10 ip CONN
+2022-07-03 13:42:15,627 API Response: True
+2022-07-03 13:42:15,627 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep10/server/serviceu_ip10/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,629 API Request: is_conn_synced dep10 server serviceu10 service CONN
+2022-07-03 13:42:15,629 API Response: True
+2022-07-03 13:42:15,629 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep10/server/serviceu10/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,631 API Request: is_conn_synced dep10 server serviceu10 service CONN
+2022-07-03 13:42:15,631 API Response: True
+2022-07-03 13:42:15,631 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep10/server/serviceu10/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,692 [13:42:15:692] Connection already done: Waiting connection from dep10
+2022-07-03 13:42:15,692 Request: is_conn_synced(server, dep10, service, serviceu10, CONN)
+2022-07-03 13:42:15,697 Result: True
+2022-07-03 13:42:15,697 [13:42:15:697] Current instruction: Type.CONNECT_23
+2022-07-03 13:42:15,697 Request: is_conn_synced(server, dep11, ip, serviceu_ip11, CONN)
+2022-07-03 13:42:15,702 Result: True
+2022-07-03 13:42:15,702 [13:42:15:702] Is conn synced between server and dep11 ? (for serviceu_ip11 and ip): True
+2022-07-03 13:42:15,702 [13:42:15:702] Current instruction: Type.CONNECT_24
+2022-07-03 13:42:15,702 Request: is_conn_synced(server, dep11, service, serviceu11, CONN)
+2022-07-03 13:42:15,705 Result: False
+2022-07-03 13:42:15,705 [13:42:15:705] Is conn synced between server and dep11 ? (for serviceu11 and service): False
+2022-07-03 13:42:15,713 API Request: is_conn_synced dep11 server serviceu_ip11 ip CONN
+2022-07-03 13:42:15,713 API Response: True
+2022-07-03 13:42:15,714 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep11/server/serviceu_ip11/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,715 API Request: is_conn_synced dep11 server serviceu_ip11 ip CONN
+2022-07-03 13:42:15,716 API Response: True
+2022-07-03 13:42:15,716 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep11/server/serviceu_ip11/ip/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,718 API Request: is_conn_synced dep11 server serviceu11 service CONN
+2022-07-03 13:42:15,719 API Response: True
+2022-07-03 13:42:15,719 127.0.0.1 - - [03/Jul/2022 13:42:15] "HEAD /is_conn_synced/dep11/server/serviceu11/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,721 API Request: is_conn_synced dep11 server serviceu11 service CONN
+2022-07-03 13:42:15,721 API Response: True
+2022-07-03 13:42:15,722 127.0.0.1 - - [03/Jul/2022 13:42:15] "GET /is_conn_synced/dep11/server/serviceu11/service/CONN HTTP/1.1" 200 -
+2022-07-03 13:42:15,806 [13:42:15:806] Connection already done: Waiting connection from dep11
+2022-07-03 13:42:15,806 Request: is_conn_synced(server, dep11, service, serviceu11, CONN)
+2022-07-03 13:42:15,811 Result: True
+2022-07-03 13:42:15,811 [13:42:15:811] Current instruction: Type.PUSH_B_25
+2022-07-03 13:42:15,811 [35m[server] Changing behavior to 'deploy'[0m
+2022-07-03 13:42:15,811 [13:42:15:811] Current instruction: Type.WAIT_ALL_26
+2022-07-03 13:42:15,811 Need to process undeployed for place_to_odocks
+2022-07-03 13:42:15,811 odocks to deal with [<concerto.place.Dock object at 0x7f4707d6d760>]
+2022-07-03 13:42:15,811 [35m[server] Leaving place 'undeployed'[0m
+2022-07-03 13:42:15,811 Need to process Docker place: undeployed for start_transition
+2022-07-03 13:42:15,811 [35m[server] Starting transition 'allocate'[0m
+2022-07-03 13:42:15,812 [35m[server] allocating resources[0m
+2022-07-03 13:42:19,015 [35m[server] finished allocation (ip:123.124.1.2)[0m
+2022-07-03 13:42:19,027 [35m[server] Ending transition 'allocate'[0m
+2022-07-03 13:42:19,128 Need to process server_allocated_allocate for idocks_to_place
+2022-07-03 13:42:19,128 [35m[server] Entering place 'allocated'[0m
+2022-07-03 13:42:19,128 [35m[server] Starting to use place dependency 'ip'[0m
+2022-07-03 13:42:19,128 Need to process allocated for place_to_odocks
+2022-07-03 13:42:19,128 odocks to deal with [<concerto.place.Dock object at 0x7f4707d6d910>, <concerto.place.Dock object at 0x7f4707d6dc70>, <concerto.place.Dock object at 0x7f4707d6dfd0>, <concerto.place.Dock object at 0x7f4707d79790>, <concerto.place.Dock object at 0x7f4707d796d0>, <concerto.place.Dock object at 0x7f4707d79f10>, <concerto.place.Dock object at 0x7f4707d79b50>, <concerto.place.Dock object at 0x7f4707d58c10>, <concerto.place.Dock object at 0x7f4707520070>, <concerto.place.Dock object at 0x7f4707520340>, <concerto.place.Dock object at 0x7f4707520610>, <concerto.place.Dock object at 0x7f47075208e0>]
+2022-07-03 13:42:19,128 [35m[server] Leaving place 'allocated'[0m
+2022-07-03 13:42:19,129 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,129 Request: get_nb_dependency_users(dep7, ip)
+2022-07-03 13:42:19,136 Result: 1
+2022-07-03 13:42:19,136 [35m[server] Starting transition 'config7'[0m
+2022-07-03 13:42:19,136 [35m[server] Starting to use transition dependency 'serviceu_ip7'[0m
+2022-07-03 13:42:19,136 [35m[server] waiting for dependency 7[0m
+2022-07-03 13:42:19,136 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,137 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,145 Result: 0
+2022-07-03 13:42:19,146 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,146 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,146 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,152 Result: 0
+2022-07-03 13:42:19,152 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,152 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,153 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,159 Result: 0
+2022-07-03 13:42:19,159 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,159 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,159 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,164 Result: 0
+2022-07-03 13:42:19,164 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,164 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,164 Request: get_nb_dependency_users(dep11, ip)
+2022-07-03 13:42:19,168 Result: 1
+2022-07-03 13:42:19,168 [35m[server] Starting transition 'config11'[0m
+2022-07-03 13:42:19,168 [35m[server] Starting to use transition dependency 'serviceu_ip11'[0m
+2022-07-03 13:42:19,168 [35m[server] waiting for dependency 11[0m
+2022-07-03 13:42:19,168 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,169 Request: get_nb_dependency_users(dep0, ip)
+2022-07-03 13:42:19,172 Result: 1
+2022-07-03 13:42:19,172 [35m[server] Starting transition 'config0'[0m
+2022-07-03 13:42:19,172 [35m[server] Starting to use transition dependency 'serviceu_ip0'[0m
+2022-07-03 13:42:19,172 [35m[server] waiting for dependency 0[0m
+2022-07-03 13:42:19,172 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,173 Request: get_nb_dependency_users(dep5, ip)
+2022-07-03 13:42:19,177 Result: 1
+2022-07-03 13:42:19,177 [35m[server] Starting transition 'config5'[0m
+2022-07-03 13:42:19,177 [35m[server] Starting to use transition dependency 'serviceu_ip5'[0m
+2022-07-03 13:42:19,177 [35m[server] waiting for dependency 5[0m
+2022-07-03 13:42:19,177 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,177 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,181 Result: 0
+2022-07-03 13:42:19,181 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,182 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,182 Request: get_nb_dependency_users(dep6, ip)
+2022-07-03 13:42:19,185 Result: 1
+2022-07-03 13:42:19,185 [35m[server] Starting transition 'config6'[0m
+2022-07-03 13:42:19,186 [35m[server] Starting to use transition dependency 'serviceu_ip6'[0m
+2022-07-03 13:42:19,186 [35m[server] waiting for dependency 6[0m
+2022-07-03 13:42:19,186 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,186 Request: get_nb_dependency_users(dep3, ip)
+2022-07-03 13:42:19,190 Result: 1
+2022-07-03 13:42:19,191 [35m[server] Starting transition 'config3'[0m
+2022-07-03 13:42:19,191 [35m[server] Starting to use transition dependency 'serviceu_ip3'[0m
+2022-07-03 13:42:19,191 [35m[server] waiting for dependency 3[0m
+2022-07-03 13:42:19,191 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,192 Request: get_nb_dependency_users(dep2, ip)
+2022-07-03 13:42:19,196 Result: 1
+2022-07-03 13:42:19,196 [35m[server] Starting transition 'config2'[0m
+2022-07-03 13:42:19,196 [35m[server] Starting to use transition dependency 'serviceu_ip2'[0m
+2022-07-03 13:42:19,196 [35m[server] waiting for dependency 2[0m
+2022-07-03 13:42:19,297 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,297 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,303 Result: 0
+2022-07-03 13:42:19,303 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,303 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,303 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,309 Result: 0
+2022-07-03 13:42:19,309 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,309 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,309 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,315 Result: 0
+2022-07-03 13:42:19,315 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,315 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,315 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,321 Result: 0
+2022-07-03 13:42:19,321 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,322 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,322 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,327 Result: 0
+2022-07-03 13:42:19,328 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,428 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,429 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,440 Result: 0
+2022-07-03 13:42:19,440 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,441 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,441 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,451 Result: 0
+2022-07-03 13:42:19,451 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,451 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,452 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,458 Result: 0
+2022-07-03 13:42:19,459 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,459 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,459 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,465 Result: 0
+2022-07-03 13:42:19,465 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,465 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,465 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,470 Result: 0
+2022-07-03 13:42:19,470 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,571 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,571 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,579 Result: 0
+2022-07-03 13:42:19,579 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,579 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,580 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,588 Result: 0
+2022-07-03 13:42:19,588 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,588 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,588 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,596 Result: 0
+2022-07-03 13:42:19,596 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,596 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,596 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,603 Result: 0
+2022-07-03 13:42:19,603 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,603 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,603 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,609 Result: 0
+2022-07-03 13:42:19,609 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,710 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,711 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,718 Result: 0
+2022-07-03 13:42:19,718 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,718 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,718 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,723 Result: 0
+2022-07-03 13:42:19,723 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,723 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,723 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,727 Result: 0
+2022-07-03 13:42:19,727 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,727 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,727 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,730 Result: 0
+2022-07-03 13:42:19,731 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,731 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,731 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,734 Result: 0
+2022-07-03 13:42:19,734 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,835 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,835 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,845 Result: 0
+2022-07-03 13:42:19,845 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,846 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,846 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,852 Result: 0
+2022-07-03 13:42:19,852 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,852 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,852 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,857 Result: 0
+2022-07-03 13:42:19,857 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,857 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,858 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,862 Result: 0
+2022-07-03 13:42:19,862 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,862 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,862 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,866 Result: 0
+2022-07-03 13:42:19,866 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:19,966 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,966 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:19,974 Result: 0
+2022-07-03 13:42:19,975 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:19,975 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,975 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:19,982 Result: 0
+2022-07-03 13:42:19,982 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:19,982 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,982 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:19,987 Result: 0
+2022-07-03 13:42:19,987 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:19,988 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,988 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:19,993 Result: 0
+2022-07-03 13:42:19,993 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:19,993 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:19,993 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:19,998 Result: 0
+2022-07-03 13:42:19,998 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:20,099 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,099 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,105 Result: 0
+2022-07-03 13:42:20,105 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,105 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,105 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,111 Result: 0
+2022-07-03 13:42:20,111 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,111 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,111 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,117 Result: 0
+2022-07-03 13:42:20,117 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,117 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,117 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,121 Result: 0
+2022-07-03 13:42:20,121 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,121 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,121 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:20,126 Result: 0
+2022-07-03 13:42:20,127 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:20,197 [35m[server] dependency 7 configured[0m
+2022-07-03 13:42:20,227 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,227 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,232 Result: 0
+2022-07-03 13:42:20,232 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,232 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,232 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,236 Result: 0
+2022-07-03 13:42:20,236 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,236 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,237 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,241 Result: 0
+2022-07-03 13:42:20,241 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,241 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,241 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,247 Result: 0
+2022-07-03 13:42:20,247 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,247 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,247 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:20,252 Result: 0
+2022-07-03 13:42:20,252 Dep <concerto.dependency.Dependency object at 0x7f4707520f40> is not served
+2022-07-03 13:42:20,252 [35m[server] Stopping to use transition dependency 'serviceu_ip7'[0m
+2022-07-03 13:42:20,252 [35m[server] Ending transition 'config7'[0m
+2022-07-03 13:42:20,352 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,353 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,353 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,357 Result: 0
+2022-07-03 13:42:20,358 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,358 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,358 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,362 Result: 0
+2022-07-03 13:42:20,362 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,362 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,362 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,366 Result: 0
+2022-07-03 13:42:20,366 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,366 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,366 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,370 Result: 0
+2022-07-03 13:42:20,370 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,370 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,370 Request: get_nb_dependency_users(dep9, ip)
+2022-07-03 13:42:20,374 Result: 1
+2022-07-03 13:42:20,374 [35m[server] Starting transition 'config9'[0m
+2022-07-03 13:42:20,375 [35m[server] Starting to use transition dependency 'serviceu_ip9'[0m
+2022-07-03 13:42:20,375 [35m[server] waiting for dependency 9[0m
+2022-07-03 13:42:20,475 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,475 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,475 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,479 Result: 0
+2022-07-03 13:42:20,479 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,480 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,480 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,484 Result: 0
+2022-07-03 13:42:20,484 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,484 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,484 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,489 Result: 0
+2022-07-03 13:42:20,489 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,489 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,489 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,493 Result: 0
+2022-07-03 13:42:20,493 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,594 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,594 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,594 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,599 Result: 0
+2022-07-03 13:42:20,599 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,599 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,599 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,604 Result: 0
+2022-07-03 13:42:20,604 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,604 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,604 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,608 Result: 0
+2022-07-03 13:42:20,608 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,608 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,608 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,612 Result: 0
+2022-07-03 13:42:20,612 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,713 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,713 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,713 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,717 Result: 0
+2022-07-03 13:42:20,717 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,717 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,718 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,722 Result: 0
+2022-07-03 13:42:20,722 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,723 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,723 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,726 Result: 0
+2022-07-03 13:42:20,726 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,727 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,727 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,730 Result: 0
+2022-07-03 13:42:20,730 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,831 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,831 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,831 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,835 Result: 0
+2022-07-03 13:42:20,835 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,835 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,835 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,839 Result: 0
+2022-07-03 13:42:20,839 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,839 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,839 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,844 Result: 0
+2022-07-03 13:42:20,844 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,844 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,844 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,847 Result: 0
+2022-07-03 13:42:20,848 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:20,948 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:20,948 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,948 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:20,952 Result: 0
+2022-07-03 13:42:20,952 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:20,953 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,953 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:20,958 Result: 0
+2022-07-03 13:42:20,958 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:20,958 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,958 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:20,963 Result: 0
+2022-07-03 13:42:20,963 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:20,963 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:20,963 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:20,968 Result: 0
+2022-07-03 13:42:20,968 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:21,068 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:21,069 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,069 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:21,073 Result: 0
+2022-07-03 13:42:21,073 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:21,073 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,073 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:21,078 Result: 0
+2022-07-03 13:42:21,078 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:21,078 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,078 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:21,083 Result: 0
+2022-07-03 13:42:21,083 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:21,083 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,083 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:21,087 Result: 0
+2022-07-03 13:42:21,087 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:21,187 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:21,187 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,188 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:21,192 Result: 0
+2022-07-03 13:42:21,192 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:21,192 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,192 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:21,197 Result: 0
+2022-07-03 13:42:21,197 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:21,197 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,197 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:21,203 Result: 0
+2022-07-03 13:42:21,204 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:21,205 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,205 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:21,213 Result: 0
+2022-07-03 13:42:21,213 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:21,247 [35m[server] dependency 6 configured[0m
+2022-07-03 13:42:21,314 Need to process server_configured_config7 for idocks_to_place
+2022-07-03 13:42:21,314 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,314 Request: get_nb_dependency_users(dep10, ip)
+2022-07-03 13:42:21,319 Result: 0
+2022-07-03 13:42:21,320 Dep <concerto.dependency.Dependency object at 0x7f4707520fa0> is not served
+2022-07-03 13:42:21,320 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,320 Request: get_nb_dependency_users(dep1, ip)
+2022-07-03 13:42:21,331 Result: 0
+2022-07-03 13:42:21,331 Dep <concerto.dependency.Dependency object at 0x7f4707520c40> is not served
+2022-07-03 13:42:21,331 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,331 Request: get_nb_dependency_users(dep8, ip)
+2022-07-03 13:42:21,352 Result: 0
+2022-07-03 13:42:21,352 Dep <concerto.dependency.Dependency object at 0x7f4707520ee0> is not served
+2022-07-03 13:42:21,352 Need to process Docker place: allocated for start_transition
+2022-07-03 13:42:21,352 Request: get_nb_dependency_users(dep4, ip)
+2022-07-03 13:42:21,358 Result: 0
+2022-07-03 13:42:21,358 Dep <concerto.dependency.Dependency object at 0x7f4707520d60> is not served
+2022-07-03 13:42:21,358 [35m[server] Stopping to use transition dependency 'serviceu_ip6'[0m
+2022-07-03 13:42:21,358 [35m[server] Ending transition 'config6'[0m

@@ -1,0 +1,15 @@
+2022-06-30 12:28:28,085 --- All experiments to treat: ---
+2022-06-30 12:28:28,085 {'uptimes': '/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json', 'transitions_times': '/home/anomond/parameters/transitions_times/mock_transitions_times-1-30-deps2.json', 'cluster': 'uvb', 'experiment_num': 1}
+2022-06-30 12:28:28,085 ----------------------------------
+2022-06-30 12:28:28,114 ----- Launching experiment ---------
+2022-06-30 12:28:28,114 ------ Fetching infrastructure --------
+2022-06-30 12:28:28,122 Experiment FAILED
+2022-06-30 12:28:28,122 [Errno 2] No such file or directory: '/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json'
+Traceback (most recent call last):
+  File "experiment/execution_experiment.py", line 282, in create_and_run_sweeper
+    launch_experiment(is_normal, version_concerto_name, parameter["uptimes"], parameter["transitions_times"], parameter["cluster"], parameter["experiment_num"])
+  File "experiment/execution_experiment.py", line 145, in launch_experiment
+    with open(uptimes_file_name) as f:
+FileNotFoundError: [Errno 2] No such file or directory: '/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json'
+2022-06-30 12:28:28,123 [Errno 2] No such file or directory: '/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json'
+2022-06-30 12:28:28,123 Skipping experiment with parameters {'uptimes': '/home/anomond/parameters/uptimes/uptimes-30-30-2-0_98-1.json', 'transitions_times': '/home/anomond/parameters/transitions_times/mock_transitions_times-1-30-deps2.json', 'cluster': 'uvb', 'experiment_num': 1}
