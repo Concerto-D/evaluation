@@ -13,7 +13,7 @@ def destroy_provider_from_job_name(job_name: str):
 
 
 def reserve_node_for_deployment(cluster: str):
-    _ = en.init_logging()
+    # _ = en.init_logging()
     site = get_cluster_site(cluster)
     base_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
     conf = (
@@ -34,7 +34,7 @@ def reserve_node_for_deployment(cluster: str):
 
 
 def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
-    _ = en.init_logging()
+    # _ = en.init_logging()
     site = get_cluster_site(cluster)
     base_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
     conf = (
@@ -51,14 +51,14 @@ def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01
 
     provider = en.G5k(conf)
     roles, networks = provider.init()
-    return roles, networks
+    return roles, networks, provider
 
 
 def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
     """
     TODO: voir pour les restriction des ressources (pour approcher des ressources d'une OU (raspberry ou autre))
     """
-    _ = en.init_logging()
+    # _ = en.init_logging()
     site = get_cluster_site(cluster)
     concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
     # TODO: le walltime, le mettre jusqu'à 9am du jour d'après pour tous les noeuds
