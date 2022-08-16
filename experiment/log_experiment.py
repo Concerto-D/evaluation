@@ -1,5 +1,5 @@
 import logging
-import os
+import sys
 from datetime import datetime
 
 from experiment import globals_variables
@@ -13,5 +13,8 @@ def initialize_logging(expe_name):
     logging.basicConfig(filename=f"{global_dir_expe}/experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
     global log
     log = logging.getLogger(__name__)
+    console = logging.StreamHandler(sys.stdout)
+    console.setLevel(logging.DEBUG)
+    log.addHandler(console)
     log.setLevel(logging.DEBUG)
     return log
