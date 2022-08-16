@@ -36,7 +36,7 @@ def main():
         log.debug("Reserve the deployment node")
         deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster)
         log.debug("Initialise repositories")
-        concerto_d_g5k.initialize_expe_repositories(deployment_node["deployment"], version_concerto_d)
+        concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"], version_concerto_d)
         if version_concerto_d == "concerto-decentralized-synchrone":
             log.debug("Synchronous version: creating inventory")
             create_inventory_from_roles(roles)
