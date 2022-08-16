@@ -1,6 +1,6 @@
 from datetime import datetime
 
-local_homedir = "/home/aomond"
+local_homedir = "/home/anomond"
 remote_homedir = "/home/anomond"
 sweeper_parameters_file = "sweeper_parameters.yaml"
 

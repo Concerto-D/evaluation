@@ -4,7 +4,7 @@ import sys
 import yaml
 from experiment import concerto_d_g5k
 
-from evaluation.experiment import execution_experiment, globals_variables
+from experiment import execution_experiment, globals_variables
 
 
 # def get_normal_parameters():

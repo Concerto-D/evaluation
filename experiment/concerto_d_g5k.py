@@ -3,12 +3,13 @@ from typing import List, Optional
 import enoslib as en
 from enoslib.infra.enos_g5k.g5k_api_utils import get_cluster_site
 
-from evaluation.experiment import globals_variables
+from experiment import globals_variables
 
 
-def get_provider_from_job_name(job_name: str):
+def destroy_provider_from_job_name(job_name: str):
     conf = en.G5kConf.from_settings(job_name=job_name).finalize()
-    return en.G5k(conf)
+    provider = en.G5k(conf)
+    provider.destroy()
 
 
 def reserve_node_for_deployment(cluster: str):

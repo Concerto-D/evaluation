@@ -14,7 +14,7 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper
 
-from evaluation.experiment import globals_variables
+from experiment import globals_variables
 from log_experiment import log
 
 from experiment import concerto_d_g5k
