@@ -5,7 +5,7 @@ import traceback
 import yaml
 
 from experiment import concerto_d_g5k, globals_variables, log_experiment, destroy_reservation, execution_experiment
-
+from experiment.log_experiment import log
 
 def main():
     # Reservation experiment
@@ -22,28 +22,29 @@ def main():
 
     global_dir_expe = globals_variables.global_dir_expe(expe_name)
     os.makedirs(f"{global_dir_expe}/experiment_logs", exist_ok=True)
-    log = log_experiment.initialize_logging(expe_name)
+    log_experiment.initialize_logging(expe_name)
     try:
         log.debug(f"Start {expe_name} for {version_concerto_d}")
         log.debug(f"Job should start at {reservation} and should last for {walltime}")
         log.debug(f"Reserve {nb_concerto_nodes} concerto_d and {nb_zenoh_routers} named {job_name_concerto}")
-        roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
+        # roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
         log.debug(f"Reserve the controller node named {job_name_controller}")
-        role_controller, _, _ = concerto_d_g5k.reserve_node_for_controller(job_name_controller, cluster, walltime=walltime, reservation=reservation)
+        # role_controller, _, _ = concerto_d_g5k.reserve_node_for_controller(job_name_controller, cluster, walltime=walltime, reservation=reservation)
 
         # Initialisation experiment
         cluster = "uvb"
         log.debug("Reserve the deployment node")
-        deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster)
+        # deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster)
         log.debug("Initialise repositories")
-        concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"], version_concerto_d)
+        # concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"], version_concerto_d)
         if version_concerto_d == "concerto-decentralized-synchrone":
             log.debug("Synchronous version: creating inventory")
-            create_inventory_from_roles(roles)
+            # create_inventory_from_roles(roles)
             log.debug("Put inventory file on frontend")
-            concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized-synchrone/inventory.yaml")
+            # concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized-synchrone/inventory.yaml")
         log.debug("Destroy deployment node")
-        provider_deployment.destroy()
+        # provider_deployment.destroy()
+        roles = None
 
         # Execution experiment
         params_to_sweep = parameters["sweeper_parameters"]
