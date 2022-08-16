@@ -4,8 +4,8 @@ import traceback
 
 import yaml
 
-from experiment import concerto_d_g5k, globals_variables, log_experiment, destroy_reservation, execution_experiment
-from experiment.log_experiment import log
+from experiment import concerto_d_g5k, execution_experiment, globals_variables, log_experiment, destroy_reservation
+
 
 def main():
     # Reservation experiment
@@ -22,7 +22,7 @@ def main():
 
     global_dir_expe = globals_variables.global_dir_expe(expe_name)
     os.makedirs(f"{global_dir_expe}/experiment_logs", exist_ok=True)
-    log_experiment.initialize_logging(expe_name)
+    log = log_experiment.initialize_logging(expe_name)
     try:
         log.debug(f"Start {expe_name} for {version_concerto_d}")
         log.debug(f"Job should start at {reservation} and should last for {walltime}")

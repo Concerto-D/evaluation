@@ -15,7 +15,7 @@ import yaml
 from execo_engine import sweep, ParamSweeper
 
 from experiment import globals_variables
-from log_experiment import log
+import log_experiment
 
 from experiment import concerto_d_g5k
 
@@ -84,6 +84,7 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_n
     qui prennent un peu de temps)
     TODO: à changer ? loader un json via yaml.load
     """
+    log = log_experiment.log
     log.debug("SCHEDULING START")
     expe_time_start = time.time()
     uptimes_nodes = [list(uptimes) for uptimes in uptimes_nodes_tuples]
@@ -140,6 +141,7 @@ def launch_experiment(job_name, version_concerto_name, roles, uptimes_file_name,
     # Retour Baptiste: On peut préciser un job pour la nuit sans le considérer comme une réservation, mais il est considéré comme besteffort
     # Voir si on peut se baser sur une réservation oarsub pour lancer les scripts enoslib
     # Provision infrastructure
+    log = log_experiment.log
     globals_variables.initialize_execution_expe_dir()
     homedir = globals_variables.local_homedir
     log.debug("------ Fetching infrastructure --------")
@@ -222,6 +224,7 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
 
 
 def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
+    log = log_experiment.log
     dir_to_save_expe = globals_variables.execution_expe_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
@@ -320,6 +323,7 @@ def create_and_run_sweeper(expe_name, job_name, version_concerto_name, params_to
     # os.makedirs("/home/anomond/results", exist_ok=True)
     # dir_to_save_expe = f"/home/anomond/results/results_{timestamp_expe}"
     # os.makedirs(dir_to_save_expe, exist_ok=True)
+    log = log_experiment.log
     global_dir_expe = globals_variables.global_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_dir_expe}")
     sweeps = sweep(params_to_sweep)
