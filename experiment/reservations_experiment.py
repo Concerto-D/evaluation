@@ -2,9 +2,7 @@ import sys
 
 import yaml
 
-from experiment import concerto_d_g5k, execution_experiment, globals_variables, log_experiment
-
-from evaluation.experiment import destroy_reservation
+from experiment import concerto_d_g5k, execution_experiment, globals_variables, log_experiment, destroy_reservation
 
 
 def main():
