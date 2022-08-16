@@ -16,4 +16,5 @@ sweeper_parameters:
   transitions_times:
     - "transitions_times-1-30-deps12-0.json"
   cluster: "uvb"
-  waiting_rate: 1  # Between 0 and 1
+  experiment_num: 1  # Between 0 and 1
+  timeout: "False"
