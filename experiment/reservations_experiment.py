@@ -4,7 +4,7 @@ import traceback
 
 import yaml
 
-from experiment import concerto_d_g5k, execution_experiment, globals_variables, log_experiment, destroy_reservation
+from experiment import concerto_d_g5k, globals_variables, log_experiment, destroy_reservation, execution_experiment
 
 
 def main():
@@ -44,6 +44,7 @@ def main():
             concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized-synchrone/inventory.yaml")
         log.debug("Destroy deployment node")
         provider_deployment.destroy()
+
         # Execution experiment
         params_to_sweep = parameters["sweeper_parameters"]
         execution_experiment.create_and_run_sweeper(expe_name, job_name_concerto, version_concerto_d, params_to_sweep, roles)
