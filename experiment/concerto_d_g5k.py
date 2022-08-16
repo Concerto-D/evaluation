@@ -3,6 +3,8 @@ from typing import List, Optional
 import enoslib as en
 from enoslib.infra.enos_g5k.g5k_api_utils import get_cluster_site
 
+from evaluation.experiment import globals_variables
+
 
 def get_provider_from_job_name(job_name: str):
     conf = en.G5kConf.from_settings(job_name=job_name).finalize()
@@ -10,7 +12,6 @@ def get_provider_from_job_name(job_name: str):
 
 
 def reserve_node_for_deployment(cluster: str):
-    # TODO: dire à Matthieu qu'il y a un problème entre enoslib et parasilo (le provider n'est pas reload alors que je donne le même job_name et le même cluster)
     _ = en.init_logging()
     site = get_cluster_site(cluster)
     base_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
@@ -89,86 +90,69 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 
     provider = en.G5k(conf)
     roles, networks = provider.init()
-    # roles = en.sync_info(roles, networks)
-    #
-    # netem = en.NetemHTB()
-    # netem.add_constraints(
-    #     src=roles["zenoh_routers"],
-    #     dest=roles[f"concerto_d"],
-    #     delay="0ms",
-    #     rate="200kbit",
-    #     symetric=True,
-    # )
-    # netem.deploy()
-    # netem.validate()
     return roles, networks
 
 
-def install_apt_deps(roles_concerto_d: List):
-    with en.actions(roles=roles_concerto_d) as a:
+# def install_apt_deps(roles_concerto_d: List):
+#     with en.actions(roles=roles_concerto_d) as a:
+#         a.apt(name=["python3", "git"], state="present")
+#         print(a.results)
+
+
+# def put_assemblies_configuration_file(role_controller, configuration_file_path: str):
+#     with en.actions(roles=role_controller) as a:
+#         home_dir = globals_variables.homedir
+#         a.copy(src=configuration_file_path, dest=f"{home_dir}/concertonode/{configuration_file_path}")
+#         print(a.results)
+
+
+# def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
+#     with en.actions(roles=role_controller) as a:
+#         home_dir = globals_variables.homedir
+#         a.file(path=f"{home_dir}/parameters/uptimes", state="directory")
+#         a.file(path=f"{home_dir}/parameters/transitions_times", state="directory")
+#         a.copy(src=f"{uptimes_src}", dest=f"{home_dir}/{uptimes_dst}")
+#         print(a.results)
+
+
+def initialize_expe_repositories(role_controller, version_concerto_d):
+    home_dir = globals_variables.remote_homedir
+    with en.actions(roles=role_controller) as a:
         a.apt(name=["python3", "git"], state="present")
-        print(a.results)
-
-
-def put_assemblies_configuration_file(role_controller, configuration_file_path: str):
-    with en.actions(roles=role_controller) as a:
-        home_dir = "/home/anomond"
-        a.copy(src=configuration_file_path, dest=f"{home_dir}/concertonode/{configuration_file_path}")
-        print(a.results)
-
-
-def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
-    with en.actions(roles=role_controller) as a:
-        home_dir = "/home/anomond"
-        a.file(path=f"{home_dir}/parameters", state="directory")
-        a.file(path=f"{home_dir}/parameters/uptimes", state="directory")
-        a.file(path=f"{home_dir}/parameters/transitions_times", state="directory")
-        a.copy(src=f"{uptimes_src}", dest=f"{home_dir}/{uptimes_dst}")
-        print(a.results)
-
-
-def initiate_concerto_d_dir(role_controller):
-    """
-    Homedir is shared between site frontend and nodes, so this can be done only once per site
-    """
-    with en.actions(roles=role_controller) as a:
-        home_dir = "/home/anomond"
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
-        a.git(dest=f"{home_dir}/concerto-decentralized",
-              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized.git",
+        a.git(dest=f"{home_dir}/{version_concerto_d}",
+              repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/{version_concerto_d}.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
               accept_hostkey=True)
-        a.git(dest=f"{home_dir}/concerto-decentralized-synchrone",
-              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized-synchrone.git",
-              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
-              accept_hostkey=True)
-        for concertonode in ["concerto-decentralized", "concerto-decentralized-synchrone"]:
-            a.pip(chdir=f"{home_dir}/{concertonode}",
-                  requirements=f"{home_dir}/{concertonode}/requirements.txt",
-                  virtualenv=f"{home_dir}/{concertonode}/venv")
-            # Reset reprise_configs dir
-            a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="absent")
-            a.file(path=f"{home_dir}/{concertonode}/concerto/reprise_configs", state="directory")
-            # Reset communication_cache dir
-            a.file(path=f"{home_dir}/{concertonode}/concerto/communication_cache", state="absent")
-            a.file(path=f"{home_dir}/{concertonode}/concerto/communication_cache", state="directory")
-            # Reset logs dir
-            a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="absent")
-            a.file(path=f"{home_dir}/{concertonode}/concerto/logs", state="directory")
-            a.file(path=f"{home_dir}/{concertonode}/concerto/archives_reprises", state="directory")
-            # Reset finished_reconfigurations dir
-            a.file(path=f"{home_dir}/{concertonode}/concerto/finished_reconfigurations", state="absent")
-            a.file(path=f"{home_dir}/{concertonode}/concerto/finished_reconfigurations", state="directory")
+        a.pip(chdir=f"{home_dir}/{version_concerto_d}",
+              requirements=f"{home_dir}/{version_concerto_d}/requirements.txt",
+              virtualenv=f"{home_dir}/{version_concerto_d}/venv")
         a.git(dest=f"{home_dir}/evaluation",
               repo="git@gitlab.inria.fr:aomond-imt/concerto-d/evaluation.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
               accept_hostkey=True)
+        a.git(dest=f"{home_dir}/experiment_files",
+              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/experiment_files.git",
+              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              accept_hostkey=True)
 
-        a.file(path=f"{home_dir}/evaluation/experiment/results_experiment", state="directory")
-        a.file(path=f"{home_dir}/evaluation/experiment/results_experiment/logs_files_assemblies", state="directory")
-        # Reset logs
-        a.file(path=f"{home_dir}/evaluation/experiment_logs", state="absent")
-        a.file(path=f"{home_dir}/evaluation/experiment_logs", state="directory")
+
+def initialize_expe_dirs(role_controller):
+    """
+    Homedir is shared between site frontend and nodes, so this can be done only once per site
+    """
+    with en.actions(roles=role_controller) as a:
+        # Concerto-D
+        execution_expe_dir = globals_variables.execution_expe_dir
+        a.file(path=f"{execution_expe_dir}/reprise_configs", state="directory")
+        a.file(path=f"{execution_expe_dir}/communication_cache", state="directory")
+        a.file(path=f"{execution_expe_dir}/logs", state="directory")
+        a.file(path=f"{execution_expe_dir}/archives_reprises", state="directory")
+        a.file(path=f"{execution_expe_dir}/finished_reconfigurations", state="directory")
+
+        # Evaluation
+        a.file(path=f"{execution_expe_dir}/logs_files_assemblies", state="directory")
+        a.file(path=f"{execution_expe_dir}/experiment_logs", state="directory")
         print(a.results)
 
 
@@ -192,9 +176,10 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_args.append(str(experiment_num))
     command_args.append(timestamp_log_file)
     command_args.append(timeout)
+    command_args.append(globals_variables.execution_expe_dir)
 
     command_str = " ".join(command_args)
-    home_dir = "/home/anomond"
+    home_dir = globals_variables.remote_homedir
     with en.actions(roles=role_node) as a:
         a.shell(chdir=f"{home_dir}/{version_concerto_name}", command=command_str)
 
@@ -213,7 +198,7 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
 
 
 def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
-    home_dir = "/home/anomond"
+    home_dir = globals_variables.remote_homedir
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
@@ -224,6 +209,7 @@ def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assemb
 
 
 def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
+    # return f"{assembly_name}_{timestamp_log_file}.yaml"
     if dep_num is None:
         return f"{assembly_name}_{timestamp_log_file}.yaml"
     else:
@@ -234,6 +220,6 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            dest=f"/home/anomond/evaluation/experiment/results_experiment/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
+            dest=f"{globals_variables.remote_homedir}/{globals_variables.execution_expe_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             flat="yes"
         )

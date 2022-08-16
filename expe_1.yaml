@@ -1,0 +1,19 @@
+# Reservation parameters
+reservation_parameters:
+  expe_name: "expe-1"
+  job_name_concerto: "concerto-d-expe-1"
+  job_name_controller: "controller-expe-1"
+  walltime: "8:00:00"
+  reservation: ""
+  nb_concerto_nodes: 13
+  nb_zenoh_routers: 0
+  version_concerto_d: "concerto-decentralized"
+
+# Sweeper parameters
+sweeper_parameters:
+  uptimes:
+    - "uptimes-60-30-12-0_5-0_6.json"
+  transitions_times:
+    - "transitions_times-1-30-deps12-0.json"
+  cluster: "uvb"
+  waiting_rate: 1  # Between 0 and 1

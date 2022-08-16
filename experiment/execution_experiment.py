@@ -13,6 +13,8 @@ from typing import List
 
 import yaml
 from execo_engine import sweep, ParamSweeper
+
+from evaluation.experiment import globals_variables
 from log_experiment import log
 
 from experiment import concerto_d_g5k
@@ -24,6 +26,8 @@ sleeping_times_nodes = {}
 
 
 def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num, timeout):
+    execution_expe_dir = globals_variables.execution_expe_dir
+    # timestamp_execution_dir = f"{execution_expe_dir}/logs_files_assemblies"
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     # Execute reconf
@@ -37,12 +41,12 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
-    if exists(f"/home/anomond/{version_concerto_name}/concerto/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+    if exists(f"{execution_expe_dir}/finished_reconfigurations/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         finished_nodes.append(node_num)
 
 
 def compute_results(assembly_name: str, timestamp_log_file: str):
-    with open(f"/home/anomond/evaluation/experiment/results_experiment/logs_files_assemblies/{timestamp_log_file}", "r") as f:
+    with open(f"{globals_variables.local_homedir}/{globals_variables.execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -132,17 +136,19 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(job_name, version_concerto_name, dir_to_save_expe, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
-    # On peut préciser un job pour la nuit sans le considérer comme une réservation, mais il est considéré comme besteffort
+def launch_experiment(job_name, version_concerto_name, roles, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
+    # Retour Baptiste: On peut préciser un job pour la nuit sans le considérer comme une réservation, mais il est considéré comme besteffort
     # Voir si on peut se baser sur une réservation oarsub pour lancer les scripts enoslib
     # Provision infrastructure
+    globals_variables.initialize_execution_expe_dir()
+    homedir = globals_variables.local_homedir
     log.debug("------ Fetching infrastructure --------")
-    with open(uptimes_file_name) as f:
+    with open(f"{homedir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
 
     # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
-    log.debug(roles, networks)
+    # roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
+    # log.debug(roles, networks)
 
     # Create transitions time file
     # TODO: Mettre synchrone/asynchrone/Muse
@@ -150,7 +156,8 @@ def launch_experiment(job_name, version_concerto_name, dir_to_save_expe, uptimes
     # TODO: générer les fichiers en amont et uniquement passer leurs chemin au ParamSweeper
 
     # Reinitialize finished configuration states
-    reinitialize_reconf_files(version_concerto_name)
+    # reinitialize_reconf_files(version_concerto_name)
+    concerto_d_g5k.initialize_expe_dirs(roles)
 
     # Deploy zenoh routers
     if version_concerto_name == "concerto-decentralized":
@@ -184,7 +191,7 @@ def launch_experiment(job_name, version_concerto_name, dir_to_save_expe, uptimes
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
 
     # Save results
-    save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num, timeout)
+    save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num, timeout)
 
     log.debug("------ End of experiment ---------")
 
@@ -214,7 +221,8 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
     return file_name
 
 
-def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
+def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
+    dir_to_save_expe = globals_variables.execution_expe_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
@@ -222,7 +230,7 @@ def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_t
     file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num, timeout)
 
     global_results = {}
-    reconf_dir_path = f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"
+    reconf_dir_path = f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations"
     if not exists(reconf_dir_path):
         global_results["finished_reconf"] = False
     else:
@@ -268,15 +276,15 @@ def save_results(dir_to_save_expe, version_concerto_name, cluster, transitions_t
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
-    if exists(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations"):
-        shutil.copytree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+    if exists(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations"):
+        shutil.copytree(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
-def reinitialize_reconf_files(version_concerto_name):
-    log.debug("------- Removing previous finished_configurations files -------")
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", ignore_errors=True)
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache", ignore_errors=True)
-    shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs", ignore_errors=True)
+# def reinitialize_reconf_files(version_concerto_name):
+#     log.debug("------- Removing previous finished_configurations files -------")
+#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", ignore_errors=True)
+#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache", ignore_errors=True)
+#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs", ignore_errors=True)
 
 
 def get_normal_parameters():
@@ -307,21 +315,15 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file):
-
+def create_and_run_sweeper(expe_name, job_name, version_concerto_name, params_to_sweep, roles):
+    # timestamp_expe = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    # os.makedirs("/home/anomond/results", exist_ok=True)
+    # dir_to_save_expe = f"/home/anomond/results/results_{timestamp_expe}"
+    # os.makedirs(dir_to_save_expe, exist_ok=True)
+    global_dir_expe = globals_variables.global_dir_expe(expe_name)
     sweeps = sweep(params_to_sweep)
-    log.debug("--- All experiments to treat: ---")
-    for k in sweeps:
-        log.debug(k)
-    log.debug("----------------------------------")
-
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    os.makedirs("/home/anomond/results", exist_ok=True)
-    dir_to_save_expe = f"/home/anomond/results/results_{timestamp}"
-    os.makedirs(dir_to_save_expe, exist_ok=True)
-
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"experiment/sweeps{version_concerto_name}{parameters_file}").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"{global_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
@@ -330,7 +332,7 @@ def create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, par
             launch_experiment(
                 job_name,
                 version_concerto_name,
-                dir_to_save_expe,
+                roles,
                 parameter["uptimes"],
                 parameter["transitions_times"],
                 parameter["cluster"],
@@ -360,9 +362,9 @@ if __name__ == '__main__':
             "last_results_async_2.json",
         ]
         for parameters_file in parameters_files:
-            with open(f"/home/anomond/parameters/{parameters_file}") as f:
+            with open(f"{globals_variables.local_homedir}/parameters/{parameters_file}") as f:
                 params_to_sweep = json.load(f)
-            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
+            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
     else:
         parameters_files = [
             "last_results_sync_0.json",
@@ -373,4 +375,4 @@ if __name__ == '__main__':
         for parameters_file in parameters_files:
             with open(f"/home/anomond/parameters/{parameters_file}") as f:
                 params_to_sweep = json.load(f)
-            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep, parameters_file)
+            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )

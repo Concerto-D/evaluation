@@ -8,7 +8,7 @@ def main():
     """
     cluster = "uvb"
     deployment_node, networks, provider = concerto_d_g5k.reserve_node_for_controller("controller", cluster)
-    concerto_d_g5k.initiate_concerto_d_dir(deployment_node["controller"])
+    concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"], version_concerto_d)
     uptimes_dir_path_list = [
         ("experiment_files/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json", "parameters/uptimes/uptimes-60-30-12-0_02-0_05.json"),
         ("experiment_files/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json", "parameters/uptimes/uptimes-60-30-12-0_2-0_3.json"),
