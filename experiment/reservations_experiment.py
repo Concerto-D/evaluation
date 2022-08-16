@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 
@@ -19,8 +20,10 @@ def main():
         parameters = yaml.safe_load(f)
         expe_name, job_name_concerto, job_name_controller, walltime, reservation, nb_concerto_nodes, nb_zenoh_routers, version_concerto_d = parameters["reservation_parameters"].values()
 
+    global_dir_expe = globals_variables.global_dir_expe(expe_name)
+    os.makedirs(f"{global_dir_expe}/experiment_logs", exist_ok=True)
+    log = log_experiment.initialize_logging(expe_name)
     try:
-        log = log_experiment.initialize_logging(expe_name)
         log.debug(f"Start {expe_name} for {version_concerto_d}")
         log.debug(f"Job should start at {reservation} and should last for {walltime}")
         log.debug(f"Reserve {nb_concerto_nodes} concerto_d and {nb_zenoh_routers} named {job_name_concerto}")
