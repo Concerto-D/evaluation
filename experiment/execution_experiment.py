@@ -321,6 +321,7 @@ def create_and_run_sweeper(expe_name, job_name, version_concerto_name, params_to
     # dir_to_save_expe = f"/home/anomond/results/results_{timestamp_expe}"
     # os.makedirs(dir_to_save_expe, exist_ok=True)
     global_dir_expe = globals_variables.global_dir_expe(expe_name)
+    log.debug(f"Global expe dir: {global_dir_expe}")
     sweeps = sweep(params_to_sweep)
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{global_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True

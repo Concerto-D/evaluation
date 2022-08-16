@@ -15,3 +15,4 @@ def initialize_logging(expe_name):
     global log
     log = logging.getLogger(__name__)
     log.setLevel(logging.DEBUG)
+    return log
