@@ -14,11 +14,7 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper
 
-from experiment import globals_variables
-import log_experiment
-
-from experiment import concerto_d_g5k
-
+from experiment import globals_variables, concerto_d_g5k, log_experiment
 
 finished_nodes = []
 results = {}
@@ -26,13 +22,13 @@ sleeping_times_nodes = {}
 
 
 def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_config_file_path, duration, dep_num, node_num, experiment_num, timeout):
-    execution_expe_dir = globals_variables.execution_expe_dir
-    # timestamp_execution_dir = f"{execution_expe_dir}/logs_files_assemblies"
+    remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    transitions_times_file = f"{globals_variables.remote_homedir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
 
     # Execute reconf
     sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
-    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_name, reconf_config_file_path, duration, timestamp_log_dir, dep_num, experiment_num, timeout)
+    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_name, transitions_times_file, duration, timestamp_log_dir, dep_num, experiment_num, timeout)
     sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
 
     # Fetch and compute results
@@ -41,12 +37,12 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
-    if exists(f"{execution_expe_dir}/finished_reconfigurations/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+    if exists(f"{remote_execution_expe_dir}/finished_reconfigurations/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         finished_nodes.append(node_num)
 
 
 def compute_results(assembly_name: str, timestamp_log_file: str):
-    with open(f"{globals_variables.local_homedir}/{globals_variables.execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
+    with open(f"{globals_variables.local_homedir}/{globals_variables.remote_execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -79,11 +75,6 @@ def find_next_uptime(uptimes_nodes):
 
 
 def schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes_tuples: List, reconfig_config_file_path, experiment_num, timeout):
-    """
-    TODO: Faire une liste ordonnée globale pour tous les assemblies, puis attendre (enlever les calculs
-    qui prennent un peu de temps)
-    TODO: à changer ? loader un json via yaml.load
-    """
     log = log_experiment.log
     log.debug("SCHEDULING START")
     expe_time_start = time.time()
@@ -137,29 +128,23 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(job_name, version_concerto_name, roles, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
-    # Retour Baptiste: On peut préciser un job pour la nuit sans le considérer comme une réservation, mais il est considéré comme besteffort
-    # Voir si on peut se baser sur une réservation oarsub pour lancer les scripts enoslib
-    # Provision infrastructure
+def launch_experiment(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, version_concerto_name, uptimes_file_name, transitions_times_file_name, cluster, experiment_num, timeout):
+    # TODO: enlever le paramètre roles
     log = log_experiment.log
-    globals_variables.initialize_execution_expe_dir()
-    homedir = globals_variables.local_homedir
-    log.debug("------ Fetching infrastructure --------")
-    with open(f"{homedir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
+    with open(f"{globals_variables.local_homedir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
 
-    # TODO: Need to do the reservation previsouly but still to precise roles and stuff, to change
-    # roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=len(uptimes_nodes), nb_zenoh_routers=1, cluster=cluster)
-    # log.debug(roles, networks)
+    log.debug("------ Fetching infrastructure --------")
+    # Fetch reserved infrastructure
+    # TODO: fetch from job_name instead of reserve
+    # TODO: ne pas fetch depuis la longueur des uptimes nodes mais plutôt du nombre de nodes réservées à Concerto-D
+    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster)
+    log.debug(roles, networks)
 
-    # Create transitions time file
-    # TODO: Mettre synchrone/asynchrone/Muse
-    # TODO: Mettre les deux expériences (cf présentation) (donc ce qui est mesuré dans les deux expériences)
-    # TODO: générer les fichiers en amont et uniquement passer leurs chemin au ParamSweeper
-
-    # Reinitialize finished configuration states
-    # reinitialize_reconf_files(version_concerto_name)
-    concerto_d_g5k.initialize_expe_dirs(roles)
+    # Initialize expe dirs and get uptimes nodes
+    globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
+    os.makedirs(globals_variables.local_execution_expe_dir, exist_ok=True)
+    concerto_d_g5k.initialize_remote_expe_dirs(roles["server"])
 
     # Deploy zenoh routers
     if version_concerto_name == "concerto-decentralized":
@@ -177,9 +162,6 @@ def launch_experiment(job_name, version_concerto_name, roles, uptimes_file_name,
             "total_update_duration": 0,
             "total_saving_state_duration": 0
         }
-
-    # Run experiment
-    log.debug("------- Run experiment ----------")
     nodes_names = ["server"] + [f"dep{i}" for i in range(len(uptimes_nodes) - 1)]
     for name in nodes_names:
         sleeping_times_nodes[name] = {
@@ -187,12 +169,13 @@ def launch_experiment(job_name, version_concerto_name, roles, uptimes_file_name,
             "current_down_time": time.time(),
         }
 
+    # Run experiment
+    log.debug("------- Run experiment ----------")
     schedule_and_run_uptimes_from_config(roles, version_concerto_name, uptimes_nodes, transitions_times_file_name, experiment_num, timeout)
 
+    # Save results
     for name in nodes_names:
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
-
-    # Save results
     save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, experiment_num, timeout)
 
     log.debug("------ End of experiment ---------")
@@ -225,7 +208,7 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
 
 def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
     log = log_experiment.log
-    dir_to_save_expe = globals_variables.execution_expe_dir
+    dir_to_save_expe = globals_variables.remote_execution_expe_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
@@ -318,29 +301,27 @@ def get_test_parameters():
     return uptimes_to_test, transitions_times_list
 
 
-def create_and_run_sweeper(expe_name, job_name, version_concerto_name, params_to_sweep, roles):
-    # timestamp_expe = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    # os.makedirs("/home/anomond/results", exist_ok=True)
-    # dir_to_save_expe = f"/home/anomond/results/results_{timestamp_expe}"
-    # os.makedirs(dir_to_save_expe, exist_ok=True)
+def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_name, params_to_sweep, roles):
     log = log_experiment.log
-    global_dir_expe = globals_variables.global_dir_expe(expe_name)
-    log.debug(f"Global expe dir: {global_dir_expe}")
+    global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
+    log.debug(f"Global expe dir: {global_local_dir_expe}")
     sweeps = sweep(params_to_sweep)
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"{global_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
             launch_experiment(
+                expe_name,
                 job_name,
+                nb_concerto_nodes,
+                nb_zenoh_routers,
                 version_concerto_name,
-                roles,
                 parameter["uptimes"],
                 parameter["transitions_times"],
-                parameter["cluster"],
+                cluster,
                 parameter["experiment_num"],
                 parameter["timeout"]
             )

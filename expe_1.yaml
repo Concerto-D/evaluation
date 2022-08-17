@@ -5,8 +5,9 @@ reservation_parameters:
   job_name_controller: "controller-expe-1"
   walltime: "00:30:00"
   reservation: ""
-  nb_concerto_nodes: 1
-  nb_zenoh_routers: 0
+  nb_concerto_nodes: 13
+  nb_zenoh_routers: 1
+  cluster: "econome"
   version_concerto_d: "concerto-decentralized"
 
 # Sweeper parameters
@@ -15,6 +16,5 @@ sweeper_parameters:
     - "uptimes-60-30-12-1-1-1.json"
   transitions_times:
     - "transitions_times-1-30-deps12-0.json"
-  cluster: "uvb"
-  experiment_num: 1
-  timeout: "False"
+  experiment_num: [1]
+  timeout: ["False"]

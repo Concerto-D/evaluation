@@ -3,7 +3,7 @@ from typing import List, Optional
 import enoslib as en
 from enoslib.infra.enos_g5k.g5k_api_utils import get_cluster_site
 
-from experiment import globals_variables
+from experiment import globals_variables, log_experiment
 
 
 def destroy_provider_from_job_name(job_name: str):
@@ -97,29 +97,25 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 # def install_apt_deps(roles_concerto_d: List):
 #     with en.actions(roles=roles_concerto_d) as a:
 #         a.apt(name=["python3", "git"], state="present")
-#         print(a.results)
+#         log_experiment.log.debug(a.results)
 
 
 # def put_assemblies_configuration_file(role_controller, configuration_file_path: str):
 #     with en.actions(roles=role_controller) as a:
 #         home_dir = globals_variables.homedir
 #         a.copy(src=configuration_file_path, dest=f"{home_dir}/concertonode/{configuration_file_path}")
-#         print(a.results)
+#         log_experiment.log.debug(a.results)
 
 
-# def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
-#     with en.actions(roles=role_controller) as a:
-#         home_dir = globals_variables.homedir
-#         a.file(path=f"{home_dir}/parameters/uptimes", state="directory")
-#         a.file(path=f"{home_dir}/parameters/transitions_times", state="directory")
-#         a.copy(src=f"{uptimes_src}", dest=f"{home_dir}/{uptimes_dst}")
-#         print(a.results)
+def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
+    with en.actions(roles=role_controller) as a:
+        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.remote_homedir}/{uptimes_dst}")
+        log_experiment.log.debug(a.results)
 
 
 def initialize_expe_repositories(role_controller, version_concerto_d):
     home_dir = globals_variables.remote_homedir
     with en.actions(roles=role_controller) as a:
-        a.apt(name=["python3", "git"], state="present")
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
         a.git(dest=f"{home_dir}/{version_concerto_d}",
               repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/{version_concerto_d}.git",
@@ -141,30 +137,26 @@ def initialize_expe_repositories(role_controller, version_concerto_d):
               accept_hostkey=True)
 
 
-def initialize_expe_dirs(role_controller):
+def initialize_remote_expe_dirs(role_controller):
     """
     Homedir is shared between site frontend and nodes, so this can be done only once per site
     """
     with en.actions(roles=role_controller) as a:
-        # Concerto-D
-        execution_expe_dir = globals_variables.execution_expe_dir
-        a.file(path=f"{execution_expe_dir}/reprise_configs", state="directory")
-        a.file(path=f"{execution_expe_dir}/communication_cache", state="directory")
-        a.file(path=f"{execution_expe_dir}/logs", state="directory")
-        a.file(path=f"{execution_expe_dir}/archives_reprises", state="directory")
-        a.file(path=f"{execution_expe_dir}/finished_reconfigurations", state="directory")
-
-        # Evaluation
-        a.file(path=f"{execution_expe_dir}/logs_files_assemblies", state="directory")
-        a.file(path=f"{execution_expe_dir}/experiment_logs", state="directory")
-        print(a.results)
+        remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
+        a.file(path=f"{remote_execution_expe_dir}/reprise_configs", state="directory")
+        a.file(path=f"{remote_execution_expe_dir}/communication_cache", state="directory")
+        a.file(path=f"{remote_execution_expe_dir}/logs", state="directory")
+        a.file(path=f"{remote_execution_expe_dir}/archives_reprises", state="directory")
+        a.file(path=f"{remote_execution_expe_dir}/finished_reconfigurations", state="directory")
+        # a.file(path=f"{remote_execution_expe_dir}/logs_files_assemblies", state="directory")
+        log_experiment.log.debug(a.results)
 
 
 def install_zenoh_router(roles_zenoh_router: List):
     with en.actions(roles=roles_zenoh_router) as a:
         a.apt_repository(repo="deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /", state="present")
         a.apt(name="zenoh", update_cache="yes")
-        print(a.results)
+        log_experiment.log.debug(a.results)
 
 
 def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, experiment_num: int, timeout):
@@ -180,7 +172,7 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_args.append(str(experiment_num))
     command_args.append(timestamp_log_file)
     command_args.append(timeout)
-    command_args.append(globals_variables.execution_expe_dir)
+    command_args.append(globals_variables.remote_execution_expe_dir)
 
     command_str = " ".join(command_args)
     home_dir = globals_variables.remote_homedir
@@ -189,7 +181,7 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout):
-    print(f"launch zenoh routers with {timeout} timeout")
+    log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
     en.run_command("kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')", roles=roles_zenoh_router, on_error_continue=True)
     en.run_command(" ".join(["RUST_LOG=debug", "timeout", str(timeout), "zenohd", "--mem-storage='/**'"]), roles=roles_zenoh_router, background=True)
 
@@ -201,12 +193,11 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
         return f"finished_reconfigurations/{assembly_name.replace(str(dep_num), '')}_assembly_{dep_num}"
 
 
-def fetch_finished_reconfiguration_file(role_node, version_concerto_name, assembly_name, dep_num):
-    home_dir = globals_variables.remote_homedir
+def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num):
     with en.actions(roles=role_node) as a:
         a.fetch(
-            src=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            dest=f"{home_dir}/{version_concerto_name}/concerto/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            src=f"{globals_variables.remote_execution_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            dest=f"{globals_variables.local_execution_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
             flat="yes",
             fail_on_missing="no"
         )
@@ -224,6 +215,6 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            dest=f"{globals_variables.remote_homedir}/{globals_variables.execution_expe_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
+            dest=f"{globals_variables.local_execution_expe_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             flat="yes"
         )
