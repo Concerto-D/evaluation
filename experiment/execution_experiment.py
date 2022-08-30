@@ -36,13 +36,16 @@ def execute_reconf_in_g5k(roles, version_concerto_name, assembly_name, reconf_co
     compute_results(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir))
 
     # Finish reconf for assembly name if its over
-    concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], version_concerto_name, assembly_name, dep_num)
-    if exists(f"{remote_execution_expe_dir}/finished_reconfigurations/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+    concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num)
+    print(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}")
+    print(exists(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"))
+    if exists(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+
         finished_nodes.append(node_num)
 
 
 def compute_results(assembly_name: str, timestamp_log_file: str):
-    with open(f"{globals_variables.local_homedir}/{globals_variables.remote_execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
+    with open(f"{globals_variables.local_execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -208,7 +211,7 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
 
 def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, expe_num, timeout):
     log = log_experiment.log
-    dir_to_save_expe = globals_variables.remote_execution_expe_dir
+    dir_to_save_expe = globals_variables.local_execution_expe_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
@@ -216,7 +219,7 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
     file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, expe_num, timeout)
 
     global_results = {}
-    reconf_dir_path = f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations"
+    reconf_dir_path = f"{dir_to_save_expe}/finished_reconfigurations"
     if not exists(reconf_dir_path):
         global_results["finished_reconf"] = False
     else:
@@ -273,32 +276,32 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
 #     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs", ignore_errors=True)
 
 
-def get_normal_parameters():
-    uptimes_to_test = [
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-1-1-1.json",
-    ]
-
-    transitions_times_list = [
-        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json",
-        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-1.json"
-    ]
-
-    return uptimes_to_test, transitions_times_list
-
-
-def get_test_parameters():
-    uptimes_to_test = [
-        "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
-    ]
-
-    transitions_times_list = [
-        "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json"
-    ]
-
-    return uptimes_to_test, transitions_times_list
+# def get_normal_parameters():
+#     uptimes_to_test = [
+#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
+#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
+#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
+#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-1-1-1.json",
+#     ]
+#
+#     transitions_times_list = [
+#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json",
+#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-1.json"
+#     ]
+#
+#     return uptimes_to_test, transitions_times_list
+#
+#
+# def get_test_parameters():
+#     uptimes_to_test = [
+#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
+#     ]
+#
+#     transitions_times_list = [
+#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json"
+#     ]
+#
+#     return uptimes_to_test, transitions_times_list
 
 
 def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_name, params_to_sweep, roles):
@@ -306,6 +309,13 @@ def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_rout
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_local_dir_expe}")
     sweeps = sweep(params_to_sweep)
+    sweeper = ParamSweeper(
+        persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+    )
+
+    # Reset inprogress (that haven't been tagged as skipped caused of crash), do not run this script concurrently
+    # on the same sweeper
+    sweeper.reset(reset_inprogress=True)
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
@@ -337,28 +347,28 @@ def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_rout
             parameter = sweeper.get_next()
 
 
-if __name__ == '__main__':
-    job_name = sys.argv[1]
-    version_concerto_name = sys.argv[2]
-    # parameters_file = sys.argv[3]
-    if version_concerto_name == "concerto-decentralized":
-        parameters_files = [
-            "last_results_async_0.json",
-            "last_results_async_1.json",
-            "last_results_async_2.json",
-        ]
-        for parameters_file in parameters_files:
-            with open(f"{globals_variables.local_homedir}/parameters/{parameters_file}") as f:
-                params_to_sweep = json.load(f)
-            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
-    else:
-        parameters_files = [
-            "last_results_sync_0.json",
-            "last_results_sync_1.json",
-            "last_results_sync_2.json",
-            "last_results_sync_3.json",
-        ]
-        for parameters_file in parameters_files:
-            with open(f"/home/anomond/parameters/{parameters_file}") as f:
-                params_to_sweep = json.load(f)
-            create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
+# if __name__ == '__main__':
+#     job_name = sys.argv[1]
+#     version_concerto_name = sys.argv[2]
+#     # parameters_file = sys.argv[3]
+#     if version_concerto_name == "concerto-decentralized":
+#         parameters_files = [
+#             "last_results_async_0.json",
+#             "last_results_async_1.json",
+#             "last_results_async_2.json",
+#         ]
+#         for parameters_file in parameters_files:
+#             with open(f"{globals_variables.local_homedir}/parameters/{parameters_file}") as f:
+#                 params_to_sweep = json.load(f)
+#             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
+#     else:
+#         parameters_files = [
+#             "last_results_sync_0.json",
+#             "last_results_sync_1.json",
+#             "last_results_sync_2.json",
+#             "last_results_sync_3.json",
+#         ]
+#         for parameters_file in parameters_files:
+#             with open(f"/home/anomond/parameters/{parameters_file}") as f:
+#                 params_to_sweep = json.load(f)
+#             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )

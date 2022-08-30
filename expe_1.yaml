@@ -1,13 +1,13 @@
 # Reservation parameters
 reservation_parameters:
-  expe_name: "expe-1"
-  job_name_concerto: "concerto-d-expe-1"
-  job_name_controller: "controller-expe-1"
+  expe_name: "expe-14"
+  job_name_concerto: "concerto-d-async"
+  job_name_controller: "controller-async"
   walltime: "00:30:00"
   reservation: ""
   nb_concerto_nodes: 13
   nb_zenoh_routers: 1
-  cluster: "econome"
+  cluster: "uvb"
   version_concerto_d: "concerto-decentralized"
 
 # Sweeper parameters
