@@ -6,7 +6,7 @@ from synthetic_use_case.reconf_programs import reconf_programs
 
 
 def deploy(sc, nb_deps_tot):
-    # _p_id_sync = 0
+    time_logger.log_time_value(TimeToSave.START_DEPLOY)
     sc._p_id_sync = 0
     sc.add_component("server", sc.server)
     for dep_num in range(nb_deps_tot):
@@ -14,15 +14,17 @@ def deploy(sc, nb_deps_tot):
         sc.connect("server", f"serviceu{dep_num}", f"dep{dep_num}", "service")
     sc.push_b("server", "deploy")
     sc.wait_all()
+    time_logger.log_time_value(TimeToSave.END_DEPLOY)
 
 
 def update(sc):
-    # _p_id_sync = 1
+    time_logger.log_time_value(TimeToSave.START_UPDATE)
     sc._p_id_sync = 1
     sc.push_b("server", "suspend")
     sc.wait_all(wait_for_refusing_provide=True)
     sc.push_b("server", "deploy")
     sc.wait_all()
+    time_logger.log_time_value(TimeToSave.END_UPDATE)
 
 
 def execute_reconf(config_dict, duration, waiting_rate):
