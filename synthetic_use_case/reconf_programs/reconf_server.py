@@ -1,27 +1,8 @@
-import logging
-import os
-import sys
-from typing import Tuple, Dict, Optional
-
-from concerto import dir_paths
-from concerto.debug_logger import log
-
 from concerto import time_logger
 from concerto.time_logger import TimeToSave
 from synthetic_use_case.assemblies.server_assembly import ServerAssembly
-import yaml
 
-
-def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], bool, str]:
-    config_file_path = args[1]
-    with open(config_file_path, "r") as f:
-        loaded_config = yaml.safe_load(f)
-    uptime_duration = float(args[2])
-    sleep_when_blocked = args[3] == "2"
-    timestamp_log_dir = args[4] if len(args) > 4 else None
-    timeout = args[5] == "True"
-    execution_expe_dir = args[6]
-    return loaded_config, uptime_duration, sleep_when_blocked, timestamp_log_dir, timeout, execution_expe_dir
+from synthetic_use_case.reconf_programs import reconf_programs
 
 
 def deploy(sc, nb_deps_tot):
@@ -42,8 +23,8 @@ def update(sc):
     sc.wait_all()
 
 
-def execute_reconf(config_dict, duration, sleep_when_blocked=True, timeout=False):
-    sc = ServerAssembly(config_dict, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
+def execute_reconf(config_dict, duration, waiting_rate):
+    sc = ServerAssembly(config_dict, waiting_rate)
     sc.set_verbosity(2)
     deploy(sc, config_dict["nb_deps_tot"])
     update(sc)
@@ -51,12 +32,6 @@ def execute_reconf(config_dict, duration, sleep_when_blocked=True, timeout=False
 
 
 if __name__ == '__main__':
-    # TODO Voir si loader la config file prend du temps (comme pour loader
-    # le state), car on log the uptime après
-    config_dict, duration, sleep_when_blocked, timestamp_log_dir, timeout, execution_expe_dir = get_assembly_parameters(sys.argv)
-    time_logger.init_time_log_dir("server", timestamp_log_dir=timestamp_log_dir)
-    time_logger.log_time_value(TimeToSave.UP_TIME)
-    logging.basicConfig(filename=f"{execution_expe_dir}/logs/logs_server.txt", format='%(asctime)s %(message)s', filemode="a+")
-    dir_paths.execution_expe_dir = execution_expe_dir
-    execute_reconf(config_dict, duration, sleep_when_blocked=sleep_when_blocked, timeout=timeout)
+    config_dict, duration, waiting_rate, dep_num = reconf_programs.initialize_reconfiguration()
+    execute_reconf(config_dict, duration, waiting_rate)
     time_logger.log_time_value(TimeToSave.SLEEP_TIME)

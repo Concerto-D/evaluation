@@ -159,20 +159,19 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, experiment_num: int, timeout):
+def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float):
     command_args = []
     command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source source_dir.sh)
     command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
     assembly_name = "server" if dep_num is None else "dep"
     command_args.append(f"../evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
-    if dep_num is not None:
-        command_args.append(str(dep_num))  # If it's a dependency
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
-    command_args.append(str(experiment_num))
+    command_args.append(str(waiting_rate))
     command_args.append(timestamp_log_file)
-    command_args.append(timeout)
     command_args.append(globals_variables.remote_execution_expe_dir)
+    if dep_num is not None:
+        command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
     home_dir = globals_variables.remote_homedir
@@ -185,7 +184,7 @@ def execute_zenoh_routers(roles_zenoh_router, timeout):
     en.run_command("kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')", roles=roles_zenoh_router, on_error_continue=True)
     en.run_command(" ".join(["RUST_LOG=debug", "timeout", str(timeout), "zenohd", "--mem-storage='/**'"]), roles=roles_zenoh_router, background=True)
 
-
+# TODO: refacto les dep/server names
 def build_finished_reconfiguration_path(assembly_name, dep_num):
     if dep_num is None:
         return f"finished_reconfigurations/{assembly_name}_assembly"

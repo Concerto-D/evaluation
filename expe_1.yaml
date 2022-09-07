@@ -1,6 +1,6 @@
 # Reservation parameters
 reservation_parameters:
-  expe_name: "expe-14"
+  expe_name: "expe-2"
   job_name_concerto: "concerto-d-async"
   job_name_controller: "controller-async"
   walltime: "00:30:00"
@@ -16,5 +16,4 @@ sweeper_parameters:
     - "uptimes-60-30-12-1-1-1.json"
   transitions_times:
     - "transitions_times-1-30-deps12-0.json"
-  experiment_num: [1]
-  timeout: ["False"]
+  waiting_rate: [0, 0.5, 1]
