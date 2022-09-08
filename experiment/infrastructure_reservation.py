@@ -21,6 +21,10 @@ def main():
         parameters = yaml.safe_load(f)
     (
         expe_name,
+        local_homedir,
+        remote_homedir
+    ) = parameters["global_parameters"].values()
+    (
         job_name_concerto,
         job_name_controller,
         walltime,
@@ -32,6 +36,8 @@ def main():
     ) = parameters["reservation_parameters"].values()
 
     # Création du dossier de l'expérience et du dossier pour les logs
+    globals_variables.local_homedir = local_homedir
+    globals_variables.remote_homedir = remote_homedir
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     os.makedirs(f"{global_local_dir_expe}/experiment_logs", exist_ok=True)
 

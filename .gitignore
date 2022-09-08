@@ -3,3 +3,5 @@ venv/
 concerto-decentralized-synchrone/
 concerto-decentralized/
 experiment_files/
+cachedir/
+__pycache__/
