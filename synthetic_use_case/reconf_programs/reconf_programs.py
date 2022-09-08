@@ -18,7 +18,7 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
     timestamp_log_dir = args[4]
     execution_expe_dir = args[5]
     version_concerto_d = args[6]
-    dep_num = int(args[7]) if len(args) > 6 else None
+    dep_num = int(args[7]) if len(args) > 7 else None
     return loaded_config, uptime_duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, dep_num
 
 

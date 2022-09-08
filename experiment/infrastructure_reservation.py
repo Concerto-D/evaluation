@@ -62,7 +62,7 @@ def main():
         log.debug("Synchronous version: creating inventory")
         create_inventory_from_roles(roles)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
-        # concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized-synchrone/inventory.yaml")
+        concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized/inventory.yaml")
     # log.debug("Destroy deployment node")
     # provider_deployment.destroy()
 
