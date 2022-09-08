@@ -11,9 +11,9 @@ class DepAssembly(Assembly):
     remote_assemblies_names = {"server_assembly"}
 
     # TODO: reconf_config_dict: Gives only the transitions_times of the dep associated
-    def __init__(self, p, reconf_config_dict, waiting_rate):
+    def __init__(self, p, reconf_config_dict, waiting_rate, version_concerto_d):
         Assembly.__init__(self, f"dep_assembly_{p}", self.components_types, self.remote_component_names,
-                          self.remote_assemblies_names, reconf_config_dict, waiting_rate)
+                          self.remote_assemblies_names, reconf_config_dict, waiting_rate, version_concerto_d)
         dep_params = reconf_config_dict['transitions_time'][f"dep{p}"]
         self.dep = Dep(**dep_params)
 

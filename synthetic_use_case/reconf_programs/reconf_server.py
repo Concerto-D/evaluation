@@ -27,8 +27,8 @@ def update(sc):
     time_logger.log_time_value(TimeToSave.END_UPDATE)
 
 
-def execute_reconf(config_dict, duration, waiting_rate):
-    sc = ServerAssembly(config_dict, waiting_rate)
+def execute_reconf(config_dict, duration, waiting_rate, version_concerto_d):
+    sc = ServerAssembly(config_dict, waiting_rate, version_concerto_d)
     sc.set_verbosity(2)
     sc.time_manager.start(duration)
     deploy(sc, config_dict["nb_deps_tot"])
@@ -37,6 +37,6 @@ def execute_reconf(config_dict, duration, waiting_rate):
 
 
 if __name__ == '__main__':
-    config_dict, duration, waiting_rate, dep_num = reconf_programs.initialize_reconfiguration()
-    execute_reconf(config_dict, duration, waiting_rate)
+    config_dict, duration, waiting_rate, version_concerto_d, dep_num = reconf_programs.initialize_reconfiguration()
+    execute_reconf(config_dict, duration, waiting_rate, version_concerto_d)
     time_logger.log_time_value(TimeToSave.SLEEP_TIME)

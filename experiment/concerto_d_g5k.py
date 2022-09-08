@@ -113,18 +113,18 @@ def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
         log_experiment.log.debug(a.results)
 
 
-def initialize_expe_repositories(role_controller, version_concerto_d):
+def initialize_expe_repositories(role_controller):
     home_dir = globals_variables.remote_homedir
     with en.actions(roles=role_controller) as a:
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
-        a.git(dest=f"{home_dir}/{version_concerto_d}",
-              repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/{version_concerto_d}.git",
+        a.git(dest=f"{home_dir}/concerto-decentralized",
+              repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
               version="clean",  # Name of the branch
               accept_hostkey=True)
-        a.pip(chdir=f"{home_dir}/{version_concerto_d}",
-              requirements=f"{home_dir}/{version_concerto_d}/requirements.txt",
-              virtualenv=f"{home_dir}/{version_concerto_d}/venv")
+        a.pip(chdir=f"{home_dir}/concerto-decentralized",
+              requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
+              virtualenv=f"{home_dir}/concerto-decentralized/venv")
         a.git(dest=f"{home_dir}/evaluation",
               repo="git@gitlab.inria.fr:aomond-imt/concerto-d/evaluation.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
@@ -159,7 +159,7 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_name, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float):
+def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float):
     command_args = []
     command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source source_dir.sh)
     command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
@@ -170,13 +170,14 @@ def execute_reconf(role_node, version_concerto_name, config_file_path: str, dura
     command_args.append(str(waiting_rate))
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.remote_execution_expe_dir)
+    command_args.append(version_concerto_d)
     if dep_num is not None:
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
     home_dir = globals_variables.remote_homedir
     with en.actions(roles=role_node) as a:
-        a.shell(chdir=f"{home_dir}/{version_concerto_name}", command=command_str)
+        a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout):
