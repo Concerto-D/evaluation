@@ -1,15 +1,17 @@
 import sys
 
+import yaml
+
 from experiment import concerto_d_g5k
 
 
-def destroy_reservation(expe_name):
-    job_name_concerto = f"concerto-d-{expe_name}"
-    job_name_controller = f"controller-{expe_name}"
-    concerto_d_g5k.destroy_provider_from_job_name(job_name_concerto)
-    concerto_d_g5k.destroy_provider_from_job_name(job_name_controller)
+def destroy_reservation(parameters):
+    concerto_d_g5k.destroy_provider_from_job_name(parameters["reservation_parameters"]["job_name_concerto"])
+    concerto_d_g5k.destroy_provider_from_job_name(parameters["reservation_parameters"]["job_name_controller"])
 
 
 if __name__ == "__main__":
-    expe_name = sys.argv[1]
-    destroy_reservation(expe_name)
+    configuration_file_path = sys.argv[1]
+    with open(configuration_file_path) as f:
+        parameters = yaml.safe_load(f)
+    destroy_reservation(parameters)

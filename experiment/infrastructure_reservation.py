@@ -4,7 +4,7 @@ import traceback
 
 import yaml
 
-from experiment import concerto_d_g5k, execution_experiment, globals_variables, log_experiment, destroy_reservation
+from experiment import concerto_d_g5k, experiment_controller, globals_variables, log_experiment, destroy_reservation
 
 
 # Reservation experiment
@@ -62,7 +62,7 @@ def main():
 
     # Execution experiment
     params_to_sweep = parameters["sweeper_parameters"]
-    execution_experiment.create_and_run_sweeper(expe_name, job_name_concerto, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_d, params_to_sweep, roles)
+    experiment_controller.create_and_run_sweeper(expe_name, job_name_concerto, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_d, params_to_sweep, roles)
 
 
 def create_inventory_from_roles(roles):

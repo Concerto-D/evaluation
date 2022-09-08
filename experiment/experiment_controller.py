@@ -266,41 +266,6 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
         shutil.copytree(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
-# def reinitialize_reconf_files(version_concerto_name):
-#     log.debug("------- Removing previous finished_configurations files -------")
-#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/finished_reconfigurations", ignore_errors=True)
-#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/communication_cache", ignore_errors=True)
-#     shutil.rmtree(f"/home/anomond/{version_concerto_name}/concerto/reprise_configs", ignore_errors=True)
-
-
-# def get_normal_parameters():
-#     uptimes_to_test = [
-#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_5-0_6.json",
-#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
-#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_02-0_05.json",
-#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-1-1-1.json",
-#     ]
-#
-#     transitions_times_list = [
-#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json",
-#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-1.json"
-#     ]
-#
-#     return uptimes_to_test, transitions_times_list
-#
-#
-# def get_test_parameters():
-#     uptimes_to_test = [
-#         "/home/anomond/parameters/uptimes/uptimes-60-30-12-0_2-0_3.json",
-#     ]
-#
-#     transitions_times_list = [
-#         "/home/anomond/parameters/transitions_times/transitions_times-1-30-deps12-0.json"
-#     ]
-#
-#     return uptimes_to_test, transitions_times_list
-
-
 def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_name, params_to_sweep, roles):
     log = log_experiment.log
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
@@ -341,30 +306,3 @@ def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_rout
             traceback.print_exc()
         finally:
             parameter = sweeper.get_next()
-
-
-# if __name__ == '__main__':
-#     job_name = sys.argv[1]
-#     version_concerto_name = sys.argv[2]
-#     # parameters_file = sys.argv[3]
-#     if version_concerto_name == "concerto-decentralized":
-#         parameters_files = [
-#             "last_results_async_0.json",
-#             "last_results_async_1.json",
-#             "last_results_async_2.json",
-#         ]
-#         for parameters_file in parameters_files:
-#             with open(f"{globals_variables.local_homedir}/parameters/{parameters_file}") as f:
-#                 params_to_sweep = json.load(f)
-#             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
-#     else:
-#         parameters_files = [
-#             "last_results_sync_0.json",
-#             "last_results_sync_1.json",
-#             "last_results_sync_2.json",
-#             "last_results_sync_3.json",
-#         ]
-#         for parameters_file in parameters_files:
-#             with open(f"/home/anomond/parameters/{parameters_file}") as f:
-#                 params_to_sweep = json.load(f)
-#             create_and_run_sweeper(job_name, version_concerto_name, params_to_sweep )
