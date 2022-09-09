@@ -12,7 +12,7 @@ from experiment import concerto_d_g5k, experiment_controller, globals_variables,
 # Mettre à jour python-grid5000 n'a pas l'air d'être une bonne solution car la version d'enoslib utilise une
 # version specific de python-grid5000
 # TODO: à signaler: même avec verify_ssl ça ne suffit pas il faut mettre le user et le mdp sur le front-end
-from experiment.log_experiment import log
+from experiment import log_experiment
 
 
 def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters):
@@ -25,6 +25,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         nb_zenoh_routers,
         cluster
     ) = reservation_parameters.values()
+    log = log_experiment.log
 
     # Réservation nodes concerto_d, controller expé
     log.debug(f"Job should start at {reservation} and should last for {walltime}")
