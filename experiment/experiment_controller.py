@@ -130,7 +130,7 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, version_concerto_d, uptimes_file_name, transitions_times_file_name, cluster, waiting_rate):
+def launch_experiment(expe_name, cluster, version_concerto_d, uptimes_file_name, transitions_times_file_name, waiting_rate, roles_concerto_d):
     # TODO: enlever le paramètre roles
     log = log_experiment.log
     with open(f"{globals_variables.local_homedir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
@@ -140,20 +140,18 @@ def launch_experiment(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, 
     # Fetch reserved infrastructure
     # TODO: fetch from job_name instead of reserve
     # TODO: ne pas fetch depuis la longueur des uptimes nodes mais plutôt du nombre de nodes réservées à Concerto-D
-    roles, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster)
-    log.debug(roles, networks)
 
     # Initialize expe dirs and get uptimes nodes
     globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
     os.makedirs(globals_variables.local_execution_expe_dir, exist_ok=True)
-    concerto_d_g5k.initialize_remote_expe_dirs(roles["server"])
+    concerto_d_g5k.initialize_remote_expe_dirs(roles_concerto_d["server"])
 
     # Deploy zenoh routers
     if version_concerto_d == "asynchronous":
         log.debug("------- Deploy zenoh routers -------")
         max_uptime_value = compute_end_reconfiguration_time(uptimes_nodes)
-        concerto_d_g5k.install_zenoh_router(roles["zenoh_routers"])
-        concerto_d_g5k.execute_zenoh_routers(roles["zenoh_routers"], max_uptime_value)
+        concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
+        concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value)
 
     # Reset results logs
     for assembly_name in results.keys():
@@ -173,7 +171,7 @@ def launch_experiment(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, 
 
     # Run experiment
     log.debug("------- Run experiment ----------")
-    schedule_and_run_uptimes_from_config(roles, version_concerto_d, uptimes_nodes, transitions_times_file_name, waiting_rate)
+    schedule_and_run_uptimes_from_config(roles_concerto_d, version_concerto_d, uptimes_nodes, transitions_times_file_name, waiting_rate)
 
     # Save results
     for name in nodes_names:
@@ -266,7 +264,7 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
         shutil.copytree(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
-def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_routers, cluster, version_concerto_d, params_to_sweep, roles):
+def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_sweep, roles_concerto_d):
     log = log_experiment.log
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_local_dir_expe}")
@@ -287,14 +285,12 @@ def create_and_run_sweeper(expe_name, job_name, nb_concerto_nodes, nb_zenoh_rout
             log.debug("----- Launching experiment ---------")
             launch_experiment(
                 expe_name,
-                job_name,
-                nb_concerto_nodes,
-                nb_zenoh_routers,
+                cluster,
                 version_concerto_d,
                 parameter["uptimes"],
                 parameter["transitions_times"],
-                cluster,
-                parameter["waiting_rate"]
+                parameter["waiting_rate"],
+                roles_concerto_d
             )
             sweeper.done(parameter)
         except Exception as e:
