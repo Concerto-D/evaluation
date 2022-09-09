@@ -55,7 +55,7 @@ def main():
     log.debug(f"reserved roles : {roles}")
     # Initialisation experiment repositories
     log.debug("Reserve the deployment node")
-    deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster)
+    deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster, "00:10:00")
     log.debug("Initialise repositories")
     concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"])
     if version_concerto_d == "synchronous":
