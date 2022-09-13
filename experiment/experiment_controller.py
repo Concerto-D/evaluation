@@ -268,7 +268,7 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_swe
     log = log_experiment.log
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_local_dir_expe}")
-    sweeps = sweep(params_to_sweep)
+    sweeps = params_to_sweep
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
