@@ -24,7 +24,7 @@ sleeping_times_nodes = {}
 def execute_reconf_in_g5k(roles, version_concerto_d, assembly_name, reconf_config_file_path, duration, dep_num, node_num, waiting_rate):
     remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    transitions_times_file = f"{globals_variables.remote_homedir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
+    transitions_times_file = f"{globals_variables.remote_project_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
 
     # Execute reconf
     sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
@@ -133,13 +133,8 @@ def compute_end_reconfiguration_time(uptimes_nodes):
 def launch_experiment(expe_name, cluster, version_concerto_d, uptimes_file_name, transitions_times_file_name, waiting_rate, roles_concerto_d):
     # TODO: enlever le paramètre roles
     log = log_experiment.log
-    with open(f"{globals_variables.local_homedir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
+    with open(f"{globals_variables.local_project_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
-
-    log.debug("------ Fetching infrastructure --------")
-    # Fetch reserved infrastructure
-    # TODO: fetch from job_name instead of reserve
-    # TODO: ne pas fetch depuis la longueur des uptimes nodes mais plutôt du nombre de nodes réservées à Concerto-D
 
     # Initialize expe dirs and get uptimes nodes
     globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
@@ -260,15 +255,15 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
-    if exists(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations"):
-        shutil.copytree(f"{globals_variables.local_homedir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+    if exists(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations"):
+        shutil.copytree(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
 def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_sweep, roles_concerto_d):
     log = log_experiment.log
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_local_dir_expe}")
-    sweeps = params_to_sweep
+    sweeps = sweep(params_to_sweep)
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )

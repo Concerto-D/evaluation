@@ -13,13 +13,13 @@ if __name__ == '__main__':
     (
         expe_name,
         version_concerto_d,
-        local_homedir,
-        remote_homedir
+        local_project_dir,
+        remote_project_dir
     ) = expe_parameters["global_parameters"].values()
 
     # Création du dossier de l'expérience et du dossier pour les logs
-    globals_variables.local_homedir = local_homedir
-    globals_variables.remote_homedir = remote_homedir
+    globals_variables.local_project_dir = local_project_dir
+    globals_variables.remote_project_dir = remote_project_dir
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     os.makedirs(f"{global_local_dir_expe}/experiment_logs", exist_ok=True)
 

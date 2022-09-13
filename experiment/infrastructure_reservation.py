@@ -33,7 +33,10 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     roles_concerto_d, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
     log.debug(f"Reserve the controller node named {job_name_controller}")
     # concerto_d_g5k.reserve_node_for_controller(job_name_controller, cluster, walltime=walltime, reservation=reservation)
-    log.debug(f"reserved roles : {roles_concerto_d}")
+    log.debug(f"reserved roles:")
+    for k, v in roles_concerto_d.items():
+        if k != "concerto_d":
+            print(f"{k}: {v[0].address}")
     # Initialisation experiment repositories
     log.debug("Reserve the deployment node")
     deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster, "00:10:00")

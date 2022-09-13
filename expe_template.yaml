@@ -2,9 +2,9 @@
 global_parameters:
   expe_name: "expe-fixing-sync"      # The experiment name, has to be unique
   version_concerto_d: "synchronous"  # synchronous or asynchronous
-  local_homedir: "~/implementations/concerto-d-projects"  # Dir where experiment is launched and results are computed.
-  # If the execution is launched on g5k, it is the same as <remote_homedir>
-  remote_homedir: "~"  # Dir for the execution of the reconfiguration happens (where the timestamps are created, the logs are stored, etc)
+  local_project_dir: "/home/vagrant/concerto_d_evaluation"  # Dir where experiment is launched and results are computed.
+  # If the execution is launched on g5k, it is the same as <remote_project_dir>
+  remote_project_dir: "/home/anomond"  # Dir for the execution of the reconfiguration happens (where the timestamps are created, the logs are stored, etc)
   # Will always be on g5k
 
 
@@ -29,44 +29,48 @@ reservation_parameters:
 #     before going back to sleep.
 # Below is an example of a list of experiments.
 sweeper_parameters:
-  - uptimes: "uptimes-60-30-12-0_2-0_3.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_2-0_3.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_2-0_3.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_2-0_3.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
+  uptimes: ["uptimes-60-30-12-0_2-0_3.json"]
+  transitions_times: ["transitions_times-1-30-deps12-1.json"]
+  waiting_rate: [1]
+# sweeper_parameters:
+#   - uptimes: "uptimes-60-30-12-0_2-0_3.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_2-0_3.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_2-0_3.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_2-0_3.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
 
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-1.json"
-    waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-1.json"
+#     waiting_rate: 1
 
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-0.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-0.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-0.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-0.json"
-    waiting_rate: 1
-  - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-    transitions_times: "transitions_times-1-30-deps12-0.json"
-    waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-0.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-0.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-0.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-0.json"
+#     waiting_rate: 1
+#   - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#     transitions_times: "transitions_times-1-30-deps12-0.json"
+#     waiting_rate: 1

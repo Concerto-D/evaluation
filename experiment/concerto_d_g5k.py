@@ -109,12 +109,12 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 
 def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
     with en.actions(roles=role_controller) as a:
-        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.remote_homedir}/{uptimes_dst}")
+        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.remote_project_dir}/{uptimes_dst}")
         log_experiment.log.debug(a.results)
 
 
 def initialize_expe_repositories(role_controller):
-    home_dir = globals_variables.remote_homedir
+    home_dir = globals_variables.remote_project_dir
     with en.actions(roles=role_controller) as a:
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
         a.git(dest=f"{home_dir}/concerto-decentralized",
@@ -175,7 +175,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
-    home_dir = globals_variables.remote_homedir
+    home_dir = globals_variables.remote_project_dir
     with en.actions(roles=role_node) as a:
         a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
 
