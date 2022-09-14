@@ -27,7 +27,11 @@ def initialize_reconfiguration():
     assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
     time_logger.init_time_log_dir(assembly_name, timestamp_log_dir=timestamp_log_dir)
     time_logger.log_time_value(TimeToSave.UP_TIME)
+    os.makedirs(f"{execution_expe_dir}/reprise_configs", exist_ok=True)
+    os.makedirs(f"{execution_expe_dir}/communication_cache", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/logs", exist_ok=True)
+    os.makedirs(f"{execution_expe_dir}/archives_reprises", exist_ok=True)
+    os.makedirs(f"{execution_expe_dir}/finished_reconfigurations", exist_ok=True)
     logging.basicConfig(filename=f"{execution_expe_dir}/logs/logs_{assembly_name}.txt", format='%(asctime)s %(message)s', filemode="a+")
     global_variables.execution_expe_dir = execution_expe_dir
 
