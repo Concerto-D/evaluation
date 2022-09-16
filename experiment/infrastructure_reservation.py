@@ -14,6 +14,9 @@ from experiment import concerto_d_g5k, experiment_controller, globals_variables,
 # TODO: à signaler: même avec verify_ssl ça ne suffit pas il faut mettre le user et le mdp sur le front-end
 from experiment import log_experiment
 
+CREATED_INVENTORY_PATH = "/tmp/inventory.yaml"
+CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
+
 
 def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters):
     (
@@ -46,7 +49,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         log.debug("Synchronous version: creating inventory")
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
-        concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized/inventory.yaml")
+        concerto_d_g5k.put_file(deployment_node["controller"], CREATED_INVENTORY_PATH, CONCERTO_D_INVENTORY_PATH)
     log.debug("Destroy deployment node")
     provider_deployment.destroy()
 
@@ -54,7 +57,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
 
 
 def _create_inventory_from_roles(roles):
-    with open("inventory.yaml", "w") as f:
+    with open(CREATED_INVENTORY_PATH, "w") as f:
         host = roles["server"][0].address
         f.write(f'server_assembly: "{host}:5000"')
         f.write("\n")
