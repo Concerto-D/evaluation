@@ -12,7 +12,7 @@ from threading import Thread
 from typing import List
 
 import yaml
-from execo_engine import sweep, ParamSweeper
+from execo_engine import sweep, ParamSweeper, HashableDict
 
 from experiment import globals_variables, concerto_d_g5k, log_experiment
 
@@ -21,7 +21,16 @@ results = {}
 sleeping_times_nodes = {}
 
 
-def execute_reconf_in_g5k(roles, version_concerto_d, assembly_name, reconf_config_file_path, duration, dep_num, node_num, waiting_rate):
+def _execute_node_reconf_in_g5k(
+        roles,
+        version_concerto_d,
+        assembly_name,
+        reconf_config_file_path,
+        duration,
+        dep_num,
+        node_num,
+        waiting_rate
+):
     remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     transitions_times_file = f"{globals_variables.remote_project_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
@@ -33,7 +42,7 @@ def execute_reconf_in_g5k(roles, version_concerto_d, assembly_name, reconf_confi
 
     # Fetch and compute results
     concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir)
-    compute_results(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir))
+    _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir))
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num)
@@ -43,7 +52,7 @@ def execute_reconf_in_g5k(roles, version_concerto_d, assembly_name, reconf_confi
         finished_nodes.append(node_num)
 
 
-def compute_results(assembly_name: str, timestamp_log_file: str):
+def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
     with open(f"{globals_variables.local_execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
@@ -66,7 +75,7 @@ def compute_results(assembly_name: str, timestamp_log_file: str):
         results[assembly_name]["total_update_duration"] += loaded_results["end_update"] - loaded_results["start_update"]
 
 
-def find_next_uptime(uptimes_nodes):
+def _find_next_uptime(uptimes_nodes):
     min_uptime = (0, (math.inf, math.inf))
     for node_num, uptimes_values in enumerate(uptimes_nodes):
         for uptime in uptimes_values:
@@ -76,7 +85,17 @@ def find_next_uptime(uptimes_nodes):
     return min_uptime
 
 
-def schedule_and_run_uptimes_from_config(roles, version_concerto_d, uptimes_nodes_tuples: List, reconfig_config_file_path, waiting_rate):
+def _schedule_and_run_uptimes_from_config(
+        roles,
+        version_concerto_d,
+        uptimes_nodes_tuples: List,
+        reconfig_config_file_path,
+        waiting_rate
+):
+    """
+    Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
+    simulate the awakening, the sleeping time and the reconfiguration of a node.
+    """
     log = log_experiment.log
     log.debug("SCHEDULING START")
     expe_time_start = time.time()
@@ -91,7 +110,7 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_d, uptimes_node
     while any(len(uptimes) > 0 for uptimes in uptimes_nodes):
 
         # Find the next reconf to launch (closest in time)
-        node_num, next_uptime = find_next_uptime(uptimes_nodes)
+        node_num, next_uptime = _find_next_uptime(uptimes_nodes)
         if node_num in finished_nodes:
             log.debug(f"{node_num} finished its reconfiguration, clearing all subsequent uptimes")
             uptimes_nodes[node_num].clear()
@@ -101,7 +120,19 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_d, uptimes_node
             duration = next_uptime[1]
             dep_num = None if node_num == 0 else node_num - 1
             assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-            thread = Thread(target=execute_reconf_in_g5k, args=(roles, version_concerto_d, assembly_name, reconfig_config_file_path, duration, dep_num, node_num, waiting_rate))
+            thread = Thread(
+                target=_execute_node_reconf_in_g5k,
+                args=(
+                    roles,
+                    version_concerto_d,
+                    assembly_name,
+                    reconfig_config_file_path,
+                    duration,
+                    dep_num,
+                    node_num,
+                    waiting_rate
+                )
+            )
 
             # Start reconf and remove it from uptimes
             thread.start()
@@ -120,7 +151,7 @@ def schedule_and_run_uptimes_from_config(roles, version_concerto_d, uptimes_node
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
 
 
-def compute_end_reconfiguration_time(uptimes_nodes):
+def _compute_end_reconfiguration_time(uptimes_nodes):
     max_uptime_value = 0
     for uptimes_node in uptimes_nodes:
         for uptime in uptimes_node:
@@ -130,8 +161,15 @@ def compute_end_reconfiguration_time(uptimes_nodes):
     return max_uptime_value
 
 
-def launch_experiment(expe_name, cluster, version_concerto_d, uptimes_file_name, transitions_times_file_name, waiting_rate, roles_concerto_d):
-    # TODO: enlever le paramètre roles
+def _launch_experiment_with_params(
+        expe_name,
+        cluster,
+        version_concerto_d,
+        uptimes_file_name,
+        transitions_times_file_name,
+        waiting_rate,
+        roles_concerto_d
+):
     log = log_experiment.log
     with open(f"{globals_variables.local_project_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
@@ -139,12 +177,14 @@ def launch_experiment(expe_name, cluster, version_concerto_d, uptimes_file_name,
     # Initialize expe dirs and get uptimes nodes
     globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
     os.makedirs(globals_variables.local_execution_expe_dir, exist_ok=True)
+    log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_expe_dir} ---------------------")
+    log.debug(f"------------ Remote execution expe dir on {globals_variables.remote_execution_expe_dir} ---------------------")
     concerto_d_g5k.initialize_remote_expe_dirs(roles_concerto_d["server"])
 
     # Deploy zenoh routers
     if version_concerto_d == "asynchronous":
         log.debug("------- Deploy zenoh routers -------")
-        max_uptime_value = compute_end_reconfiguration_time(uptimes_nodes)
+        max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
         concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
         concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value)
 
@@ -166,17 +206,23 @@ def launch_experiment(expe_name, cluster, version_concerto_d, uptimes_file_name,
 
     # Run experiment
     log.debug("------- Run experiment ----------")
-    schedule_and_run_uptimes_from_config(roles_concerto_d, version_concerto_d, uptimes_nodes, transitions_times_file_name, waiting_rate)
+    _schedule_and_run_uptimes_from_config(
+        roles_concerto_d,
+        version_concerto_d,
+        uptimes_nodes,
+        transitions_times_file_name,
+        waiting_rate
+    )
 
     # Save results
     for name in nodes_names:
         results[name]["total_sleeping_time"] = sleeping_times_nodes[name]["total_sleeping_time"]
-    save_results(version_concerto_d, cluster, transitions_times_file_name, uptimes_file_name, waiting_rate)
+    _save_experiment_results_in_file(version_concerto_d, cluster, transitions_times_file_name, uptimes_file_name, waiting_rate)
 
     log.debug("------ End of experiment ---------")
 
 
-def build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate):
+def _build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate):
     file_name = "results"
     file_name += "_synchrone" if "synchrone" in version_concerto_name else "_asynchrone"
 
@@ -199,14 +245,19 @@ def build_save_results_file_name(version_concerto_name, transitions_times_file_n
     return file_name
 
 
-def save_results(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, waiting_rate):
+def _save_experiment_results_in_file(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, waiting_rate):
     log = log_experiment.log
     dir_to_save_expe = globals_variables.local_execution_expe_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
     # File name
-    file_name = build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate)
+    file_name = _build_save_results_file_name(
+        version_concerto_name,
+        transitions_times_file_name,
+        uptimes_file_name,
+        waiting_rate
+    )
 
     global_results = {}
     reconf_dir_path = f"{dir_to_save_expe}/finished_reconfigurations"
@@ -255,15 +306,30 @@ def save_results(version_concerto_name, cluster, transitions_times_file_name, up
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
-    if exists(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations"):
-        shutil.copytree(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+    # if exists(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations"):
+    #     shutil.copytree(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+
+
+def _parse_sweeper_parameters(params_to_sweep):
+    """
+    Helper function to have the choice of either do the cartesian product of all possible parameters
+    combinations or to pass directly a list of specifics parameters to experiment
+    """
+    if type(params_to_sweep) == list:
+        sweeps = [HashableDict(params) for params in params_to_sweep]
+    else:
+        sweeps = sweep(params_to_sweep)
+
+    return sweeps
 
 
 def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_sweep, roles_concerto_d):
     log = log_experiment.log
     global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
     log.debug(f"Global expe dir: {global_local_dir_expe}")
-    sweeps = sweep(params_to_sweep)
+    sweeps = _parse_sweeper_parameters(params_to_sweep)
+    log.debug("------------------------ Execution of experiments start ------------------------")
+    log.debug(f"Number of experiments: {len(sweeps)}")
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
@@ -278,7 +344,7 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_swe
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
-            launch_experiment(
+            _launch_experiment_with_params(
                 expe_name,
                 cluster,
                 version_concerto_d,
@@ -288,10 +354,11 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_swe
                 roles_concerto_d
             )
             sweeper.done(parameter)
+            log.debug(f"Parameter {parameter} done")
+            log.debug(f"State of the sweeper: {sweeper}")
         except Exception as e:
             sweeper.skip(parameter)
             log.debug("Experiment FAILED")
-            log.exception(e)
             log.debug(e)
             log.debug(f"Skipping experiment with parameters {parameter}")
             traceback.print_exc()

@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-fixing-sync-1"      # The experiment name, has to be unique
+  expe_name: "expe-fixing-sync-2"      # The experiment name, has to be unique
   version_concerto_d: "synchronous"  # synchronous or asynchronous
   local_project_dir: "/home/aomond/implementations/concerto-d-projects"  # Dir where experiment is launched and results are computed.
   # If the execution is launched on g5k, it is the same as <remote_project_dir>
