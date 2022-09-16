@@ -3,8 +3,10 @@ from concerto.time_logger import TimeToSave
 from synthetic_use_case.assemblies.server_assembly import ServerAssembly
 
 from synthetic_use_case.reconf_programs import reconf_programs
+from synthetic_use_case.reconf_programs.reconf_programs import handle_sleeping_behavior
 
 
+@handle_sleeping_behavior(TimeToSave.END_DEPLOY)
 def deploy(sc, nb_deps_tot):
     time_logger.log_time_value(TimeToSave.START_DEPLOY)
     sc._p_id_sync = 0
@@ -17,6 +19,7 @@ def deploy(sc, nb_deps_tot):
     time_logger.log_time_value(TimeToSave.END_DEPLOY)
 
 
+@handle_sleeping_behavior(TimeToSave.END_UPDATE)
 def update(sc):
     time_logger.log_time_value(TimeToSave.START_UPDATE)
     sc._p_id_sync = 1
