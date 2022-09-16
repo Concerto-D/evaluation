@@ -8,7 +8,7 @@ from synthetic_use_case.reconf_programs import reconf_programs
 def deploy(sc, nb_deps_tot):
     time_logger.log_time_value(TimeToSave.START_DEPLOY)
     sc._p_id_sync = 0
-    sc.add_component("server", sc.server)
+    sc.add_component("server", "Server")
     for dep_num in range(nb_deps_tot):
         sc.connect("server", f"serviceu_ip{dep_num}", f"dep{dep_num}", "ip")
         sc.connect("server", f"serviceu{dep_num}", f"dep{dep_num}", "service")

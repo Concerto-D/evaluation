@@ -2,8 +2,8 @@ from concerto.all import *
 
 class Server(Component):
 
-    def __init__(self, t_sa : float, t_sc : List[float], t_sr : float, t_ss : List[float], t_sp : List[float], nb_deps: int):
-        self.nb_deps = nb_deps
+    def __init__(self, nb_deps_tot: int, t_sa : float, t_sc : List[float], t_sr : float, t_ss : List[float], t_sp : List[float]):
+        self.nb_deps_tot = nb_deps_tot
         self.t_sa = t_sa
         self.t_sc = t_sc
         self.t_sr = t_sr
@@ -34,7 +34,7 @@ class Server(Component):
             'service': (DepType.PROVIDE, ['running'])
         }
         
-        for i in range(self.nb_deps):
+        for i in range(self.nb_deps_tot):
             self.places.append(self.name_for_dep_suspended(i))
             self.groups[self.name_for_dep_group(i)] = ['running', self.name_for_dep_suspended(i)]
             self.transitions[self.name_for_dep_config(i)] = ('allocated', 'configured', 'deploy', 0, self.configure, [i])
