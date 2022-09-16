@@ -44,7 +44,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"])
     if version_concerto_d == "synchronous":
         log.debug("Synchronous version: creating inventory")
-        create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
+        _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
         concerto_d_g5k.put_file(deployment_node["controller"], "inventory.yaml", "concerto-decentralized/inventory.yaml")
     log.debug("Destroy deployment node")
@@ -53,7 +53,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     return roles_concerto_d
 
 
-def create_inventory_from_roles(roles):
+def _create_inventory_from_roles(roles):
     with open("inventory.yaml", "w") as f:
         host = roles["server"][0].address
         f.write(f'server_assembly: "{host}:5000"')
@@ -69,7 +69,3 @@ def create_inventory_from_roles(roles):
                 f.write("\n")
                 f.write(f'{k}: "{v[0].address}:{port}"')
                 f.write("\n")
-
-
-if __name__ == '__main__':
-    main()

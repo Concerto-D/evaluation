@@ -109,12 +109,12 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 
 def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
     with en.actions(roles=role_controller) as a:
-        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.remote_project_dir}/{uptimes_dst}")
+        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.g5k_executions_expe_logs_dir}/{uptimes_dst}")
         log_experiment.log.debug(a.results)
 
 
 def initialize_expe_repositories(role_controller):
-    home_dir = globals_variables.remote_project_dir
+    home_dir = globals_variables.g5k_executions_expe_logs_dir
     with en.actions(roles=role_controller) as a:
         a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
         a.git(dest=f"{home_dir}/concerto-decentralized",
@@ -142,13 +142,13 @@ def initialize_remote_expe_dirs(role_controller):
     Homedir is shared between site frontend and nodes, so this can be done only once per site
     """
     with en.actions(roles=role_controller) as a:
-        remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
-        a.file(path=f"{remote_execution_expe_dir}/reprise_configs", state="directory")
-        a.file(path=f"{remote_execution_expe_dir}/communication_cache", state="directory")
-        a.file(path=f"{remote_execution_expe_dir}/logs", state="directory")
-        a.file(path=f"{remote_execution_expe_dir}/archives_reprises", state="directory")
-        a.file(path=f"{remote_execution_expe_dir}/finished_reconfigurations", state="directory")
-        # a.file(path=f"{remote_execution_expe_dir}/logs_files_assemblies", state="directory")
+        g5k_execution_params_dir = globals_variables.g5k_execution_params_dir
+        a.file(path=f"{g5k_execution_params_dir}/reprise_configs", state="directory")
+        a.file(path=f"{g5k_execution_params_dir}/communication_cache", state="directory")
+        a.file(path=f"{g5k_execution_params_dir}/logs", state="directory")
+        a.file(path=f"{g5k_execution_params_dir}/archives_reprises", state="directory")
+        a.file(path=f"{g5k_execution_params_dir}/finished_reconfigurations", state="directory")
+        # a.file(path=f"{g5k_execution_params_dir}/logs_files_assemblies", state="directory")
         log_experiment.log.debug(a.results)
 
 
@@ -169,13 +169,13 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
     command_args.append(timestamp_log_file)
-    command_args.append(globals_variables.remote_execution_expe_dir)
+    command_args.append(globals_variables.g5k_execution_params_dir)
     command_args.append(version_concerto_d)
     if dep_num is not None:
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
-    home_dir = globals_variables.remote_project_dir
+    home_dir = globals_variables.g5k_executions_expe_logs_dir
     with en.actions(roles=role_node) as a:
         a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
 
@@ -196,8 +196,8 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
 def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num):
     with en.actions(roles=role_node) as a:
         a.fetch(
-            src=f"{globals_variables.remote_execution_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            dest=f"{globals_variables.local_execution_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            src=f"{globals_variables.g5k_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
+            dest=f"{globals_variables.local_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
             flat="yes",
             fail_on_missing="no"
         )
@@ -215,6 +215,6 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     with en.actions(roles=role_node) as a:
         a.fetch(
             src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            dest=f"{globals_variables.local_execution_expe_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
+            dest=f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
             flat="yes"
         )

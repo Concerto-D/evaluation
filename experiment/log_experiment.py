@@ -9,8 +9,8 @@ log = None
 
 def initialize_logging(expe_name):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
-    logging.basicConfig(filename=f"{global_local_dir_expe}/experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
+    experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
+    logging.basicConfig(filename=f"{experiment_results_dir}/experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
     global log
     log = logging.getLogger(__name__)
     console = logging.StreamHandler(sys.stdout)

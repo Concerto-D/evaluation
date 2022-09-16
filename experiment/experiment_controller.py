@@ -31,9 +31,9 @@ def _execute_node_reconf_in_g5k(
         node_num,
         waiting_rate
 ):
-    remote_execution_expe_dir = globals_variables.remote_execution_expe_dir
+    g5k_execution_params_dir = globals_variables.g5k_execution_params_dir
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    transitions_times_file = f"{globals_variables.remote_project_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
+    transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
 
     # Execute reconf
     sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
@@ -46,14 +46,14 @@ def _execute_node_reconf_in_g5k(
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num)
-    print(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}")
-    print(exists(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"))
-    if exists(f"{globals_variables.local_execution_expe_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+    print(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}")
+    print(exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"))
+    if exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         finished_nodes.append(node_num)
 
 
 def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
-    with open(f"{globals_variables.local_execution_expe_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
+    with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -171,14 +171,14 @@ def _launch_experiment_with_params(
         roles_concerto_d
 ):
     log = log_experiment.log
-    with open(f"{globals_variables.local_project_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
+    with open(f"{globals_variables.all_experiments_results_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
 
     # Initialize expe dirs and get uptimes nodes
     globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
-    os.makedirs(globals_variables.local_execution_expe_dir, exist_ok=True)
-    log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_expe_dir} ---------------------")
-    log.debug(f"------------ Remote execution expe dir on {globals_variables.remote_execution_expe_dir} ---------------------")
+    os.makedirs(globals_variables.local_execution_params_dir, exist_ok=True)
+    log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_params_dir} ---------------------")
+    log.debug(f"------------ Remote execution expe dir on {globals_variables.g5k_execution_params_dir} ---------------------")
     concerto_d_g5k.initialize_remote_expe_dirs(roles_concerto_d["server"])
 
     # Deploy zenoh routers
@@ -247,7 +247,7 @@ def _build_save_results_file_name(version_concerto_name, transitions_times_file_
 
 def _save_experiment_results_in_file(version_concerto_name, cluster, transitions_times_file_name, uptimes_file_name, waiting_rate):
     log = log_experiment.log
-    dir_to_save_expe = globals_variables.local_execution_expe_dir
+    dir_to_save_expe = globals_variables.local_execution_params_dir
     # Dans le nom: timestamp
     log.debug(f"Saving results in dir {dir_to_save_expe}")
 
@@ -306,8 +306,8 @@ def _save_experiment_results_in_file(version_concerto_name, cluster, transitions
         json.dump(results_to_dump, f, indent=4)
 
     # Save config expe + results
-    # if exists(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations"):
-    #     shutil.copytree(f"{globals_variables.local_project_dir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
+    # if exists(f"{globals_variables.all_experiments_results_dir}/{dir_to_save_expe}/finished_reconfigurations"):
+    #     shutil.copytree(f"{globals_variables.all_experiments_results_dir}/{dir_to_save_expe}/finished_reconfigurations", f"{dir_to_save_expe}/finished_reconfigurations_{file_name}")
 
 
 def _parse_sweeper_parameters(params_to_sweep):
@@ -325,20 +325,20 @@ def _parse_sweeper_parameters(params_to_sweep):
 
 def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_sweep, roles_concerto_d):
     log = log_experiment.log
-    global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
-    log.debug(f"Global expe dir: {global_local_dir_expe}")
+    experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
+    log.debug(f"Global expe dir: {experiment_results_dir}")
     sweeps = _parse_sweeper_parameters(params_to_sweep)
     log.debug("------------------------ Execution of experiments start ------------------------")
     log.debug(f"Number of experiments: {len(sweeps)}")
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"{experiment_results_dir}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
 
     # TODO: Reset inprogress (that haven't been tagged as skipped caused of crash), do not run this script concurrently
     # on the same sweeper
     sweeper.reset(reset_inprogress=True)
     sweeper = ParamSweeper(
-        persistence_dir=str(Path(f"{global_local_dir_expe}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
+        persistence_dir=str(Path(f"{experiment_results_dir}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
     while parameter:

@@ -1,22 +1,28 @@
 import os
 from datetime import datetime
 
-local_project_dir = "/home/aomond/implementations/concerto-d-projects"
-remote_project_dir = "/home/anomond"
-sweeper_parameters_file = "sweeper_parameters.yaml"
+all_experiments_results_dir = ""
+g5k_executions_expe_logs_dir = ""
 
-remote_execution_expe_dir = None
-local_execution_expe_dir = None
+local_execution_params_dir = None
+g5k_execution_params_dir = None
 
 
-def global_local_dir_expe(expe_name):
-    return f"{local_project_dir}/global-{expe_name}-dir"
+def experiment_results_dir(expe_name):
+    return f"{all_experiments_results_dir}/experiment-{expe_name}-dir"
 
 
 def initialize_remote_execution_expe_dir_name(expe_name):
-    global remote_execution_expe_dir
-    global local_execution_expe_dir
+    """
+    Initialization of the experiments directories.
+    <all_experiments_results_dir>: global dir on the host where all the executions of expe_name are executed.
+    <g5k_executions_expe_logs_dir>: global dir on the remote infrastructure where all the executions are executed (here on G5K)
+    <local_execution_params_dir>: specific local dir of the execution of parameters
+    <g5k_execution_params_dir>: specific remote dir of the execution of parameters
+    """
+    global g5k_execution_params_dir
+    global local_execution_params_dir
     ref_execution_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     execution_expe_dir = f"execution-{expe_name}-{ref_execution_timestamp}"
-    remote_execution_expe_dir = f"{remote_project_dir}/{execution_expe_dir}"
-    local_execution_expe_dir = f"{global_local_dir_expe(expe_name)}/{execution_expe_dir}"
+    g5k_execution_params_dir = f"{g5k_executions_expe_logs_dir}/{execution_expe_dir}"
+    local_execution_params_dir = f"{experiment_results_dir(expe_name)}/{execution_expe_dir}"

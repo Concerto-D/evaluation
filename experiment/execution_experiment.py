@@ -13,15 +13,15 @@ if __name__ == '__main__':
     (
         expe_name,
         version_concerto_d,
-        local_project_dir,
-        remote_project_dir
+        all_experiments_results_dir,
+        g5k_executions_expe_logs_dir
     ) = expe_parameters["global_parameters"].values()
 
     # Création du dossier de l'expérience et du dossier pour les logs
-    globals_variables.local_project_dir = local_project_dir
-    globals_variables.remote_project_dir = remote_project_dir
-    global_local_dir_expe = globals_variables.global_local_dir_expe(expe_name)
-    os.makedirs(f"{global_local_dir_expe}/experiment_logs", exist_ok=True)
+    globals_variables.all_experiments_results_dir = all_experiments_results_dir
+    globals_variables.g5k_executions_expe_logs_dir = g5k_executions_expe_logs_dir
+    experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
+    os.makedirs(f"{experiment_results_dir}/experiment_logs", exist_ok=True)
 
     # Init logging
     log_experiment.initialize_logging(expe_name)
