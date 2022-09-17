@@ -31,7 +31,6 @@ def _execute_node_reconf_in_g5k(
         node_num,
         waiting_rate
 ):
-    g5k_execution_params_dir = globals_variables.g5k_execution_params_dir
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
 
@@ -46,9 +45,8 @@ def _execute_node_reconf_in_g5k(
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num)
-    print(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}")
-    print(exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"))
     if exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+        log_experiment.log.debug(f"Node {node_num} finished")
         finished_nodes.append(node_num)
 
 
