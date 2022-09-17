@@ -9,6 +9,7 @@ from synthetic_use_case.reconf_programs.reconf_programs import handle_sleeping_b
 @handle_sleeping_behavior(TimeToSave.END_DEPLOY)
 def deploy(sc, dep_num):
     time_logger.log_time_value(TimeToSave.START_DEPLOY)
+    sc._p_id_sync = 0
     sc.add_component(f"dep{dep_num}", "Dep")
     sc.connect(f"dep{dep_num}", "ip", "server", f"serviceu_ip{dep_num}")
     sc.connect(f"dep{dep_num}", "service", "server", f"serviceu{dep_num}")
@@ -20,6 +21,7 @@ def deploy(sc, dep_num):
 @handle_sleeping_behavior(TimeToSave.END_UPDATE)
 def update(sc, dep_num):
     time_logger.log_time_value(TimeToSave.START_UPDATE)
+    sc._p_id_sync = 1
     sc.push_b(f"dep{dep_num}", "update")
     sc.push_b(f"dep{dep_num}", "deploy")
     sc.wait_all()
