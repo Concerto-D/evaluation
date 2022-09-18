@@ -161,7 +161,7 @@ def install_zenoh_router(roles_zenoh_router: List):
 
 def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float):
     command_args = []
-    command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source source_dir.sh)
+    command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
     command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
     assembly_name = "server" if dep_num is None else "dep"
     command_args.append(f"../evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
