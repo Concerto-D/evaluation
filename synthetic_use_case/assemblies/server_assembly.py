@@ -5,9 +5,9 @@ from synthetic_use_case.assemblies.server import Server
 class ServerAssembly(Assembly):
     def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d):
         # Add remote assemblies for the waitall instruction
-        remote_assemblies_names = set()
+        remote_assemblies_names = []
         for i in range(reconf_config_dict['nb_deps_tot']):
-            remote_assemblies_names.add(f"dep_assembly_{i}")
+            remote_assemblies_names.append(f"dep_assembly_{i}")
 
         # Add components types to instanciate for the add instruction
         components_types = {
