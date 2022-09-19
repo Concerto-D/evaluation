@@ -9,7 +9,7 @@ from synthetic_use_case.reconf_programs.reconf_programs import handle_sleeping_b
 @handle_sleeping_behavior(TimeToSave.END_DEPLOY)
 def deploy(sc, nb_deps_tot):
     time_logger.log_time_value(TimeToSave.START_DEPLOY)
-    sc._p_id_sync = 0
+    sc.id_sync = 0
     sc.add_component("server", "Server")
     for dep_num in range(nb_deps_tot):
         sc.connect("server", f"serviceu_ip{dep_num}", f"dep{dep_num}", "ip")
@@ -22,7 +22,7 @@ def deploy(sc, nb_deps_tot):
 @handle_sleeping_behavior(TimeToSave.END_UPDATE)
 def update(sc):
     time_logger.log_time_value(TimeToSave.START_UPDATE)
-    sc._p_id_sync = 1
+    sc.id_sync = 1
     sc.push_b("server", "suspend")
     sc.wait_all(wait_for_refusing_provide=True)
     sc.push_b("server", "deploy")
