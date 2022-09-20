@@ -131,11 +131,11 @@ with open(uptimes_nodes_tuples_path) as f:
 
 timestamp = f"local_exec_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
 _schedule_and_run_uptimes_from_config(
-    uptimes_nodes_tuples,
-    config_file_path,
-    30,
-    1,
-    timestamp,
-    timestamp,
-    "synchronous"
+    uptimes_nodes_tuples=uptimes_nodes_tuples,
+    config_file_path=config_file_path,
+    uptime_duration=30,
+    waiting_rate=1,
+    timestamp_log_dir=timestamp,
+    execution_expe_dir=timestamp,
+    version_concerto_d="synchronous"
 )
