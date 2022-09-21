@@ -1,1 +1,1 @@
-Cf https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized/-/tree/clean
+Cf https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized

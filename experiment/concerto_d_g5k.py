@@ -120,7 +120,6 @@ def initialize_expe_repositories(role_controller):
         a.git(dest=f"{home_dir}/concerto-decentralized",
               repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
-              version="clean",  # Name of the branch
               accept_hostkey=True)
         a.pip(chdir=f"{home_dir}/concerto-decentralized",
               requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
@@ -128,12 +127,10 @@ def initialize_expe_repositories(role_controller):
         a.git(dest=f"{home_dir}/evaluation",
               repo="git@gitlab.inria.fr:aomond-imt/concerto-d/evaluation.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
-              version="clean",  # Name of the branch
               accept_hostkey=True)
         a.git(dest=f"{home_dir}/experiment_files",
               repo="git@gitlab.inria.fr:aomond-imt/concerto-d/experiment_files.git",
               key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
-              version="clean",  # Name of the branch
               accept_hostkey=True)
 
 
