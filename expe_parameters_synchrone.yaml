@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-replay-sync-expes"      # The experiment name, has to be unique
+  expe_name: "expe-test-new-timestamps"      # The experiment name, has to be unique
   version_concerto_d: "synchronous"  # synchronous or asynchronous
 #  all_experiments_results_dir: "/home/aomond/concerto-d-projects"
   all_experiments_results_dir: "/home/anomond"  # Where results are computed
