@@ -6,8 +6,6 @@ from typing import Tuple, Dict, Optional
 import yaml
 
 from concerto import time_logger, global_variables
-from concerto.time_logger import TimeToSave
-from concerto.utility import GoingSleepingException
 
 
 def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str, str, Optional[int]]:
@@ -27,7 +25,6 @@ def initialize_reconfiguration():
     config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, dep_num = get_assembly_parameters(sys.argv)
     assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
     time_logger.init_time_log_dir(assembly_name, timestamp_log_dir=timestamp_log_dir)
-    time_logger.log_time_value(TimeToSave.UP_TIME)
     os.makedirs(f"{execution_expe_dir}/reprise_configs", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/communication_cache", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/logs", exist_ok=True)
@@ -37,21 +34,3 @@ def initialize_reconfiguration():
     global_variables.execution_expe_dir = execution_expe_dir
 
     return config_dict, duration, waiting_rate, version_concerto_d, dep_num
-
-
-def handle_sleeping_behavior(time_to_log):
-    """
-    If the node raise Exception saying it goes to sleep, then take the measure and
-    exit the program
-    """
-    def _handle_going_sleeping(func):
-        def wrapper(*args, **kwargs):
-            try:
-                result = func(*args, **kwargs)
-                return result
-            except GoingSleepingException:
-                time_logger.log_time_value(time_to_log)
-                time_logger.log_time_value(TimeToSave.SLEEP_TIME)
-                exit()
-        return wrapper
-    return _handle_going_sleeping
