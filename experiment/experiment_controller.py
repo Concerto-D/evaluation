@@ -14,7 +14,6 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper, HashableDict
 
-from concerto.time_logger import TimestampPeriod
 from experiment import globals_variables, concerto_d_g5k, log_experiment
 
 finished_nodes = []
@@ -68,7 +67,7 @@ def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
         results[assembly_name] = {}
 
     for timestamp_name, timestamp_values in loaded_results:
-        results[assembly_name][timestamp_name] = timestamp_values[TimestampPeriod.END] - timestamp_values[TimestampPeriod.START]
+        results[assembly_name][timestamp_name] = timestamp_values["end"] - timestamp_values["start"]  # TODO: magic values refacto
 
 
 def _find_next_uptime(uptimes_nodes):
