@@ -14,6 +14,7 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper, HashableDict
 
+from concerto.time_logger import TimestampPeriod
 from experiment import globals_variables, concerto_d_g5k, log_experiment
 
 finished_nodes = []
@@ -63,14 +64,11 @@ def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
             "total_saving_state_duration": 0
         }
 
-    results[assembly_name]["total_uptime_duration"] += loaded_results["sleep_time"] - loaded_results["up_time"]
-    results[assembly_name]["total_loading_state_duration"] += loaded_results["end_loading_state"] - loaded_results["start_loading_state"]
-    if "end_saving_state" in loaded_results.keys() and "start_saving_state" in loaded_results.keys():
-        results[assembly_name]["total_saving_state_duration"] += loaded_results["end_saving_state"] - loaded_results["start_saving_state"]
-    if "start_deploy" in loaded_results.keys() and "end_deploy" in loaded_results.keys():
-        results[assembly_name]["total_deploy_duration"] += loaded_results["end_deploy"] - loaded_results["start_deploy"]
-    if "start_update" in loaded_results.keys() and "end_update" in loaded_results.keys():
-        results[assembly_name]["total_update_duration"] += loaded_results["end_update"] - loaded_results["start_update"]
+    if assembly_name not in results.keys():
+        results[assembly_name] = {}
+
+    for timestamp_name, timestamp_values in loaded_results:
+        results[assembly_name][timestamp_name] = timestamp_values[TimestampPeriod.END] - timestamp_values[TimestampPeriod.START]
 
 
 def _find_next_uptime(uptimes_nodes):
