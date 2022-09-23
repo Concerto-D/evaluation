@@ -66,7 +66,7 @@ def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
     if assembly_name not in results.keys():
         results[assembly_name] = {}
 
-    for timestamp_name, timestamp_values in loaded_results:
+    for timestamp_name, timestamp_values in loaded_results.items():
         results[assembly_name][timestamp_name] = timestamp_values["end"] - timestamp_values["start"]  # TODO: magic values refacto
 
 
