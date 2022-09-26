@@ -1,10 +1,12 @@
 # Parameters used during the whole execution
 global_parameters:
   expe_name: "expe-test-new-timestamps"      # The experiment name, has to be unique
+  environment: "local"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
-#  all_experiments_results_dir: "/home/aomond/concerto-d-projects"
-  all_experiments_results_dir: "/home/anomond"  # Where results are computed
-  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
+  all_experiments_results_dir: "/home/aomond/concerto-d-projects"
+#  all_experiments_results_dir: "/home/anomond"  # Where results are computed
+  g5k_executions_expe_logs_dir: "/home/aomond/concerto-d-projects"
+#  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
 
 
 # Infrastructure reservation. The synthetic use-case is executed on Grid5000 nodes that need to be
@@ -32,10 +34,14 @@ reservation_parameters:
 #  transitions_times: ["transitions_times-1-30-deps12-1.json", "transitions_times-1-30-deps12-0.json"]
 #  waiting_rate: [1]
 sweeper_parameters:
- - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-   transitions_times: "transitions_times-1-30-deps12-1.json"
+ - uptimes: "uptimes-60-30-12-1-1-1.json"
+   transitions_times: "transitions_times-1-30-deps12-0.json"
    waiting_rate: 1
-   id: 0
+   id: 3
+# - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#   transitions_times: "transitions_times-1-30-deps12-1.json"
+#   waiting_rate: 1
+#   id: 3
 # - uptimes: "uptimes-60-30-12-0_5-0_6.json"
 #   transitions_times: "transitions_times-1-30-deps12-1.json"
 #   waiting_rate: 1
@@ -49,10 +55,10 @@ sweeper_parameters:
 #   waiting_rate: 1
 #   id: 3
 #
- - uptimes: "uptimes-60-30-12-0_5-0_6.json"
-   transitions_times: "transitions_times-1-30-deps12-0.json"
-   waiting_rate: 1
-   id: 0
+# - uptimes: "uptimes-60-30-12-0_5-0_6.json"
+#   transitions_times: "transitions_times-1-30-deps12-0.json"
+#   waiting_rate: 1
+#   id: 0
 # - uptimes: "uptimes-60-30-12-0_5-0_6.json"
 #   transitions_times: "transitions_times-1-30-deps12-0.json"
 #   waiting_rate: 1
@@ -66,9 +72,9 @@ sweeper_parameters:
 #   waiting_rate: 1
 #   id: 3
 
- - uptimes: "uptimes-60-30-12-0_2-0_3.json"
-   transitions_times: "transitions_times-1-30-deps12-1.json"
-   waiting_rate: 1
+# - uptimes: "uptimes-60-30-12-0_2-0_3.json"
+#   transitions_times: "transitions_times-1-30-deps12-1.json"
+#   waiting_rate: 1
 #   - uptimes: "uptimes-60-30-12-0_2-0_3.json"
 #     transitions_times: "transitions_times-1-30-deps12-1.json"
 #     waiting_rate: 1

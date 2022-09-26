@@ -1,3 +1,7 @@
+import os
+import shutil
+import subprocess
+from os.path import exists
 from typing import List, Optional
 
 import enoslib as en
@@ -134,21 +138,6 @@ def initialize_expe_repositories(role_controller):
               accept_hostkey=True)
 
 
-def initialize_remote_expe_dirs(role_controller):
-    """
-    Homedir is shared between site frontend and nodes, so this can be done only once per site
-    """
-    with en.actions(roles=role_controller) as a:
-        g5k_execution_params_dir = globals_variables.g5k_execution_params_dir
-        a.file(path=f"{g5k_execution_params_dir}/reprise_configs", state="directory")
-        a.file(path=f"{g5k_execution_params_dir}/communication_cache", state="directory")
-        a.file(path=f"{g5k_execution_params_dir}/logs", state="directory")
-        a.file(path=f"{g5k_execution_params_dir}/archives_reprises", state="directory")
-        a.file(path=f"{g5k_execution_params_dir}/finished_reconfigurations", state="directory")
-        # a.file(path=f"{g5k_execution_params_dir}/logs_files_assemblies", state="directory")
-        log_experiment.log.debug(a.results)
-
-
 def install_zenoh_router(roles_zenoh_router: List):
     with en.actions(roles=roles_zenoh_router) as a:
         a.apt_repository(repo="deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /", state="present")
@@ -156,9 +145,10 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float):
+def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float, environment: str):
     command_args = []
-    command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
+    if environment == "remote":
+        command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
     command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
     assembly_name = "server" if dep_num is None else "dep"
     command_args.append(f"../evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
@@ -173,14 +163,28 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
 
     command_str = " ".join(command_args)
     home_dir = globals_variables.g5k_executions_expe_logs_dir
-    with en.actions(roles=role_node) as a:
-        a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
+    if environment == "remote":
+        with en.actions(roles=role_node) as a:
+            a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
+    else:
+        cwd = os.getcwd()
+        env_process = os.environ.copy()
+        env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
+        process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
+        process.wait()
 
 
-def execute_zenoh_routers(roles_zenoh_router, timeout):
+def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
-    en.run_command("kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')", roles=roles_zenoh_router, on_error_continue=True)
-    en.run_command(" ".join(["RUST_LOG=debug", "timeout", str(timeout), "zenohd", "--mem-storage='/**'"]), roles=roles_zenoh_router, background=True)
+    kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
+    launch_router_cmd = " ".join(["timeout", str(timeout), "zenohd", "--mem-storage='/**'"])
+
+    if environment == "remote":
+        en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
+        en.run_command(launch_router_cmd, roles=roles_zenoh_router, background=True)
+    else:
+        subprocess.Popen(launch_router_cmd, shell=True)  # Process is killed when main thread is killed
+
 
 # TODO: refacto les dep/server names
 def build_finished_reconfiguration_path(assembly_name, dep_num):
@@ -190,14 +194,16 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
         return f"finished_reconfigurations/{assembly_name.replace(str(dep_num), '')}_assembly_{dep_num}"
 
 
-def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num):
-    with en.actions(roles=role_node) as a:
-        a.fetch(
-            src=f"{globals_variables.g5k_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            dest=f"{globals_variables.local_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}",
-            flat="yes",
-            fail_on_missing="no"
-        )
+def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num, environment):
+    src = f"{globals_variables.g5k_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
+    dst = f"{globals_variables.local_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
+    if environment == "remote":
+        with en.actions(roles=role_node) as a:
+            a.fetch(src=src, dest=dst, flat="yes", fail_on_missing="no")
+    else:
+        if exists(src):
+            os.makedirs(f"{globals_variables.local_execution_params_dir}/finished_reconfigurations", exist_ok=True)
+            shutil.copy(src, dst)
 
 
 def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
@@ -208,10 +214,13 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
         return f"dep{dep_num}_{timestamp_log_file}.yaml"
 
 
-def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str):
-    with en.actions(roles=role_node) as a:
-        a.fetch(
-            src=f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            dest=f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}",
-            flat="yes"
-        )
+def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, environment):
+    src = f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies"
+    dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+    if environment == "remote":
+        with en.actions(roles=role_node) as a:
+            a.fetch(src=src, dest=dst, flat="yes")
+    else:
+        os.makedirs(dst_dir, exist_ok=True)
+        shutil.copy(src, dst)

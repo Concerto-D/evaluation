@@ -2,6 +2,8 @@ import os
 import sys
 
 import yaml
+from enoslib import Host
+
 import infrastructure_reservation
 from experiment import globals_variables, log_experiment, experiment_controller
 
@@ -12,6 +14,7 @@ if __name__ == '__main__':
         expe_parameters = yaml.safe_load(f)
     (
         expe_name,
+        environment,
         version_concerto_d,
         all_experiments_results_dir,
         g5k_executions_expe_logs_dir
@@ -26,12 +29,19 @@ if __name__ == '__main__':
     # Init logging
     log_experiment.initialize_logging(expe_name)
     log = log_experiment.log
-
-    log.debug(f"Start {expe_name}")
-    roles_concerto_d = infrastructure_reservation.create_reservation_for_concerto_d(
-        version_concerto_d,
-        expe_parameters["reservation_parameters"]
-    )
+    roles_concerto_d = None
+    if environment == "remote":
+        log.debug(f"Start {expe_name}")
+        roles_concerto_d = infrastructure_reservation.create_reservation_for_concerto_d(
+            version_concerto_d,
+            expe_parameters["reservation_parameters"]
+        )
+    else:
+        roles_concerto_d = {
+            "server": Host("localhost"),
+            **{f"dep{dep_num}": Host("localhost") for dep_num in range(expe_parameters["reservation_parameters"]["nb_concerto_nodes"] - 1)},
+            "zenoh_routers": Host("localhost")
+        }
 
     # Execution experiment
     params_to_sweep = expe_parameters["sweeper_parameters"]
@@ -40,5 +50,6 @@ if __name__ == '__main__':
         expe_parameters["reservation_parameters"]["cluster"],
         version_concerto_d,
         params_to_sweep,
+        environment,
         roles_concerto_d
     )

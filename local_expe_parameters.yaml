@@ -35,5 +35,5 @@ reservation_parameters:
 #  waiting_rate: [1]
 sweeper_parameters:
  - uptimes: "uptimes-60-30-12-1-1-1.json"
-   transitions_times: "transitions_times-1-30-deps12-0.json"
+   transitions_times: "mock_transitions_times_1_sec_for_testing.json"
    waiting_rate: 1
