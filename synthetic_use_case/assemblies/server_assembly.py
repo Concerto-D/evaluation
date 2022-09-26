@@ -3,11 +3,11 @@ from synthetic_use_case.assemblies.server import Server
 
 
 class ServerAssembly(Assembly):
-    def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d):
+    def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d, reconfiguration_name):
         # Add remote assemblies for the waitall instruction
-        remote_assemblies_names = []
+        remote_assemblies = {}
         for i in range(reconf_config_dict['nb_deps_tot']):
-            remote_assemblies_names.append(f"dep_assembly_{i}")
+            remote_assemblies[f"dep_assembly_{i}"] = f"dep{i}"
 
         # Add components types to instanciate for the add instruction
         components_types = {
@@ -18,8 +18,9 @@ class ServerAssembly(Assembly):
             self,
             "server_assembly",
             components_types,
-            remote_assemblies_names,
+            remote_assemblies,
             reconf_config_dict["transitions_times"],
             waiting_rate,
-            version_concerto_d
+            version_concerto_d,
+            reconfiguration_name
         )

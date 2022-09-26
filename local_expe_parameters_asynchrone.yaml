@@ -1,12 +1,10 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-test-new-timestamps-async"      # The experiment name, has to be unique
+  expe_name: "expe-test-wait-waitall"      # The experiment name, has to be unique
   environment: "local"
   version_concerto_d: "asynchronous"  # synchronous or asynchronous
   all_experiments_results_dir: "/home/aomond/concerto-d-projects"
-#  all_experiments_results_dir: "/home/anomond"  # Where results are computed
   g5k_executions_expe_logs_dir: "/home/aomond/concerto-d-projects"
-#  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
 
 
 # Infrastructure reservation. The synthetic use-case is executed on Grid5000 nodes that need to be

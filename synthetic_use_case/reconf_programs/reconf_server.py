@@ -11,27 +11,31 @@ def deploy(sc, nb_deps_tot):
         sc.connect("server", f"serviceu_ip{dep_num}", f"dep{dep_num}", "ip")
         sc.connect("server", f"serviceu{dep_num}", f"dep{dep_num}", "service")
     sc.push_b("server", "deploy")
+    # sc.wait("server")
     sc.wait_all()
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPDATE)
 def update(sc):
     sc.push_b("server", "suspend")
-    sc.wait_all(wait_for_refusing_provide=True)
+    sc.wait_all()
     sc.push_b("server", "deploy")
+    # sc.wait("server")
     sc.wait_all()
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPTIME)
-def execute_reconf(config_dict, duration, waiting_rate, version_concerto_d):
-    sc = ServerAssembly(config_dict, waiting_rate, version_concerto_d)
+def execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name):
+    sc = ServerAssembly(config_dict, waiting_rate, version_concerto_d, reconfiguration_name)
     sc.set_verbosity(2)
     sc.time_manager.start(duration)
-    deploy(sc, config_dict["nb_deps_tot"])
-    update(sc)
+    if reconfiguration_name == "deploy":
+        deploy(sc, config_dict["nb_deps_tot"])
+    else:
+        update(sc)
     sc.finish_reconfiguration()
 
 
 if __name__ == '__main__':
-    config_dict, duration, waiting_rate, version_concerto_d, dep_num = reconf_programs.initialize_reconfiguration()
-    execute_reconf(config_dict, duration, waiting_rate, version_concerto_d)
+    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, dep_num = reconf_programs.initialize_reconfiguration()
+    execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name)

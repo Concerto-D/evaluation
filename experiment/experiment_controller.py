@@ -30,6 +30,7 @@ def _execute_node_reconf_in_g5k(
         dep_num,
         node_num,
         waiting_rate,
+        reconfiguration_name,
         environment
 ):
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -37,12 +38,12 @@ def _execute_node_reconf_in_g5k(
 
     # Execute reconf
     sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
-    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, dep_num, waiting_rate, environment)
+    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, dep_num, waiting_rate, reconfiguration_name, environment)
     sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
 
     # Fetch and compute results
-    concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, environment)
-    _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir))
+    concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
+    _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir), reconfiguration_name)
 
     # Finish reconf for assembly name if its over
     concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num, environment)
@@ -51,8 +52,8 @@ def _execute_node_reconf_in_g5k(
         finished_nodes.append(node_num)
 
 
-def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str):
-    with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{timestamp_log_file}") as f:
+def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str, reconfiguration_name: str):
+    with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}/{timestamp_log_file}") as f:
         loaded_results = yaml.safe_load(f)
 
     if assembly_name not in results.keys():
@@ -78,9 +79,10 @@ def _find_next_uptime(uptimes_nodes):
 def _schedule_and_run_uptimes_from_config(
         roles,
         version_concerto_d,
-        uptimes_nodes_tuples: List,
+        uptimes_nodes: List,
         reconfig_config_file_path,
         waiting_rate,
+        reconfiguration_name,
         environment
 ):
     """
@@ -90,7 +92,6 @@ def _schedule_and_run_uptimes_from_config(
     log = log_experiment.log
     log.debug("SCHEDULING START")
     expe_time_start = time.time()
-    uptimes_nodes = [list(uptimes) for uptimes in uptimes_nodes_tuples]
     all_threads = []
 
     log.debug("UPTIMES TO TREAT")
@@ -98,14 +99,11 @@ def _schedule_and_run_uptimes_from_config(
         log.debug(f"node_num: {node_num}, uptimes: {uptimes}")
     finished_nodes.clear()
 
-    while any(len(uptimes) > 0 for uptimes in uptimes_nodes):
+    while len(finished_nodes) != len(uptimes_nodes) and any(len(uptimes) > 0 for uptimes in uptimes_nodes):
 
         # Find the next reconf to launch (closest in time)
         node_num, next_uptime = _find_next_uptime(uptimes_nodes)
-        if node_num in finished_nodes:
-            log.debug(f"{node_num} finished its reconfiguration, clearing all subsequent uptimes")
-            uptimes_nodes[node_num].clear()
-        elif next_uptime[0] <= time.time() - expe_time_start:
+        if node_num not in finished_nodes and next_uptime[0] <= time.time() - expe_time_start:
 
             # Init the thread that will handle the reconf
             duration = next_uptime[1]
@@ -122,6 +120,7 @@ def _schedule_and_run_uptimes_from_config(
                     dep_num,
                     node_num,
                     waiting_rate,
+                    reconfiguration_name,
                     environment
                 ),
                 daemon=True
@@ -194,14 +193,17 @@ def _launch_experiment_with_params(
 
     # Run experiment
     log.debug("------- Run experiment ----------")
-    _schedule_and_run_uptimes_from_config(
-        roles_concerto_d,
-        version_concerto_d,
-        uptimes_nodes,
-        transitions_times_file_name,
-        waiting_rate,
-        environment
-    )
+    uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
+    for reconfiguration_name in ["deploy", "update"]:
+        _schedule_and_run_uptimes_from_config(
+            roles_concerto_d,
+            version_concerto_d,
+            uptimes_nodes_list,
+            transitions_times_file_name,
+            waiting_rate,
+            reconfiguration_name,
+            environment
+        )
 
     # Save results
     for name in nodes_names:

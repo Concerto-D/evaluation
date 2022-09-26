@@ -145,7 +145,7 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float, environment: str):
+def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
     command_args = []
     if environment == "remote":
         command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
@@ -158,6 +158,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.g5k_execution_params_dir)
     command_args.append(version_concerto_d)
+    command_args.append(reconfiguration_name)
     if dep_num is not None:
         command_args.append(str(dep_num))  # If it's a dependency
 
@@ -214,9 +215,9 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
         return f"dep{dep_num}_{timestamp_log_file}.yaml"
 
 
-def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, environment):
+def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, reconfiguration_name: str, environment):
     src = f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
-    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies"
+    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     if environment == "remote":
         with en.actions(roles=role_node) as a:

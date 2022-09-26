@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-test-new-timestamps"      # The experiment name, has to be unique
+  expe_name: "expe-test-wait-waitall"      # The experiment name, has to be unique
   environment: "local"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
   all_experiments_results_dir: "/home/aomond/concerto-d-projects"
