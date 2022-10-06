@@ -14,7 +14,7 @@ from experiment import concerto_d_g5k, experiment_controller, globals_variables,
 # TODO: à signaler: même avec verify_ssl ça ne suffit pas il faut mettre le user et le mdp sur le front-end
 from experiment import log_experiment
 
-CREATED_INVENTORY_PATH = "/tmp/inventory.yaml"
+CREATED_INVENTORY_PATH = "/home/aomond/tmp/inventory.yaml"
 CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
 
 

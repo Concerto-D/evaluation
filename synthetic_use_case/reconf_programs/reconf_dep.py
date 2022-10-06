@@ -5,35 +5,39 @@ from concerto.time_logger import TimestampType, create_timestamp_metric
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.DEPLOY)
-def deploy(sc, dep_num):
+def deploy(sc, version_concerto_d, dep_num):
     sc.add_component(f"dep{dep_num}", "Dep")
     sc.connect(f"dep{dep_num}", "ip", "server", f"serviceu_ip{dep_num}")
     sc.connect(f"dep{dep_num}", "service", "server", f"serviceu{dep_num}")
     sc.push_b(f"dep{dep_num}", "deploy")
-    # sc.wait(f"dep{dep_num}")
-    sc.wait_all()
+    if version_concerto_d == "asynchronous":
+        sc.wait(f"dep{dep_num}")
+    else:
+        sc.wait_all()
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPDATE)
-def update(sc, dep_num):
+def update(sc, version_concerto_d, dep_num):
     sc.push_b(f"dep{dep_num}", "update")
     sc.push_b(f"dep{dep_num}", "deploy")
-    # sc.wait(f"dep{dep_num}")
-    sc.wait_all()
+    if version_concerto_d == "asynchronous":
+        sc.wait(f"dep{dep_num}")
+    else:
+        sc.wait_all()
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPTIME)
-def execute_reconf(dep_num, config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name):
-    sc = DepAssembly(dep_num, config_dict, waiting_rate, version_concerto_d, reconfiguration_name)
+def execute_reconf(dep_num, config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes):
+    sc = DepAssembly(dep_num, config_dict, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes)
     sc.set_verbosity(2)
     sc.time_manager.start(duration)
     if reconfiguration_name == "deploy":
-        deploy(sc, dep_num)
+        deploy(sc, version_concerto_d, dep_num)
     else:
-        update(sc, dep_num)
+        update(sc, version_concerto_d, dep_num)
     sc.finish_reconfiguration()
 
 
 if __name__ == '__main__':
-    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, dep_num = reconf_programs.initialize_reconfiguration()
-    execute_reconf(dep_num, config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name)
+    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num = reconf_programs.initialize_reconfiguration()
+    execute_reconf(dep_num, config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes)

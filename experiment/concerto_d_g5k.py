@@ -1,6 +1,8 @@
+import atexit
 import os
 import shutil
 import subprocess
+import time
 from os.path import exists
 from typing import List, Optional
 
@@ -145,7 +147,7 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
+def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
     command_args = []
     if environment == "remote":
         command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
@@ -159,6 +161,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(globals_variables.g5k_execution_params_dir)
     command_args.append(version_concerto_d)
     command_args.append(reconfiguration_name)
+    command_args.append(str(nb_concerto_nodes))
     if dep_num is not None:
         command_args.append(str(dep_num))  # If it's a dependency
 
@@ -166,13 +169,22 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     if environment == "remote":
         with en.actions(roles=role_node) as a:
-            a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
+            exit_code = a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
     else:
         cwd = os.getcwd()
         env_process = os.environ.copy()
         env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
         process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
-        process.wait()
+        exit_code = process.wait()
+
+    return exit_code
+
+
+def kill_subprocess_on_exit(subproc):
+    def _kill_subprocess():
+        subproc.kill()
+
+    return _kill_subprocess
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
@@ -184,7 +196,12 @@ def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
         en.run_command(launch_router_cmd, roles=roles_zenoh_router, background=True)
     else:
-        subprocess.Popen(launch_router_cmd, shell=True)  # Process is killed when main thread is killed
+        print("kill process")
+        kill_process = subprocess.Popen(kill_previous_routers_cmd, shell=True)
+        kill_process.wait()
+        time.sleep(.5)
+        print(f"process killed: {kill_process}")
+        subprocess.Popen(launch_router_cmd, shell=True)
 
 
 # TODO: refacto les dep/server names
@@ -216,7 +233,7 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
 
 
 def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, reconfiguration_name: str, environment):
-    src = f"/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+    src = f"/home/aomond/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     if environment == "remote":

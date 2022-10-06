@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import sched
 import shutil
 import sys
 import time
@@ -16,9 +17,14 @@ from execo_engine import sweep, ParamSweeper, HashableDict
 
 from experiment import globals_variables, concerto_d_g5k, log_experiment
 
-finished_nodes = []
 results = {}
 sleeping_times_nodes = {}
+DEFAULT_EVENT_PRIORITY = 0
+
+
+class EndOfExperimentException(BaseException):
+    def __init__(self):
+        super().__init__()
 
 
 def _execute_node_reconf_in_g5k(
@@ -26,31 +32,47 @@ def _execute_node_reconf_in_g5k(
         version_concerto_d,
         assembly_name,
         reconf_config_file_path,
-        duration,
         dep_num,
         node_num,
         waiting_rate,
         reconfiguration_name,
+        uptimes_node,
+        nb_concerto_nodes,
+        execution_start_time,
         environment
 ):
-    timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
+    finished_reconfiguration = False
+    round_reconf = 0
 
-    # Execute reconf
-    sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
-    concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, dep_num, waiting_rate, reconfiguration_name, environment)
-    sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
+    while not finished_reconfiguration and round_reconf < len(uptimes_node):
+        next_uptime, duration = uptimes_node[round_reconf]
+        sleeping_time = abs(execution_start_time + next_uptime - time.time())
+        log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
 
-    # Fetch and compute results
-    concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
-    _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir), reconfiguration_name)
+        time.sleep(sleeping_time)  # Wait until next execution
 
-    # Finish reconf for assembly name if its over
-    concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num, environment)
-    if exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
-        log_experiment.log.debug(f"Node {node_num} finished")
-        finished_nodes.append(node_num)
+        timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
 
+        # Execute reconf
+        sleeping_times_nodes[assembly_name]["total_sleeping_time"] += time.time() - sleeping_times_nodes[assembly_name]["current_down_time"]
+        exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
+        sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
+
+        # Fetch and compute results
+        concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
+        _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir), reconfiguration_name)
+
+        # Finish reconf for assembly name if its over
+        concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num, environment)
+        # if exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
+        if exit_code == 50:
+            log_experiment.log.debug(f"Node {node_num} finished")
+            finished_reconfiguration = True
+
+        round_reconf += 1
+
+    # execution_end_time = time.time()
 
 def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str, reconfiguration_name: str):
     with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}/{timestamp_log_file}") as f:
@@ -83,6 +105,8 @@ def _schedule_and_run_uptimes_from_config(
         reconfig_config_file_path,
         waiting_rate,
         reconfiguration_name,
+        nb_concerto_nodes,
+        expe_time_start,
         environment
 ):
     """
@@ -91,56 +115,88 @@ def _schedule_and_run_uptimes_from_config(
     """
     log = log_experiment.log
     log.debug("SCHEDULING START")
-    expe_time_start = time.time()
     all_threads = []
+    execution_start_time = time.time()
 
-    log.debug("UPTIMES TO TREAT")
-    for node_num, uptimes in enumerate(uptimes_nodes):
-        log.debug(f"node_num: {node_num}, uptimes: {uptimes}")
-    finished_nodes.clear()
+    for node_num in range(nb_concerto_nodes):
+        uptimes_node = uptimes_nodes[node_num]
+        dep_num = None if node_num == 0 else node_num - 1
+        assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+        thread = Thread(
+            target=_execute_node_reconf_in_g5k,
+            args=(
+                roles,
+                version_concerto_d,
+                assembly_name,
+                reconfig_config_file_path,
+                dep_num,
+                node_num,
+                waiting_rate,
+                reconfiguration_name,
+                uptimes_node,
+                nb_concerto_nodes - 1,
+                execution_start_time,
+                environment
+            ),
+            daemon=True
+        )
+        thread.start()
+        all_threads.append(thread)
 
-    while len(finished_nodes) != len(uptimes_nodes) and any(len(uptimes) > 0 for uptimes in uptimes_nodes):
-
-        # Find the next reconf to launch (closest in time)
-        node_num, next_uptime = _find_next_uptime(uptimes_nodes)
-        if node_num not in finished_nodes and next_uptime[0] <= time.time() - expe_time_start:
-
-            # Init the thread that will handle the reconf
-            duration = next_uptime[1]
-            dep_num = None if node_num == 0 else node_num - 1
-            assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-            thread = Thread(
-                target=_execute_node_reconf_in_g5k,
-                args=(
-                    roles,
-                    version_concerto_d,
-                    assembly_name,
-                    reconfig_config_file_path,
-                    duration,
-                    dep_num,
-                    node_num,
-                    waiting_rate,
-                    reconfiguration_name,
-                    environment
-                ),
-                daemon=True
-            )
-
-            # Start reconf and remove it from uptimes
-            thread.start()
-            all_threads.append(thread)
-            uptimes_nodes[node_num].remove(next_uptime)
-        else:
-            # Wait until its time to launch the reconf
-            n = (expe_time_start + next_uptime[0]) - time.time()
-            log.debug(f"sleeping {n} seconds")
-            time.sleep(n)
-
-    # Wait for non finished threads
     for th in all_threads:
         th.join()
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
+
+
+# def _schedule_and_run_uptimes_from_config(
+#         roles,
+#         version_concerto_d,
+#         uptimes_nodes: List,
+#         reconfig_config_file_path,
+#         waiting_rate,
+#         reconfiguration_name,
+#         expe_time_start,
+#         environment
+# ):
+#     """
+#     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
+#     simulate the awakening, the sleeping time and the reconfiguration of a node.
+#     """
+#     log = log_experiment.log
+#     log.debug("SCHEDULING START")
+#     all_events = []
+#     schedule = sched.scheduler()
+#     for node_num in range(len(uptimes_nodes)):
+#         dep_events = []
+#         for uptime, duration in uptimes_nodes[node_num]:
+#             dep_num = None if node_num == 0 else node_num - 1
+#             assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+#             e = schedule.enter(
+#                 uptime,
+#                 DEFAULT_EVENT_PRIORITY,
+#                 _execute_node_reconf_in_g5k,
+#                 argument=(
+#                     roles,
+#                     version_concerto_d,
+#                     assembly_name,
+#                     reconfig_config_file_path,
+#                     duration,
+#                     dep_num,
+#                     node_num,
+#                     waiting_rate,
+#                     reconfiguration_name,
+#                     environment
+#                 )
+#             )
+#             dep_events.append(e)
+#         all_events.append(dep_events)
+#
+#     try:
+#         schedule.run()
+#     except EndOfExperimentException:
+#         print("Move on to the next experiment")
+
 
 
 def _compute_end_reconfiguration_time(uptimes_nodes):
@@ -157,6 +213,7 @@ def _launch_experiment_with_params(
         expe_name,
         cluster,
         version_concerto_d,
+        nb_concerto_nodes,
         uptimes_file_name,
         transitions_times_file_name,
         waiting_rate,
@@ -173,18 +230,18 @@ def _launch_experiment_with_params(
     log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_params_dir} ---------------------")
     log.debug(f"------------ Remote execution expe dir on {globals_variables.g5k_execution_params_dir} ---------------------")
 
-    if version_concerto_d == "asynchronous" and environment == "remote":
-        concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
-
-    log.debug("------- Deploy zenoh routers -------")
-    max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
-    concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
+    if version_concerto_d == "asynchronous":
+        log.debug("------- Deploy zenoh routers -------")
+        if environment == "remote":
+            concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
+        max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
+        concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
 
     # Reset results logs
     for assembly_name in results.keys():
         results[assembly_name] = {}
 
-    nodes_names = ["server"] + [f"dep{i}" for i in range(len(uptimes_nodes) - 1)]
+    nodes_names = ["server"] + [f"dep{i}" for i in range(nb_concerto_nodes - 1)]
     for name in nodes_names:
         sleeping_times_nodes[name] = {
             "total_sleeping_time": 0,
@@ -194,6 +251,7 @@ def _launch_experiment_with_params(
     # Run experiment
     log.debug("------- Run experiment ----------")
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
+    expe_time_start = time.time()
     for reconfiguration_name in ["deploy", "update"]:
         _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
@@ -202,6 +260,8 @@ def _launch_experiment_with_params(
             transitions_times_file_name,
             waiting_rate,
             reconfiguration_name,
+            nb_concerto_nodes,
+            expe_time_start,
             environment
         )
 
@@ -263,11 +323,11 @@ def _save_experiment_results_in_file(version_concerto_name, cluster, transitions
     max_deploy_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"])
     max_deploy_time = max_deploy_values["total_event_deploy_duration"]
 
-    max_update_values = max(results.values(), key=lambda values: values["total_event_update_duration"])
-    max_update_time = max_update_values["total_event_update_duration"]
-
-    max_reconf_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"] + values["total_event_update_duration"])
-    max_reconf_time = max_reconf_values["total_event_deploy_duration"] + max_reconf_values["total_event_update_duration"]
+    # max_update_values = max(results.values(), key=lambda values: values["total_event_update_duration"])
+    # max_update_time = max_update_values["total_event_update_duration"]
+    #
+    # max_reconf_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"] + values["total_event_update_duration"])
+    # max_reconf_time = max_reconf_values["total_event_deploy_duration"] + max_reconf_values["total_event_update_duration"]
 
     max_sleeping_values = max(results.values(), key=lambda values: values["total_sleeping_time"])
     max_sleeping_time = max_sleeping_values["total_sleeping_time"]
@@ -277,8 +337,8 @@ def _save_experiment_results_in_file(version_concerto_name, cluster, transitions
 
     global_results.update({
         "max_deploy_time": round(max_deploy_time, 2),
-        "max_update_time": round(max_update_time, 2),
-        "max_reconf_time": round(max_reconf_time, 2),
+        # "max_update_time": round(max_update_time, 2),
+        # "max_reconf_time": round(max_reconf_time, 2),
         "max_sleeping_time": round(max_sleeping_time, 2),
         "max_execution_time": round(max_execution_time, 2),
     })
@@ -321,7 +381,7 @@ def _parse_sweeper_parameters(params_to_sweep):
     return sweeps
 
 
-def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_sweep, environment, roles_concerto_d):
+def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_nodes, params_to_sweep, environment, roles_concerto_d):
     log = log_experiment.log
     experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
     log.debug(f"Global expe dir: {experiment_results_dir}")
@@ -346,6 +406,7 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, params_to_swe
                 expe_name,
                 cluster,
                 version_concerto_d,
+                nb_concerto_nodes,
                 parameter["uptimes"],
                 parameter["transitions_times"],
                 parameter["waiting_rate"],

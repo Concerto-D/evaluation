@@ -30,6 +30,7 @@ if __name__ == '__main__':
     log_experiment.initialize_logging(expe_name)
     log = log_experiment.log
     roles_concerto_d = None
+    nb_concerto_nodes = expe_parameters["reservation_parameters"]["nb_concerto_nodes"]
     if environment == "remote":
         log.debug(f"Start {expe_name}")
         roles_concerto_d = infrastructure_reservation.create_reservation_for_concerto_d(
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     else:
         roles_concerto_d = {
             "server": Host("localhost"),
-            **{f"dep{dep_num}": Host("localhost") for dep_num in range(expe_parameters["reservation_parameters"]["nb_concerto_nodes"] - 1)},
+            **{f"dep{dep_num}": Host("localhost") for dep_num in range(nb_concerto_nodes - 1)},
             "zenoh_routers": Host("localhost")
         }
 
@@ -49,6 +50,7 @@ if __name__ == '__main__':
         expe_name,
         expe_parameters["reservation_parameters"]["cluster"],
         version_concerto_d,
+        nb_concerto_nodes,
         params_to_sweep,
         environment,
         roles_concerto_d
