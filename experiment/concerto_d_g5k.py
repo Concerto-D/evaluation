@@ -122,21 +122,17 @@ def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
 def initialize_expe_repositories(role_controller):
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     with en.actions(roles=role_controller) as a:
-        a.copy(src="~/.ssh/gitlab_concerto_d_deploy_key", dest=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key")
         a.git(dest=f"{home_dir}/concerto-decentralized",
-              repo=f"git@gitlab.inria.fr:aomond-imt/concerto-d/concerto-decentralized.git",
-              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
               accept_hostkey=True)
         a.pip(chdir=f"{home_dir}/concerto-decentralized",
               requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
               virtualenv=f"{home_dir}/concerto-decentralized/venv")
         a.git(dest=f"{home_dir}/evaluation",
-              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/evaluation.git",
-              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
               accept_hostkey=True)
         a.git(dest=f"{home_dir}/experiment_files",
-              repo="git@gitlab.inria.fr:aomond-imt/concerto-d/experiment_files.git",
-              key_file=f"{home_dir}/.ssh/gitlab_concerto_d_deploy_key",
+              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
               accept_hostkey=True)
 
 
@@ -233,7 +229,7 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
 
 
 def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, reconfiguration_name: str, environment):
-    src = f"/home/aomond/tmp/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+    src = f"{globals_variables.g5k_execution_params_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     if environment == "remote":
