@@ -323,11 +323,11 @@ def _save_experiment_results_in_file(version_concerto_name, cluster, transitions
     max_deploy_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"])
     max_deploy_time = max_deploy_values["total_event_deploy_duration"]
 
-    # max_update_values = max(results.values(), key=lambda values: values["total_event_update_duration"])
-    # max_update_time = max_update_values["total_event_update_duration"]
-    #
-    # max_reconf_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"] + values["total_event_update_duration"])
-    # max_reconf_time = max_reconf_values["total_event_deploy_duration"] + max_reconf_values["total_event_update_duration"]
+    max_update_values = max(results.values(), key=lambda values: values["total_event_update_duration"])
+    max_update_time = max_update_values["total_event_update_duration"]
+
+    max_reconf_values = max(results.values(), key=lambda values: values["total_event_deploy_duration"] + values["total_event_update_duration"])
+    max_reconf_time = max_reconf_values["total_event_deploy_duration"] + max_reconf_values["total_event_update_duration"]
 
     max_sleeping_values = max(results.values(), key=lambda values: values["total_sleeping_time"])
     max_sleeping_time = max_sleeping_values["total_sleeping_time"]
@@ -337,8 +337,8 @@ def _save_experiment_results_in_file(version_concerto_name, cluster, transitions
 
     global_results.update({
         "max_deploy_time": round(max_deploy_time, 2),
-        # "max_update_time": round(max_update_time, 2),
-        # "max_reconf_time": round(max_reconf_time, 2),
+        "max_update_time": round(max_update_time, 2),
+        "max_reconf_time": round(max_reconf_time, 2),
         "max_sleeping_time": round(max_sleeping_time, 2),
         "max_execution_time": round(max_execution_time, 2),
     })

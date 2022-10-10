@@ -28,32 +28,14 @@ reservation_parameters:
 #     before going back to sleep.
 # Below is an example of a list of experiments.
 sweeper_parameters:
+#  uptimes: ["uptimes-60-30-12-1-1-1.json"]
   uptimes: ["uptimes-60-30-12-0_5-0_6.json"]
-  transitions_times: ["transitions_times-1-30-deps12-0.json"]
+#  transitions_times: ["mock_transitions_times_1_sec_for_testing.json"]
+  transitions_times: ["transitions_times-1-30-deps12-0.json", "transitions_times-1-30-deps12-1.json"]
   waiting_rate: [1]
-  id: [1,2]
+  id: [1, 2]
 #sweeper_parameters:
 # - uptimes: "uptimes-60-30-12-1-1-1.json"
 #   transitions_times: "transitions_times-1-30-deps12-0.json"
 #   waiting_rate: 1
 #   id: 3
-# - uptimes: "uptimes-60-30-12-1-1-1.json"
-#   transitions_times: "mock_transitions_times_1_sec_for_testing.json"
-#   waiting_rate: 1
-#   id: 1
-# - uptimes: "uptimes-60-30-12-1-1-1.json"
-#   transitions_times: "mock_transitions_times_1_sec_for_testing.json"
-#   waiting_rate: 1
-#   id: 2
-# - uptimes: "uptimes-60-30-12-1-1-1.json"
-#   transitions_times: "transitions_times-1-30-deps12-0.json"
-#   waiting_rate: 1
-#   id: 3
-# - uptimes: "uptimes-60-30-12-1-1-1.json"
-#   transitions_times: "transitions_times-1-30-deps12-0.json"
-#   waiting_rate: 1
-#   id: 4
-# - uptimes: "uptimes-60-30-12-1-1-1.json"
-#   transitions_times: "transitions_times-1-30-deps12-0.json"
-#   waiting_rate: 1
-#   id: 5
