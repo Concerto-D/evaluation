@@ -12,8 +12,8 @@ global_parameters:
 # Infrastructure reservation. The synthetic use-case is executed on Grid5000 nodes that need to be
 # reserved. The execution can happens either on a controller node or on the frontend directly.
 reservation_parameters:
-  job_name_concerto: "concerto-d-sync"    # Name of the reservation for concerto nodes
-  job_name_controller: "controller-sync"  # Name of the reservation for controller node
+  job_name_concerto: "concerto-d-async"    # Name of the reservation for concerto nodes
+  job_name_controller: "controller-async"  # Name of the reservation for controller node
   walltime: "14:00:00"                     # Duration of the reservation
   reservation: ""                         # e.g.: "2022-09-08 19:00:00", to postpone the reservation to a future date
   nb_concerto_nodes: 13                   # Number of nodes that match the synthetic use case (here: 12 deps and 1 server)
