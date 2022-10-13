@@ -164,8 +164,15 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_str = " ".join(command_args)
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     if environment == "remote":
-        with en.actions(roles=role_node) as a:
-            exit_code = a.shell(chdir=f"{home_dir}/concerto-decentralized", command=command_str)
+        result = en.run_command(roles=role_node, chdir=f"{home_dir}/concerto-decentralized", command=command_str, on_error_continue=True)
+
+        # There is always one role, so run_command returns always a list with 1 element
+        result_dict = result[0].to_dict()
+        exit_code = result_dict["rc"]
+        if exit_code not in [0, 50]:
+            raise Exception(result_dict["stderr"])
+
+
     else:
         cwd = os.getcwd()
         env_process = os.environ.copy()

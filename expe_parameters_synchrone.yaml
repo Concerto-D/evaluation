@@ -1,10 +1,10 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-20-30-synchrone-T1"      # The experiment name, has to be unique
+  expe_name: "test-code-retour-ansible"      # The experiment name, has to be unique
   environment: "remote"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
-  all_experiments_results_dir: "/home/anomond/concerto-d-projects"
-#  all_experiments_results_dir: "/home/anomond"  # Where results are computed
+#  all_experiments_results_dir: "/home/anomond/concerto-d-projects"
+  all_experiments_results_dir: "/home/aomond/concerto-d-projects"  # Where results are computed
   g5k_executions_expe_logs_dir: "/home/anomond/concerto-d-projects"
 #  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
 
@@ -12,13 +12,13 @@ global_parameters:
 # Infrastructure reservation. The synthetic use-case is executed on Grid5000 nodes that need to be
 # reserved. The execution can happens either on a controller node or on the frontend directly.
 reservation_parameters:
-  job_name_concerto: "concerto-d"    # Name of the reservation for concerto nodes
-  job_name_controller: "controller"  # Name of the reservation for controller node
+  job_name_concerto: "concerto-d-sync-2"    # Name of the reservation for concerto nodes
+  job_name_controller: "controller-sync-2"  # Name of the reservation for controller node
   walltime: "3:00:00"                     # Duration of the reservation
   reservation: ""                         # e.g.: "2022-09-08 19:00:00", to postpone the reservation to a future date
   nb_concerto_nodes: 13                   # Number of nodes that match the synthetic use case (here: 12 deps and 1 server)
   nb_zenoh_routers: 0                     # 0 if synchronous version, 1 if asynchronous
-  cluster: "uvb"                          # Which g5k cluster to reserve nodes
+  cluster: "ecotype"                          # Which g5k cluster to reserve nodes
 
 
 # Synthetic use case parameters:
@@ -30,12 +30,12 @@ reservation_parameters:
 #     before going back to sleep.
 # Below is an example of a list of experiments.
 sweeper_parameters:
-#  uptimes: ["uptimes-60-30-12-1-1-1.json"]
-  uptimes: ["uptimes-60-30-12-0_2-0_3.json"]
+  uptimes: ["uptimes-60-30-12-1-1-1.json"]
+#  uptimes: ["uptimes-60-30-12-0_2-0_3.json"]
 #  transitions_times: ["mock_transitions_times_1_sec_for_testing.json"]
   transitions_times: ["transitions_times-1-30-deps12-1.json"]
   waiting_rate: [1]
-  id: [1, 2, 3, 4]
+  id: [1]
 #sweeper_parameters:
 # - uptimes: "uptimes-60-30-12-1-1-1.json"
 #   transitions_times: "transitions_times-1-30-deps12-0.json"

@@ -41,17 +41,13 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         if k != "concerto_d":
             print(f"{k}: {v[0].address}")
     # Initialisation experiment repositories
-    log.debug("Reserve the deployment node")
-    deployment_node, networks, provider_deployment = concerto_d_g5k.reserve_node_for_controller("deployment", cluster, "00:10:00")
     log.debug("Initialise repositories")
-    concerto_d_g5k.initialize_expe_repositories(deployment_node["controller"])
+    concerto_d_g5k.initialize_expe_repositories(roles_concerto_d["server"])
     if version_concerto_d == "synchronous":
         log.debug("Synchronous version: creating inventory")
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
-        concerto_d_g5k.put_file(deployment_node["controller"], CREATED_INVENTORY_PATH, CONCERTO_D_INVENTORY_PATH)
-    log.debug("Destroy deployment node")
-    provider_deployment.destroy()
+        concerto_d_g5k.put_file(roles_concerto_d["server"], CREATED_INVENTORY_PATH, CONCERTO_D_INVENTORY_PATH)
 
     return roles_concerto_d
 

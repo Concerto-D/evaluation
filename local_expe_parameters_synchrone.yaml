@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "expe-test-wait-waitall-sync"      # The experiment name, has to be unique
+  expe_name: "validation-20-30-synchronous"      # The experiment name, has to be unique
   environment: "local"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
   all_experiments_results_dir: "/home/aomond/concerto-d-projects"
@@ -29,11 +29,11 @@ reservation_parameters:
 # Below is an example of a list of experiments.
 sweeper_parameters:
 #  uptimes: ["uptimes-60-30-12-1-1-1.json"]
-  uptimes: ["uptimes-60-30-12-0_5-0_6.json"]
+  uptimes: ["uptimes-60-30-12-0_2-0_3.json"]
 #  transitions_times: ["mock_transitions_times_1_sec_for_testing.json"]
-  transitions_times: ["transitions_times-1-30-deps12-0.json", "transitions_times-1-30-deps12-1.json"]
+  transitions_times: ["transitions_times-1-30-deps12-1.json"]
   waiting_rate: [1]
-  id: [1, 2]
+  id: [2,3,4,5]
 #sweeper_parameters:
 # - uptimes: "uptimes-60-30-12-1-1-1.json"
 #   transitions_times: "transitions_times-1-30-deps12-0.json"
