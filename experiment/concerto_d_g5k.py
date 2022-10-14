@@ -137,10 +137,19 @@ def initialize_expe_repositories(role_controller):
 
 
 def install_zenoh_router(roles_zenoh_router: List):
+    """
+    Install the 0.5 version of zenoh router
+    """
     with en.actions(roles=roles_zenoh_router) as a:
-        a.apt_repository(repo="deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /", state="present")
-        a.apt(name="zenoh", update_cache="yes")
-        log_experiment.log.debug(a.results)
+        a.file(path="/tmp/zenoh_download", state="directory")
+        a.unarchive(remote_src="yes",
+                    src=f"https://download.eclipse.org/zenoh/zenoh/0.5.0-beta.9/x86_64-unknown-linux-gnu/zenoh-0.5.0-beta.9-x86_64-unknown-linux-gnu.zip",
+                    dest="/tmp/zenoh_download")
+
+    en.run_command(command="mv /tmp/zenoh_download/zenohd /usr/bin/zenohd", roles=roles_zenoh_router)
+    en.run_command(command="mv /tmp/zenoh_download/libzplugin_rest.so /usr/lib/libzplugin_rest.so", roles=roles_zenoh_router)
+    en.run_command(command="mv /tmp/zenoh_download/libzplugin_storages.so /usr/lib/libzplugin_storages.so", roles=roles_zenoh_router)
+    log_experiment.log.debug(a.results)
 
 
 def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
@@ -171,7 +180,6 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         exit_code = result_dict["rc"]
         if exit_code not in [0, 50]:
             raise Exception(result_dict["stderr"])
-
 
     else:
         cwd = os.getcwd()
