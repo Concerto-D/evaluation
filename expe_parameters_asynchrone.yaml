@@ -3,7 +3,7 @@ global_parameters:
   expe_name: "remote-validation-0_2-0_3-asynchronous"      # The experiment name, has to be unique
   environment: "remote"
   version_concerto_d: "asynchronous"  # synchronous or asynchronous
-  all_experiments_results_dir: "/home/aomond/concerto-d-projects"
+  all_experiments_results_dir: "/home/anomond/concerto-d-projects"
 #  all_experiments_results_dir: "/home/aomond"  # Where results are computed
   g5k_executions_expe_logs_dir: "/home/anomond/concerto-d-projects"
 #  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
