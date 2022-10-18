@@ -235,7 +235,7 @@ def _launch_experiment_with_params(
     with open(f"{globals_variables.local_execution_params_dir}/execution_metadata.yaml", "w") as f:
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
-    compute_results.compute_from_expe_dir(globals_variables.local_execution_params_dir)
+    compute_results.compute_from_expe_dir(f"experiment-{expe_name}-dir")
 
     log.debug("------ End of experiment ---------")
 

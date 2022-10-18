@@ -49,7 +49,8 @@ def compute_from_expe_dir(expe_dir: str):
                 loaded_metadata["expe_parameters"]["version_concerto_name"],
                 loaded_metadata["expe_parameters"]["transitions_times_file_name"],
                 loaded_metadata["expe_parameters"]["uptimes_file_name"],
-                loaded_metadata["expe_parameters"]["waiting_rate"]
+                loaded_metadata["expe_parameters"]["waiting_rate"],
+                execution_dir
             )
 
             results["expe_parameters"] = loaded_metadata["expe_parameters"]
@@ -79,7 +80,7 @@ def _compute_execution_metrics(current_dir: str, reconfiguration_name: str, deta
             details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
 
 
-def _build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate):
+def _build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, execution_dir):
     file_name = "results"
     file_name += "_synchronous" if version_concerto_name == "synchronous" else "_asynchronous"
 
@@ -97,7 +98,7 @@ def _build_save_results_file_name(version_concerto_name, transitions_times_file_
     if "0_5-0_6" in uptimes_file_name:
         file_name += "_perc-50-60"
 
-    file_name += f"_waiting_rate-{waiting_rate}.yaml"
+    file_name += f"_waiting_rate-{waiting_rate}-{execution_dir}.yaml"
 
     return file_name
 
