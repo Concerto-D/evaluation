@@ -179,7 +179,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         result_dict = result[0].to_dict()
         exit_code = result_dict["rc"]
         if exit_code not in [0, 50]:
-            raise Exception(result_dict["stderr"])
+            raise Exception(result_dict)
 
     else:
         cwd = os.getcwd()

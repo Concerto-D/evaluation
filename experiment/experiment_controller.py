@@ -59,20 +59,17 @@ def _execute_node_reconf_in_g5k(
         exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
         sleeping_times_nodes[assembly_name]["current_down_time"] = time.time()
 
-        # Fetch and compute results
+        # Fetch results
         concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
         _compute_execution_metrics(assembly_name, concerto_d_g5k.build_times_log_path(assembly_name, dep_num, timestamp_log_dir), reconfiguration_name)
 
         # Finish reconf for assembly name if its over
-        concerto_d_g5k.fetch_finished_reconfiguration_file(roles[assembly_name], assembly_name, dep_num, environment)
-        # if exists(f"{globals_variables.local_execution_params_dir}/{concerto_d_g5k.build_finished_reconfiguration_path(assembly_name, dep_num)}"):
         if exit_code == 50:
             log_experiment.log.debug(f"Node {node_num} finished")
             finished_reconfiguration = True
 
         round_reconf += 1
 
-    # execution_end_time = time.time()
 
 def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str, reconfiguration_name: str):
     with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}/{timestamp_log_file}") as f:
@@ -149,56 +146,6 @@ def _schedule_and_run_uptimes_from_config(
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
 
 
-# def _schedule_and_run_uptimes_from_config(
-#         roles,
-#         version_concerto_d,
-#         uptimes_nodes: List,
-#         reconfig_config_file_path,
-#         waiting_rate,
-#         reconfiguration_name,
-#         expe_time_start,
-#         environment
-# ):
-#     """
-#     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
-#     simulate the awakening, the sleeping time and the reconfiguration of a node.
-#     """
-#     log = log_experiment.log
-#     log.debug("SCHEDULING START")
-#     all_events = []
-#     schedule = sched.scheduler()
-#     for node_num in range(len(uptimes_nodes)):
-#         dep_events = []
-#         for uptime, duration in uptimes_nodes[node_num]:
-#             dep_num = None if node_num == 0 else node_num - 1
-#             assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-#             e = schedule.enter(
-#                 uptime,
-#                 DEFAULT_EVENT_PRIORITY,
-#                 _execute_node_reconf_in_g5k,
-#                 argument=(
-#                     roles,
-#                     version_concerto_d,
-#                     assembly_name,
-#                     reconfig_config_file_path,
-#                     duration,
-#                     dep_num,
-#                     node_num,
-#                     waiting_rate,
-#                     reconfiguration_name,
-#                     environment
-#                 )
-#             )
-#             dep_events.append(e)
-#         all_events.append(dep_events)
-#
-#     try:
-#         schedule.run()
-#     except EndOfExperimentException:
-#         print("Move on to the next experiment")
-
-
-
 def _compute_end_reconfiguration_time(uptimes_nodes):
     max_uptime_value = 0
     for uptimes_node in uptimes_nodes:
@@ -230,6 +177,7 @@ def _launch_experiment_with_params(
     log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_params_dir} ---------------------")
     log.debug(f"------------ Remote execution expe dir on {globals_variables.g5k_execution_params_dir} ---------------------")
 
+    # If asynchronous, deploy zenoh router
     if version_concerto_d == "asynchronous":
         log.debug("------- Deploy zenoh routers -------")
         if environment == "remote":
