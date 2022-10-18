@@ -11,7 +11,7 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper, HashableDict
 
-from experiment import globals_variables, concerto_d_g5k, log_experiment
+from experiment import globals_variables, concerto_d_g5k, log_experiment, compute_results
 
 results = {}
 sleeping_times_nodes = {}
@@ -234,6 +234,8 @@ def _launch_experiment_with_params(
     }
     with open(f"{globals_variables.local_execution_params_dir}/execution_metadata.yaml", "w") as f:
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
+
+    compute_results.compute_from_expe_dir(globals_variables.local_execution_params_dir)
 
     log.debug("------ End of experiment ---------")
 

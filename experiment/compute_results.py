@@ -56,6 +56,8 @@ def compute_from_expe_dir(expe_dir: str):
             results["global_results"] = global_results
             results["details_assemblies_results"] = sorted_details_assemblies_results
             results["expe_details"] = loaded_metadata["expe_details"]
+
+            os.makedirs(target_dir, exist_ok=True)
             with open(f"{target_dir}/{experiment_results_file_name}", "w") as f:
                 yaml.dump(results, f, sort_keys=False)
 
