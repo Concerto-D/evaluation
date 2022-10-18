@@ -26,8 +26,8 @@ def compute_from_expe_dir(expe_dir: str):
             # Create a dict results with all assemblies names
             details_assemblies_results = {
                 assembly_name: {"deploy": {}, "update": {}} for assembly_name in
-                # ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
-                ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6"]
+                ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
+                # ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6"]
             }
 
             # For each reconfiguration name
@@ -111,20 +111,19 @@ def _compute_global_results(details_assemblies_results):
     max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"] + values["update"]["total_event_update_duration"])
     max_reconf_time = max_reconf_values["deploy"]["total_event_deploy_duration"] + max_reconf_values["update"]["total_event_update_duration"]
 
-    # max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_sleeping_time"] + values["update"]["total_sleeping_time"])
-    # max_sleeping_time = max_sleeping_values["deploy"]["total_sleeping_time"] + max_sleeping_values["update"]["total_sleeping_time"]
+    max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"])
+    max_sleeping_time = max_sleeping_values["deploy"]["total_event_sleeping_duration"] + max_sleeping_values["update"]["total_event_sleeping_duration"]
 
-    # max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["total_sleeping_time"] + values["total_event_uptime_duration"])
-    # max_execution_time = max_execution_values["total_sleeping_time"] + max_execution_values["total_event_uptime_duration"]
-
-    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_uptime_duration"] + values["update"]["total_event_uptime_duration"])
-    max_execution_time = max_execution_values["deploy"]["total_event_uptime_duration"] + max_execution_values["update"]["total_event_uptime_duration"]
+    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"]
+                                                                                       + values["deploy"]["total_event_uptime_duration"] + values["update"]["total_event_uptime_duration"])
+    max_execution_time = (max_execution_values["deploy"]["total_event_sleeping_duration"] + max_execution_values["update"]["total_event_sleeping_duration"]
+                         + max_execution_values["deploy"]["total_event_uptime_duration"] + max_execution_values["update"]["total_event_uptime_duration"])
 
     global_results.update({
         "max_deploy_time": round(max_deploy_time, 2),
         "max_update_time": round(max_update_time, 2),
         "max_reconf_time": round(max_reconf_time, 2),
-        # "max_sleeping_time": round(max_sleeping_time, 2),
+        "max_sleeping_time": round(max_sleeping_time, 2),
         "max_execution_time": round(max_execution_time, 2),
     })
 
@@ -132,4 +131,4 @@ def _compute_global_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    compute_from_expe_dir("experiment-validation-0_5-0_6-asynchronous-dir")
+    compute_from_expe_dir("experiment-test-logged-sleep-times-dir")
