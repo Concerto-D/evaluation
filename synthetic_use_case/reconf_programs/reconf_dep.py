@@ -27,9 +27,9 @@ def execute_reconf(dep_num, config_dict, duration, waiting_rate, version_concert
     sc.set_verbosity(2)
     sc.time_manager.start(duration)
     if reconfiguration_name == "deploy":
-        deploy(sc, version_concerto_d, dep_num)
+        deploy(sc, dep_num)
     else:
-        update(sc, version_concerto_d, dep_num)
+        update(sc, dep_num)
 
     return sc
 
