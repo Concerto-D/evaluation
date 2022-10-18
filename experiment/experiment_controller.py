@@ -110,7 +110,6 @@ def _schedule_and_run_uptimes_from_config(
         waiting_rate,
         reconfiguration_name,
         nb_concerto_nodes,
-        expe_time_start,
         environment
 ):
     """
@@ -195,7 +194,6 @@ def _launch_experiment_with_params(
     # Run experiment
     log.debug("------- Run experiment ----------")
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
-    expe_time_start = time.time()
     for reconfiguration_name in ["deploy", "update"]:
         _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
@@ -205,7 +203,6 @@ def _launch_experiment_with_params(
             waiting_rate,
             reconfiguration_name,
             nb_concerto_nodes,
-            expe_time_start,
             environment
         )
 
