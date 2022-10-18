@@ -21,7 +21,6 @@ def compute_from_expe_dir(expe_dir: str):
             results = {}
             with open(metadata_file_path) as f:
                 loaded_metadata = yaml.safe_load(f)
-            results["metadata"] = loaded_metadata
 
             # Create a dict results with all assemblies names
             details_assemblies_results = {
@@ -44,18 +43,19 @@ def compute_from_expe_dir(expe_dir: str):
 
             # Compute metric of interest
             global_results = _compute_global_results(sorted_details_assemblies_results)
-
+            global_results["global_finished_reconf"] = loaded_metadata["expe_details"]["global_finished_reconf"]
             # Save file in target directory
             experiment_results_file_name = _build_save_results_file_name(
-                loaded_metadata["version_concerto_name"],
-                loaded_metadata["transitions_times_file_name"],
-                loaded_metadata["uptimes_file_name"],
-                loaded_metadata["waiting_rate"]
+                loaded_metadata["expe_parameters"]["version_concerto_name"],
+                loaded_metadata["expe_parameters"]["transitions_times_file_name"],
+                loaded_metadata["expe_parameters"]["uptimes_file_name"],
+                loaded_metadata["expe_parameters"]["waiting_rate"]
             )
 
-            results.update({"global_results": global_results})
-            results.update({"details_assemblies_results": sorted_details_assemblies_results})
-
+            results["expe_parameters"] = loaded_metadata["expe_parameters"]
+            results["global_results"] = global_results
+            results["details_assemblies_results"] = sorted_details_assemblies_results
+            results["expe_details"] = loaded_metadata["expe_details"]
             with open(f"{target_dir}/{experiment_results_file_name}", "w") as f:
                 yaml.dump(results, f, sort_keys=False)
 

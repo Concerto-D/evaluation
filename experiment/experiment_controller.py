@@ -1,15 +1,11 @@
 import json
 import math
 import os
-import sched
-import shutil
-import sys
 import time
 import traceback
+from concurrent import futures
 from datetime import datetime
-from os.path import exists
 from pathlib import Path
-from threading import Thread
 from typing import List
 
 import yaml
@@ -77,6 +73,8 @@ def _execute_node_reconf_in_g5k(
 
         round_reconf += 1
 
+    return finished_reconfiguration, round_reconf, node_num
+
 
 def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str, reconfiguration_name: str):
     with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}/{timestamp_log_file}") as f:
@@ -118,16 +116,17 @@ def _schedule_and_run_uptimes_from_config(
     """
     log = log_experiment.log
     log.debug("SCHEDULING START")
-    all_threads = []
     execution_start_time = time.time()
 
-    for node_num in range(nb_concerto_nodes):
-        uptimes_node = uptimes_nodes[node_num]
-        dep_num = None if node_num == 0 else node_num - 1
-        assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-        thread = Thread(
-            target=_execute_node_reconf_in_g5k,
-            args=(
+    with futures.ThreadPoolExecutor(max_workers=nb_concerto_nodes) as executor:
+        futures_to_proceed = []
+        finished_reconfs = {}
+        for node_num in range(nb_concerto_nodes):
+            uptimes_node = uptimes_nodes[node_num]
+            dep_num = None if node_num == 0 else node_num - 1
+            assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+            exec_future = executor.submit(
+                _execute_node_reconf_in_g5k,
                 roles,
                 version_concerto_d,
                 assembly_name,
@@ -140,16 +139,22 @@ def _schedule_and_run_uptimes_from_config(
                 nb_concerto_nodes - 1,
                 execution_start_time,
                 environment
-            ),
-            daemon=True
-        )
-        thread.start()
-        all_threads.append(thread)
-
-    for th in all_threads:
-        th.join()
+            )
+            futures_to_proceed.append(exec_future)
+        for future in futures.as_completed(futures_to_proceed):
+            try:
+                finished_reconf, rounds_reconf, future_node_num = future.result()
+                future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
+                finished_reconfs[future_assembly_name] = {
+                    "finished_reconfiguration": finished_reconf,
+                    "rounds_reconf": rounds_reconf,
+                }
+            except:
+                log.error(future.exception())
+                raise Exception
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
+    return finished_reconfs
 
 
 def _compute_end_reconfiguration_time(uptimes_nodes):
@@ -194,8 +199,9 @@ def _launch_experiment_with_params(
     # Run experiment
     log.debug("------- Run experiment ----------")
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
+    finished_reconfs_by_reconf_name = {}
     for reconfiguration_name in ["deploy", "update"]:
-        _schedule_and_run_uptimes_from_config(
+        finished_reconfs = _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
             version_concerto_d,
             uptimes_nodes_list,
@@ -205,17 +211,29 @@ def _launch_experiment_with_params(
             nb_concerto_nodes,
             environment
         )
+        finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
+
+    finished_reconf = (
+            all(finished_reconfs_by_reconf_name["deploy"].values()) and
+            all(finished_reconfs_by_reconf_name["update"].values())
+    )
 
     # Save expe metadata
     metadata_expe = {
-        "version_concerto_name": version_concerto_d,
-        "transitions_times_file_name": transitions_times_file_name,
-        "uptimes_file_name": uptimes_file_name,
-        "waiting_rate": waiting_rate,
-        "cluster": cluster,
+        "expe_parameters": {
+            "version_concerto_name": version_concerto_d,
+            "transitions_times_file_name": transitions_times_file_name,
+            "uptimes_file_name": uptimes_file_name,
+            "waiting_rate": waiting_rate,
+            "cluster": cluster,
+        },
+        "expe_details": {
+            "global_finished_reconf": finished_reconf,
+            "details": finished_reconfs_by_reconf_name
+        }
     }
     with open(f"{globals_variables.local_execution_params_dir}/execution_metadata.yaml", "w") as f:
-        yaml.safe_dump(metadata_expe, f)
+        yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
     log.debug("------ End of experiment ---------")
 
