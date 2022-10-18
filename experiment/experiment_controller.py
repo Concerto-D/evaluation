@@ -41,6 +41,7 @@ def _execute_node_reconf_in_g5k(
     os.makedirs(logs_assemblies_file, exist_ok=True)
     finished_reconfiguration = False
     round_reconf = 0
+    exit_code = 0  # Init exit code to 0 for algo
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node):
         # Find next uptime
@@ -48,11 +49,13 @@ def _execute_node_reconf_in_g5k(
         sleeping_time = abs(execution_start_time + next_uptime - time.time())
         log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
 
+        key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
+
         # Sleep until the uptime
         sleep_times = {}
-        sleep_times["event_sleeping"] = {"start": time.time()}
+        sleep_times[key_sleep_time] = {"start": time.time()}
         time.sleep(sleeping_time)  # Wait until next execution
-        sleep_times["event_sleeping"]["end"] = time.time()
+        sleep_times[key_sleep_time]["end"] = time.time()
 
         # Save metrics
         with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:

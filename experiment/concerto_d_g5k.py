@@ -178,7 +178,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         # There is always one role, so run_command returns always a list with 1 element
         result_dict = result[0].to_dict()
         exit_code = result_dict["rc"]
-        if exit_code not in [0, 50]:
+        if exit_code not in [0, 5, 50]:
             raise Exception(result_dict)
 
     else:
