@@ -1,10 +1,10 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "remote-validation-20-30-synchronous-dir"      # The experiment name, has to be unique
+  expe_name: "remote-validation-1-1-synchronous-dir"      # The experiment name, has to be unique
   environment: "remote"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
 #  all_experiments_results_dir: "/home/anomond/concerto-d-projects"
-  all_experiments_results_dir: "/home/anomond/concerto-d-projects"  # Where results are computed
+  all_experiments_results_dir: "/home/aomond/concerto-d-projects"  # Where results are computed
   g5k_executions_expe_logs_dir: "/home/anomond/concerto-d-projects"
 #  g5k_executions_expe_logs_dir: "/home/anomond"  # Where the logs of the executions are created
 
@@ -31,7 +31,7 @@ reservation_parameters:
 # Below is an example of a list of experiments.
 sweeper_parameters:
 #  uptimes: ["uptimes-60-30-12-0_5-0_6.json"]
-  uptimes: ["uptimes-60-30-12-0_2-0_3.json"]
+  uptimes: ["uptimes-60-30-12-1-1-1.json"]
 #  transitions_times: ["mock_transitions_times_1_sec_for_testing.json"]
   transitions_times: ["transitions_times-1-30-deps12-0.json", "transitions_times-1-30-deps12-1.json"]
   waiting_rate: [1]

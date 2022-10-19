@@ -68,7 +68,7 @@ def _execute_node_reconf_in_g5k(
 
         # Fetch results
         concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
-
+        print(f"got here with exit code {exit_code}")
         # Finish reconf for assembly name if its over
         if exit_code == 50:
             log_experiment.log.debug(f"Node {node_num} finished")
@@ -154,6 +154,7 @@ def _schedule_and_run_uptimes_from_config(
                 }
             except:
                 log.error(future.exception())
+                print("exception was raised for future")
                 raise Exception
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
