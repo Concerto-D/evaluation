@@ -152,10 +152,10 @@ def _schedule_and_run_uptimes_from_config(
                     "finished_reconfiguration": finished_reconf,
                     "rounds_reconf": rounds_reconf,
                 }
-            except:
+            except Exception as e:
                 log.error(future.exception())
                 print("exception was raised for future")
-                raise Exception
+                raise e
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs

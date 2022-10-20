@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "test-logged-sleep-times"      # The experiment name, has to be unique
+  expe_name: "test-logged-sleep-times-2"      # The experiment name, has to be unique
   environment: "local"
   version_concerto_d: "synchronous"  # synchronous or asynchronous
   all_experiments_results_dir: "/home/aomond/concerto-d-projects"

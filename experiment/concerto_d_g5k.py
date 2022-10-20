@@ -1,4 +1,3 @@
-import atexit
 import os
 import shutil
 import subprocess
@@ -140,25 +139,30 @@ def install_zenoh_router(roles_zenoh_router: List):
     """
     Install the 0.5 version of zenoh router
     """
+    log = log_experiment.log
     with en.actions(roles=roles_zenoh_router) as a:
+        log.debug("Create tmp zenoh_download dir")
         a.file(path="/tmp/zenoh_download", state="directory")
+        log.debug("Download and unzip zenoh files")
         a.unarchive(remote_src="yes",
                     src=f"https://download.eclipse.org/zenoh/zenoh/0.5.0-beta.9/x86_64-unknown-linux-gnu/zenoh-0.5.0-beta.9-x86_64-unknown-linux-gnu.zip",
                     dest="/tmp/zenoh_download")
-
+    log.debug("Move each file to the correct destination (manual installation)")
     en.run_command(command="mv /tmp/zenoh_download/zenohd /usr/bin/zenohd", roles=roles_zenoh_router)
     en.run_command(command="mv /tmp/zenoh_download/libzplugin_rest.so /usr/lib/libzplugin_rest.so", roles=roles_zenoh_router)
     en.run_command(command="mv /tmp/zenoh_download/libzplugin_storages.so /usr/lib/libzplugin_storages.so", roles=roles_zenoh_router)
-    log_experiment.log.debug(a.results)
+    log.debug(a.results)
 
 
 def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
     command_args = []
+    home_dir = globals_variables.g5k_executions_expe_logs_dir
     if environment == "remote":
-        command_args.append(f"PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/../evaluation")  # Set PYTHONPATH (equivalent of source set_python_path.sh)
-    command_args.append("venv/bin/python3")               # Execute inside the python virtualenv
+        command_args.append(f"cd {home_dir}/concerto-decentralized;")
+        command_args.append(f"export PYTHONPATH=$PYTHONPATH:{home_dir}/evaluation;")
+    command_args.append(f"{home_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
     assembly_name = "server" if dep_num is None else "dep"
-    command_args.append(f"../evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
+    command_args.append(f"{home_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
@@ -171,17 +175,9 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
-    home_dir = globals_variables.g5k_executions_expe_logs_dir
     if environment == "remote":
-        result = en.run_command(roles=role_node, chdir=f"{home_dir}/concerto-decentralized", command=command_str, on_error_continue=True)
-        # There is always one role, so run_command returns always a list with 1 element
-        result_dict = result[0].to_dict()
-        del result_dict["stdout"]
-        exit_code = result_dict["rc"]
-        print(f"type exit code: {type(exit_code)}")
-        if exit_code not in [0, 5, 50]:
-            print("raising exception")
-            raise Exception(result_dict["msg"])
+        process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
+        exit_code = process.wait()
 
     else:
         cwd = os.getcwd()
@@ -189,6 +185,9 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
         process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
         exit_code = process.wait()
+
+    if exit_code not in [0, 5, 50]:
+        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
 
     return exit_code
 
@@ -250,8 +249,10 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     if environment == "remote":
-        with en.actions(roles=role_node) as a:
-            a.fetch(src=src, dest=dst, flat="yes")
+        process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
+        exit_code = process.wait()
+        if exit_code != 0:
+            raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
     else:
         os.makedirs(dst_dir, exist_ok=True)
         shutil.copy(src, dst)
