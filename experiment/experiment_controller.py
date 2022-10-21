@@ -217,6 +217,7 @@ def _launch_experiment_with_params(
         )
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
 
+    """TODO: fix algo not correct"""
     finished_reconf = (
             all(finished_reconfs_by_reconf_name["deploy"].values()) and
             all(finished_reconfs_by_reconf_name["update"].values())

@@ -1,11 +1,12 @@
 import os
+import sys
 from os.path import exists
 from typing import Dict
 
 import yaml
 
-home_dir = "/home/aomond/concerto-d-projects"
-target_dir = "/home/aomond/experiments_results"
+home_dir = f"{os.getenv('HOME')}/concerto-d-projects"
+target_dir = f"{os.getenv('HOME')}/experiments_results"
 
 
 def compute_from_expe_dir(expe_dir: str):
@@ -134,4 +135,4 @@ def _compute_global_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    compute_from_expe_dir("experiment-test-logged-sleep-times-dir")
+    compute_from_expe_dir(sys.argv[1])
