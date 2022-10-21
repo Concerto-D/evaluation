@@ -208,11 +208,11 @@ def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
         en.run_command(launch_router_cmd, roles=roles_zenoh_router, background=True)
     else:
-        print("kill process")
+        log_experiment.log.debug("kill process")
         kill_process = subprocess.Popen(kill_previous_routers_cmd, shell=True)
         kill_process.wait()
         time.sleep(.5)
-        print(f"process killed: {kill_process}")
+        log_experiment.log.debug(f"process killed: {kill_process}")
         subprocess.Popen(launch_router_cmd, shell=True)
 
 

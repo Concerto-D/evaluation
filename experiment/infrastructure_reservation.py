@@ -39,7 +39,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     log.debug(f"reserved roles:")
     for k, v in roles_concerto_d.items():
         if k != "concerto_d":
-            print(f"{k}: {v[0].address}")
+            log.debug(f"{k}: {v[0].address}")
     # Initialisation experiment repositories
     log.debug("Initialise repositories")
     concerto_d_g5k.initialize_expe_repositories(roles_concerto_d["server"])
