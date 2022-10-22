@@ -60,8 +60,13 @@ def compute_from_expe_dir(expe_dir: str):
             results["expe_details"] = loaded_metadata["expe_details"]
 
             os.makedirs(target_dir, exist_ok=True)
-            with open(f"{target_dir}/{experiment_results_file_name}", "w") as f:
+            target_file = f"{target_dir}/{experiment_results_file_name}"
+            print(f"Save computed results here: {target_file}")
+            with open(target_file, "w") as f:
                 yaml.dump(results, f, sort_keys=False)
+
+        else:
+            print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
 
 
 def _compute_execution_metrics(current_dir: str, reconfiguration_name: str, details_assemblies_results: Dict):
