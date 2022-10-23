@@ -45,6 +45,11 @@ def compute_from_expe_dir(expe_dir: str):
             # Compute metric of interest
             global_results = _compute_global_results(sorted_details_assemblies_results)
             global_results["global_finished_reconf"] = loaded_metadata["expe_details"]["global_finished_reconf"]
+            if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
+                global_synchronization_results = _compute_global_synchronization_results(sorted_details_assemblies_results)
+            else:
+                global_synchronization_results = {}
+
             # Save file in target directory
             experiment_results_file_name = _build_save_results_file_name(
                 loaded_metadata["expe_parameters"]["version_concerto_name"],
@@ -56,6 +61,8 @@ def compute_from_expe_dir(expe_dir: str):
 
             results["expe_parameters"] = loaded_metadata["expe_parameters"]
             results["global_results"] = global_results
+            if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
+                results["global_synchronization_results"] = global_synchronization_results
             results["details_assemblies_results"] = sorted_details_assemblies_results
             results["expe_details"] = loaded_metadata["expe_details"]
 
@@ -139,5 +146,37 @@ def _compute_global_results(details_assemblies_results):
     return global_results
 
 
+def _compute_global_synchronization_results(details_assemblies_results):
+    global_results = {}
+    max_deploy_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_instruction_waitall_27_duration", 0) + values["deploy"].get("total_instruction_waitall_5_duration", 0))
+    max_deploy_sync_time = max_deploy_values["deploy"].get("total_instruction_waitall_27_duration", 0) + max_deploy_values["deploy"].get("total_instruction_waitall_5_duration", 0)
+
+    max_update_values = max(details_assemblies_results.values(), key=lambda values: values["update"].get("total_instruction_waitall_4_duration", 0) + values["update"].get("total_instruction_waitall_3_duration", 0))
+    max_update_sync_time = max_update_values["update"].get("total_instruction_waitall_4_duration", 0) + max_update_values["update"].get("total_instruction_waitall_3_duration", 0)
+
+    max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_instruction_waitall_27_duration", 0) + values["deploy"].get("total_instruction_waitall_5_duration", 0)
+                                                                                  + values["update"].get("total_instruction_waitall_4_duration", 0) + values["update"].get("total_instruction_waitall_3_duration", 0))
+    max_reconf_sync_time = (max_reconf_values["deploy"].get("total_instruction_waitall_27_duration", 0) + max_reconf_values["deploy"].get("total_instruction_waitall_5_duration", 0)
+                          + max_reconf_values["update"].get("total_instruction_waitall_4_duration", 0) + max_reconf_values["update"].get("total_instruction_waitall_3_duration", 0))
+
+    max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + values["update"].get("total_event_sleeping_wait_all_duration", 0))
+    max_sleeping_sync_time = max_sleeping_values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + max_sleeping_values["update"].get("total_event_sleeping_wait_all_duration", 0)
+
+    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + values["update"].get("total_event_sleeping_wait_all_duration", 0)
+                                                                                       + values["deploy"].get("total_event_uptime_wait_all_duration", 0) + values["update"].get("total_event_uptime_wait_all_duration", 0))
+    max_execution_sync_time = (max_execution_values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + max_execution_values["update"].get("total_event_sleeping_wait_all_duration", 0)
+                             + max_execution_values["deploy"].get("total_event_uptime_wait_all_duration", 0) + max_execution_values["update"].get("total_event_uptime_wait_all_duration", 0))
+
+    global_results.update({
+        "max_deploy_sync_time": round(max_deploy_sync_time, 2),
+        "max_update_sync_time": round(max_update_sync_time, 2),
+        "max_reconf_sync_time": round(max_reconf_sync_time, 2),
+        "max_sleeping_sync_time": round(max_sleeping_sync_time, 2),
+        "max_execution_sync_time": round(max_execution_sync_time, 2),
+    })
+
+    return global_results
+
+
 if __name__ == '__main__':
-    compute_from_expe_dir(sys.argv[1])
+    compute_from_expe_dir("experiment-remote-validation-sync-50-60-dir")
