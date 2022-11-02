@@ -176,15 +176,8 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
 
     command_str = " ".join(command_args)
     if environment == "remote":
-        result = en.run_command(roles=role_node, chdir=f"{home_dir}/concerto-decentralized", command=command_str, on_error_continue=True)
-        # There is always one role, so run_command returns always a list with 1 element
-        result_dict = result[0].to_dict()
-        del result_dict["stdout"]
-        exit_code = result_dict["rc"]
-        print(f"type exit code: {type(exit_code)}")
-        if exit_code not in [0, 5, 50]:
-            print("raising exception")
-            raise Exception(result_dict["msg"])
+        process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
+        exit_code = process.wait()
 
     else:
         cwd = os.getcwd()
@@ -256,8 +249,10 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     if environment == "remote":
-        with en.actions(roles=role_node) as a:
-            a.fetch(src=src, dest=dst, flat="yes")
+        process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
+        exit_code = process.wait()
+        if exit_code != 0:
+            raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
     else:
         os.makedirs(dst_dir, exist_ok=True)
         shutil.copy(src, dst)
