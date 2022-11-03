@@ -105,6 +105,29 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 #         a.copy(src=configuration_file_path, dest=f"{home_dir}/concertonode/{configuration_file_path}")
 #         log_experiment.log.debug(a.results)
 
+def add_host_keys_to_know_hosts(roles_concerto_d, cluster):
+    site = get_cluster_site(cluster)
+    log = log_experiment.log
+    log.debug(f"Check host keys for nodes in {site}")
+    for k, v in roles_concerto_d.items():
+        if k != "concerto_d":
+            log.debug(f"Check {v[0].address}")
+            process = subprocess.Popen(
+                f"ssh-keygen -F {v[0].address}",
+                shell=True
+            )
+            res = process.wait()
+            host_key_exists = res == 0
+            if not host_key_exists:
+                known_hosts_file = "~/.ssh/known_hosts"
+                log.debug(f"Host key doesn't exists, add {v[0].address} to {known_hosts_file}")
+                process_keyscan = subprocess.Popen(
+                    f"ssh {site}.grid5000.fr 'ssh-keyscan {v[0].address}' >> {known_hosts_file}",
+                    shell=True
+                )
+                process_keyscan.wait()
+                log.debug("Added")
+
 
 def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
     with en.actions(roles=role_controller) as a:
