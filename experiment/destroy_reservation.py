@@ -7,7 +7,6 @@ from experiment import concerto_d_g5k
 
 def destroy_reservation(parameters):
     concerto_d_g5k.destroy_provider_from_job_name(parameters["reservation_parameters"]["job_name_concerto"])
-    concerto_d_g5k.destroy_provider_from_job_name(parameters["reservation_parameters"]["job_name_controller"])
 
 
 if __name__ == "__main__":

@@ -21,7 +21,6 @@ CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
 def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters):
     (
         job_name_concerto,
-        job_name_controller,
         walltime,
         reservation,
         nb_concerto_nodes,
@@ -33,7 +32,6 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     # Réservation nodes concerto_d, controller expé
     log.debug(f"Reservation with the following parameters:")
     log.debug(f"job_name_concerto: {job_name_concerto}")
-    log.debug(f"job_name_controller: {job_name_controller}")
     log.debug(f"walltime: {walltime}")
     log.debug(f"reservation: {reservation}")
     log.debug(f"nb_concerto_nodes: {nb_concerto_nodes}")
@@ -41,9 +39,8 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     log.debug(f"cluster: {cluster}")
 
     log.debug(f"Job should start at {reservation} and should last for {walltime}")
-    log.debug(f"Reserve {nb_concerto_nodes} concerto_d and {nb_zenoh_routers} named {job_name_concerto}")
+    log.debug(f"Reserve {nb_concerto_nodes} concerto_d and {nb_zenoh_routers} zenoh routers named {job_name_concerto}")
     roles_concerto_d, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
-    log.debug(f"Reserve the controller node named {job_name_controller}")
     log.debug(f"Reserved roles:")
     for k, v in roles_concerto_d.items():
         if k != "concerto_d":
