@@ -49,8 +49,8 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
 
     # Initialisation experiment repositories
     log.debug("Initialise repositories")
-    concerto_d_g5k.initialize_expe_repositories(roles_concerto_d["server"])
-    if version_concerto_d == "synchronous":
+    concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d["server"])
+    if version_concerto_d in ["synchronous", "mjuz"]:
         log.debug("Synchronous version: creating inventory")
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")

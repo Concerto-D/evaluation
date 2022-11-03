@@ -135,21 +135,58 @@ def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
         log_experiment.log.debug(a.results)
 
 
-def initialize_expe_repositories(role_controller):
+def initialize_expe_repositories(version_concerto_d, role_controller):
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     with en.actions(roles=role_controller) as a:
-        a.git(dest=f"{home_dir}/concerto-decentralized",
-              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
-              accept_hostkey=True)
-        a.pip(chdir=f"{home_dir}/concerto-decentralized",
-              requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
-              virtualenv=f"{home_dir}/concerto-decentralized/venv")
+        if version_concerto_d == "mjuz":
+            a.apt(
+                name="npm",
+                update_cache="yes"
+            )
+            # Need to pass as dict due to reserved keyword: global
+            a.npm(
+                **{
+                    "global": "yes",
+                    "name": "yarn",
+                }
+            )
+            a.npm(
+                **{
+                    "global": "yes",
+                    "name": "ts-node",
+                }
+            )
+            a.git(dest=f"{home_dir}/mjuz-concerto-d",
+                  repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
+                  version="custom_provider",
+                  accept_hostkey=True)
+            a.copy(
+                src="/home/anomond/pulumi-mjuz/pulumi",
+                dest="/opt",
+                remote_src="yes",
+            )
+        else:
+            a.git(dest=f"{home_dir}/concerto-decentralized",
+                  repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
+                  accept_hostkey=True)
+            a.pip(chdir=f"{home_dir}/concerto-decentralized",
+                  requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
+                  virtualenv=f"{home_dir}/concerto-decentralized/venv")
         a.git(dest=f"{home_dir}/evaluation",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
               accept_hostkey=True)
         a.git(dest=f"{home_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
               accept_hostkey=True)
+        log_experiment.log.debug(a.results)
+
+    if version_concerto_d == "mjuz":
+        en.run_command(
+            f"cd {home_dir}/mjuz-concerto-d && yarn", roles=role_controller
+        )
+        en.run_command(
+            "/opt/pulumi/bin/pulumi login --local", roles=role_controller
+        )
 
 
 def install_zenoh_router(roles_zenoh_router: List):
@@ -186,6 +223,44 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.g5k_execution_params_dir)
     command_args.append(version_concerto_d)
+    command_args.append(reconfiguration_name)
+    command_args.append(str(nb_concerto_nodes))
+    if dep_num is not None:
+        command_args.append(str(dep_num))  # If it's a dependency
+
+    command_str = " ".join(command_args)
+    if environment == "remote":
+        process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
+        exit_code = process.wait()
+
+    else:
+        cwd = os.getcwd()
+        env_process = os.environ.copy()
+        env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
+        process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
+        exit_code = process.wait()
+
+    if exit_code not in [0, 5, 50]:
+        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
+
+    return exit_code
+
+
+def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
+    command_args = []
+    home_dir = globals_variables.g5k_executions_expe_logs_dir
+    assembly_name = "server" if dep_num is None else "dep"
+    if environment == "remote":
+        command_args.append(f"cd {home_dir}/mjuz-concerto-d/synthetic-use-case/{assembly_name};")
+
+    command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin;")
+    command_args.append("PULUMI_SKIP_UPDATE_CHECK=1;")
+    command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0;")
+    command_args.append("PULUMI_CONFIG_PASSPHRASE=0000;")
+    command_args.append(f"ts-node . -v trace")
+    command_args.append(config_file_path)  # The path of the config file that the remote process will search to
+    command_args.append(timestamp_log_file)
+    command_args.append(globals_variables.g5k_execution_params_dir)
     command_args.append(reconfiguration_name)
     command_args.append(str(nb_concerto_nodes))
     if dep_num is not None:

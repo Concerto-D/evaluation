@@ -64,7 +64,10 @@ def _execute_node_reconf_in_g5k(
         # Execute reconf
         timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
-        exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
+        if version_concerto_d in ["synchronous", "asynchronous"]:
+            exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
+        else:
+            exit_code = concerto_d_g5k.execute_mjuz_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
 
         # Fetch results
         concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
