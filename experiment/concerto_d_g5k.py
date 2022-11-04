@@ -191,21 +191,12 @@ def initialize_expe_repositories(version_concerto_d, role_controller):
 
 def install_zenoh_router(roles_zenoh_router: List):
     """
-    Install the 0.5 version of zenoh router
+    Install the 0.6 version of zenoh router
     """
-    log = log_experiment.log
     with en.actions(roles=roles_zenoh_router) as a:
-        log.debug("Create tmp zenoh_download dir")
-        a.file(path="/tmp/zenoh_download", state="directory")
-        log.debug("Download and unzip zenoh files")
-        a.unarchive(remote_src="yes",
-                    src=f"https://download.eclipse.org/zenoh/zenoh/0.5.0-beta.9/x86_64-unknown-linux-gnu/zenoh-0.5.0-beta.9-x86_64-unknown-linux-gnu.zip",
-                    dest="/tmp/zenoh_download")
-    log.debug("Move each file to the correct destination (manual installation)")
-    en.run_command(command="mv /tmp/zenoh_download/zenohd /usr/bin/zenohd", roles=roles_zenoh_router)
-    en.run_command(command="mv /tmp/zenoh_download/libzplugin_rest.so /usr/lib/libzplugin_rest.so", roles=roles_zenoh_router)
-    en.run_command(command="mv /tmp/zenoh_download/libzplugin_storages.so /usr/lib/libzplugin_storages.so", roles=roles_zenoh_router)
-    log.debug(a.results)
+        a.apt_repository(repo="deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /", state="present")
+        a.apt(name="zenoh", update_cache="yes")
+        log_experiment.log.debug(a.results)
 
 
 def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
@@ -294,16 +285,18 @@ def kill_subprocess_on_exit(subproc):
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
     kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
-    launch_router_cmd = " ".join(["timeout", str(timeout), "zenohd", "--mem-storage='/**'"])
+    concerto_d_projects_dir = globals_variables.g5k_executions_expe_logs_dir if environment == "remote" else globals_variables.all_experiments_results_dir
+    launch_router_cmd = " ".join(["timeout", str(timeout), "zenohd", "-c", f"{concerto_d_projects_dir}/evaluation/experiment/zenohd-config.json5"])
 
     if environment == "remote":
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
+        time.sleep(1)
         en.run_command(launch_router_cmd, roles=roles_zenoh_router, background=True)
     else:
         log_experiment.log.debug("kill process")
         kill_process = subprocess.Popen(kill_previous_routers_cmd, shell=True)
         kill_process.wait()
-        time.sleep(.5)
+        time.sleep(1)
         log_experiment.log.debug(f"process killed: {kill_process}")
         subprocess.Popen(launch_router_cmd, shell=True)
 
