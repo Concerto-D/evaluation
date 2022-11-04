@@ -279,10 +279,19 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_n
         persistence_dir=str(Path(f"{experiment_results_dir}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
     parameter = sweeper.get_next()
-    print(sweeper)
+    log.debug(sweeper)
+    log.debug("----- All experiments parameters -----")
+    log.debug(params_to_sweep)
+    log.debug("--------------------------------------")
     while parameter:
         try:
             log.debug("----- Launching experiment ---------")
+            log.debug("-- Expe parameters --")
+            log.debug(f"Uptimes: {parameter['uptimes']}")
+            log.debug(f"Transitions times: {parameter['transitions_times']}")
+            log.debug(f"Waiting rate: {parameter['waiting_rate']}")
+            log.debug(f"Id: {parameter['id']}")
+            log.debug("---------------------")
             _launch_experiment_with_params(
                 expe_name,
                 cluster,
