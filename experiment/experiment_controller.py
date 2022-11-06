@@ -224,7 +224,7 @@ def _launch_experiment_with_params(
             start_round_reconf
         )
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
-        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])
+        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
 
     """TODO: fix algo not correct"""
     finished_reconf = (
