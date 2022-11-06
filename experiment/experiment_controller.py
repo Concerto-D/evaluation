@@ -35,12 +35,13 @@ def _execute_node_reconf_in_g5k(
         uptimes_node,
         nb_concerto_nodes,
         execution_start_time,
-        environment
+        environment,
+        start_round_reconf
 ):
     logs_assemblies_file = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
     finished_reconfiguration = False
-    round_reconf = 0
+    round_reconf = start_round_reconf
     exit_code = 0  # Init exit code to 0 for algo
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node):
@@ -114,7 +115,8 @@ def _schedule_and_run_uptimes_from_config(
         waiting_rate,
         reconfiguration_name,
         nb_concerto_nodes,
-        environment
+        environment,
+        start_round_reconf
 ):
     """
     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
@@ -144,7 +146,8 @@ def _schedule_and_run_uptimes_from_config(
                 uptimes_node,
                 nb_concerto_nodes - 1,
                 execution_start_time,
-                environment
+                environment,
+                start_round_reconf
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
@@ -207,6 +210,7 @@ def _launch_experiment_with_params(
     log.debug("------- Run experiment ----------")
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
     finished_reconfs_by_reconf_name = {}
+    start_round_reconf = 0
     for reconfiguration_name in ["deploy", "update"]:
         finished_reconfs = _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
@@ -216,9 +220,11 @@ def _launch_experiment_with_params(
             waiting_rate,
             reconfiguration_name,
             nb_concerto_nodes,
-            environment
+            environment,
+            start_round_reconf
         )
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
+        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])
 
     """TODO: fix algo not correct"""
     finished_reconf = (
