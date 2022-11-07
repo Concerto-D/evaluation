@@ -151,17 +151,17 @@ def _schedule_and_run_uptimes_from_config(
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
-            try:
-                finished_reconf, rounds_reconf, future_node_num = future.result()
-                future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
-                finished_reconfs[future_assembly_name] = {
-                    "finished_reconfiguration": finished_reconf,
-                    "rounds_reconf": rounds_reconf,
-                }
-            except Exception as e:
-                log.error(future.exception())
-                print("exception was raised for future")
-                raise e
+            # try:
+            finished_reconf, rounds_reconf, future_node_num = future.result()
+            future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
+            finished_reconfs[future_assembly_name] = {
+                "finished_reconfiguration": finished_reconf,
+                "rounds_reconf": rounds_reconf,
+            }
+            # except Exception as e:
+            #     log.error(future.exception())
+            #     print("exception was raised for future")
+            #     raise e
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs
