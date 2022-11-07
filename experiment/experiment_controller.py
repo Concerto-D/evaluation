@@ -116,7 +116,8 @@ def _schedule_and_run_uptimes_from_config(
         reconfiguration_name,
         nb_concerto_nodes,
         environment,
-        start_round_reconf
+        start_round_reconf,
+        execution_start_time
 ):
     """
     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
@@ -124,7 +125,6 @@ def _schedule_and_run_uptimes_from_config(
     """
     log = log_experiment.log
     log.debug("SCHEDULING START")
-    execution_start_time = time.time()
 
     with futures.ThreadPoolExecutor(max_workers=nb_concerto_nodes) as executor:
         futures_to_proceed = []
@@ -211,6 +211,7 @@ def _launch_experiment_with_params(
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
     finished_reconfs_by_reconf_name = {}
     start_round_reconf = 0
+    execution_start_time = time.time()
     for reconfiguration_name in ["deploy", "update"]:
         finished_reconfs = _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
@@ -221,7 +222,8 @@ def _launch_experiment_with_params(
             reconfiguration_name,
             nb_concerto_nodes,
             environment,
-            start_round_reconf
+            start_round_reconf,
+            execution_start_time
         )
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
         start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
