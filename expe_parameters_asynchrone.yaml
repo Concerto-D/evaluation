@@ -13,8 +13,8 @@ global_parameters:
 # reserved. The execution can happens either on a controller node or on the frontend directly.
 reservation_parameters:
   job_name_concerto: "concerto-d"    # Name of the reservation for concerto nodes
-  walltime: "1:00:00"                     # Duration of the reservation
-  reservation: ""                         # e.g.: "2022-09-08 19:00:00", to postpone the reservation to a future date
+  walltime: "17:00:00"                     # Duration of the reservation
+  reservation: "2022-11-07 19:00:00"                         # e.g.: "2022-09-08 19:00:00", to postpone the reservation to a future date
   nb_concerto_nodes: 13                   # Number of nodes that match the synthetic use case (here: 12 deps and 1 server)
   nb_zenoh_routers: 1                     # 0 if synchronous version, 1 if asynchronous
   cluster: "grisou"                          # Which g5k cluster to reserve nodes

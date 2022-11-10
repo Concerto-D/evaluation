@@ -69,6 +69,7 @@ def _execute_node_reconf_in_g5k(
             exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
         else:
             exit_code = concerto_d_g5k.execute_mjuz_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
+        log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
         # Fetch results
         concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
