@@ -1,6 +1,6 @@
 # Parameters used during the whole execution
 global_parameters:
-  expe_name: "local-replay-asynchronous-1-1"      # The experiment name, has to be unique
+  expe_name: "test-time-estimation-3"      # The experiment name, has to be unique
   environment: "local"
   version_concerto_d: "asynchronous"  # synchronous or asynchronous
   all_experiments_results_dir: "/home/aomond/concerto-d-projects"
