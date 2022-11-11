@@ -139,32 +139,10 @@ def initialize_expe_repositories(version_concerto_d, role_controller):
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     with en.actions(roles=role_controller) as a:
         if version_concerto_d == "mjuz":
-            a.apt(
-                name="npm",
-                update_cache="yes"
-            )
-            # Need to pass as dict due to reserved keyword: global
-            a.npm(
-                **{
-                    "global": "yes",
-                    "name": "yarn",
-                }
-            )
-            a.npm(
-                **{
-                    "global": "yes",
-                    "name": "ts-node",
-                }
-            )
             a.git(dest=f"{home_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
                   version="custom_provider",
                   accept_hostkey=True)
-            a.copy(
-                src="/home/anomond/pulumi-mjuz/pulumi",
-                dest="/opt",
-                remote_src="yes",
-            )
         else:
             a.git(dest=f"{home_dir}/concerto-decentralized",
                   repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
@@ -180,13 +158,39 @@ def initialize_expe_repositories(version_concerto_d, role_controller):
               accept_hostkey=True)
         log_experiment.log.debug(a.results)
 
-    if version_concerto_d == "mjuz":
-        en.run_command(
-            f"cd {home_dir}/mjuz-concerto-d && yarn", roles=role_controller
+
+def initialize_deps_mjuz(roles_concerto_d):
+    home_dir = globals_variables.g5k_executions_expe_logs_dir
+    with en.actions(roles=roles_concerto_d) as a:
+        a.apt(
+            name="npm",
+            update_cache="yes"
         )
-        en.run_command(
-            "/opt/pulumi/bin/pulumi login --local", roles=role_controller
+        # Need to pass as dict due to reserved keyword: global
+        a.npm(
+            **{
+                "global": "yes",
+                "name": "yarn",
+            }
         )
+        a.npm(
+            **{
+                "global": "yes",
+                "name": "ts-node",
+            }
+        )
+        a.copy(
+            src="/home/anomond/pulumi-mjuz/pulumi",
+            dest="/opt",
+            remote_src="yes",
+        )
+
+    en.run_command(
+        f"cd {home_dir}/mjuz-concerto-d && yarn", roles=roles_concerto_d[0]
+    )
+    en.run_command(
+        "/opt/pulumi/bin/pulumi login --local", roles=roles_concerto_d[0]
+    )
 
 
 def install_zenoh_router(roles_zenoh_router: List):
@@ -241,13 +245,13 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     command_args = []
     home_dir = globals_variables.g5k_executions_expe_logs_dir
     assembly_name = "server" if dep_num is None else "dep"
-    if environment == "remote":
-        command_args.append(f"cd {home_dir}/mjuz-concerto-d/synthetic-use-case/{assembly_name};")
 
-    command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin;")
-    command_args.append("PULUMI_SKIP_UPDATE_CHECK=1;")
-    command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0;")
-    command_args.append("PULUMI_CONFIG_PASSPHRASE=0000;")
+    command_args.append(f"cd {home_dir}/mjuz-concerto-d/synthetic-use-case/{assembly_name};")
+    trailing = ";" if environment == "remote" else ""
+    command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
+    command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
+    command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
+    command_args.append("PULUMI_CONFIG_PASSPHRASE=0000" + trailing)
     command_args.append(f"ts-node . -v trace")
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(timestamp_log_file)
@@ -260,14 +264,28 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     command_str = " ".join(command_args)
     if environment == "remote":
         process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
-        exit_code = process.wait()
-
     else:
-        cwd = os.getcwd()
-        env_process = os.environ.copy()
-        env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
-        process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
-        exit_code = process.wait()
+        process = subprocess.Popen(command_str, shell=True)
+
+    exit_code = process.wait()
+
+    # try:
+    #     exit_code, errs = process.communicate(timeout=duration)
+    # except subprocess.TimeoutExpired:
+    #     log_experiment.log.debug("terminate process")
+    #     if environment == "remote":
+    #         sigint_process = subprocess.Popen(
+    #             f"ssh anomond@{role_node[0].address} 'kill -3 $(ps -aux | pgrep -f \"ts-node . -v trace\")'",
+    #             shell=True
+    #         )
+    #     else:
+    #         sigint_process = subprocess.Popen(
+    #             "kill -3 $(ps -aux | pgrep -f \"ts-node . -v trace\")",
+    #             shell=True
+    #         )
+    #     exit_code = sigint_process.wait()
+    #     log_experiment.log.debug("Process terminated")
+    #     log_experiment.log.debug(f"Exit code received by controller for {assembly_name}: {exit_code}")
 
     if exit_code not in [0, 5, 50]:
         raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")

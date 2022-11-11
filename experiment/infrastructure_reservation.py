@@ -16,6 +16,7 @@ from experiment import log_experiment
 
 CREATED_INVENTORY_PATH = "inventory.yaml"
 CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
+MJUZ_INVENTORY_PATH = "mjuz-concerto-d/inventory.yaml"
 
 
 def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters):
@@ -50,11 +51,15 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
     # Initialisation experiment repositories
     log.debug("Initialise repositories")
     concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d["server"])
+    if version_concerto_d == "mjuz":
+        concerto_d_g5k.initialize_deps_mjuz(roles_concerto_d["concerto_d"])
+
     if version_concerto_d in ["synchronous", "mjuz"]:
         log.debug("Synchronous version: creating inventory")
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
-        concerto_d_g5k.put_file(roles_concerto_d["server"], CREATED_INVENTORY_PATH, CONCERTO_D_INVENTORY_PATH)
+        inventory_path = CONCERTO_D_INVENTORY_PATH if version_concerto_d == "synchronous" else MJUZ_INVENTORY_PATH
+        concerto_d_g5k.put_file(roles_concerto_d["server"], CREATED_INVENTORY_PATH, inventory_path)
 
     return roles_concerto_d
 
