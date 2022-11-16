@@ -9,7 +9,7 @@ home_dir = f"{os.getenv('HOME')}/concerto-d-projects"
 target_dir = f"{os.getenv('HOME')}/experiments_results"
 
 
-def compute_from_expe_dir(expe_dir: str):
+def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
     expe_dir_path = f"{home_dir}/{expe_dir}"
 
     # For each sub-dirs except experiment_logs and sweeps
@@ -26,8 +26,7 @@ def compute_from_expe_dir(expe_dir: str):
             # Create a dict results with all assemblies names
             details_assemblies_results = {
                 assembly_name: {"deploy": {}, "update": {}} for assembly_name in
-                ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
-                # ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6"]
+                ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
             }
 
             # For each reconfiguration name
