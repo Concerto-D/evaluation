@@ -23,6 +23,9 @@ class EndOfExperimentException(BaseException):
         super().__init__()
 
 
+mjuz_server_finished = False
+
+
 def _execute_node_reconf_in_g5k(
         roles,
         version_concerto_d,
@@ -72,29 +75,21 @@ def _execute_node_reconf_in_g5k(
         log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
         # Fetch results
-        # concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
+        if not (version_concerto_d == "mjuz" and node_num != 0):
+            concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
+
         # Finish reconf for assembly name if its over
-        if exit_code == 50:
+        global mjuz_server_finished
+        if exit_code == 50 or (version_concerto_d == "mjuz" and mjuz_server_finished):
             log_experiment.log.debug(f"Node {node_num} finished")
             finished_reconfiguration = True
+
+            if node_num == 0 and version_concerto_d == "mjuz":
+                mjuz_server_finished = True
 
         round_reconf += 1
 
     return finished_reconfiguration, round_reconf, node_num
-
-
-def _compute_execution_metrics(assembly_name: str, timestamp_log_file: str, reconfiguration_name: str):
-    with open(f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}/{timestamp_log_file}") as f:
-        loaded_results = yaml.safe_load(f)
-
-    if assembly_name not in results.keys():
-        results[assembly_name] = {}
-
-    for timestamp_name, timestamp_values in loaded_results.items():
-        timestamp_name_to_save = f"total_{timestamp_name}_duration"
-        if timestamp_name_to_save not in results[assembly_name]:
-            results[assembly_name][timestamp_name_to_save] = 0
-        results[assembly_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]  # TODO: magic values refacto
 
 
 def _find_next_uptime(uptimes_nodes):
@@ -129,6 +124,8 @@ def _schedule_and_run_uptimes_from_config(
     with futures.ThreadPoolExecutor(max_workers=nb_concerto_nodes) as executor:
         futures_to_proceed = []
         finished_reconfs = {}
+        global mjuz_server_finished
+        mjuz_server_finished = False
         for node_num in range(nb_concerto_nodes):
             uptimes_node = uptimes_nodes[node_num]
             dep_num = None if node_num == 0 else node_num - 1
@@ -151,17 +148,12 @@ def _schedule_and_run_uptimes_from_config(
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
-            # try:
             finished_reconf, rounds_reconf, future_node_num = future.result()
             future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
             finished_reconfs[future_assembly_name] = {
                 "finished_reconfiguration": finished_reconf,
                 "rounds_reconf": rounds_reconf,
             }
-            # except Exception as e:
-            #     log.error(future.exception())
-            #     print("exception was raised for future")
-            #     raise e
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs
@@ -227,7 +219,7 @@ def _launch_experiment_with_params(
         )
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
         start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
-    return
+
     """TODO: fix algo not correct"""
     finished_reconf = (
             all(finished_reconfs_by_reconf_name["deploy"].values()) and
