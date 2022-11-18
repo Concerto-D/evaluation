@@ -74,8 +74,8 @@ def _execute_node_reconf_in_g5k(
             exit_code = concerto_d_g5k.execute_mjuz_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
         log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
-        # Fetch results
-        if not (version_concerto_d == "mjuz" and node_num != 0):
+        # Fetch results (mjuz reconf fetch only results of the server which is node 0)
+        if version_concerto_d in ["synchronous" "synchronous"] or node_num == 0:
             concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
 
         # Finish reconf for assembly name if its over
@@ -148,12 +148,17 @@ def _schedule_and_run_uptimes_from_config(
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
-            finished_reconf, rounds_reconf, future_node_num = future.result()
-            future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
-            finished_reconfs[future_assembly_name] = {
-                "finished_reconfiguration": finished_reconf,
-                "rounds_reconf": rounds_reconf,
-            }
+            try:
+                finished_reconf, rounds_reconf, future_node_num = future.result()
+                future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
+                finished_reconfs[future_assembly_name] = {
+                    "finished_reconfiguration": finished_reconf,
+                    "rounds_reconf": rounds_reconf,
+                }
+            except Exception as e:
+                log.error(future.exception())
+                # TODO: Cancel all the futures and reset the pulumi dirs, etc if Mjuz
+                raise e
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs
@@ -197,6 +202,12 @@ def _launch_experiment_with_params(
             concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
         max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
         concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
+
+    # If Mjuz, clean the previous environment before running again
+    if version_concerto_d == "mjuz":
+        log.debug("-------- Clean previous environment -------")
+        log.debug("Clean running mjuz processes and reset previous pulumi dir")
+        concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d["server"], environment)
 
     # Run experiment
     log.debug("------- Run experiment ----------")

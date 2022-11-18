@@ -30,11 +30,12 @@ def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
                 ["server"]
             }
 
+            version_concerto_d = loaded_metadata["expe_parameters"]["version_concerto_name"]
             # For each reconfiguration name
             # for reconfiguration_name in ["deploy", "update"]:
             for reconfiguration_name in ["deploy"]:
                 # Call compute_execution_metrics for total of each metric
-                _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", reconfiguration_name, details_assemblies_results)
+                _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results)
 
             # Sort by descending order (highest values on top)
             sorted_details_assemblies_results = {}
@@ -77,7 +78,7 @@ def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
             print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
 
 
-def _compute_execution_metrics(current_dir: str, reconfiguration_name: str, details_assemblies_results: Dict):
+def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict):
     """
     Fill the param details_assemblies_results with metrics for the given reconfiguration name
     """
@@ -87,16 +88,17 @@ def _compute_execution_metrics(current_dir: str, reconfiguration_name: str, deta
             loaded_results = yaml.safe_load(f)
         assembly_name = file_name.split("_")[0]
 
-        for timestamp_name, timestamp_values in loaded_results.items():
-            timestamp_name_to_save = f"total_{timestamp_name}_duration"
-            if timestamp_name_to_save not in details_assemblies_results[assembly_name][reconfiguration_name]:
-                details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] = 0
-            details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
+        if version_concerto_d != "mjuz" or assembly_name == "server":
+            for timestamp_name, timestamp_values in loaded_results.items():
+                timestamp_name_to_save = f"total_{timestamp_name}_duration"
+                if timestamp_name_to_save not in details_assemblies_results[assembly_name][reconfiguration_name]:
+                    details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] = 0
+                details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
 
 
 def _build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, execution_dir):
-    file_name = "results"
-    file_name += "_synchronous" if version_concerto_name == "synchronous" else "_asynchronous"
+    file_name = "results_"
+    file_name += version_concerto_name
 
     if "1-30-deps12-0" in transitions_times_file_name:
         file_name += "_T0"
@@ -180,4 +182,4 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    compute_from_expe_dir("experiment-remote-validation-sync-50-60-dir")
+    compute_from_expe_dir("experiment-local-mjuz-test-10-dir", 2)
