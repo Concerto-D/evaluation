@@ -222,8 +222,8 @@ def _launch_experiment_with_params(
 
     """TODO: fix algo not correct"""
     finished_reconf = (
-            all(finished_reconfs_by_reconf_name["deploy"].values()) and
-            all(finished_reconfs_by_reconf_name["update"].values())
+            all(finished_reconfs_by_reconf_name["deploy"].values())
+            # and all(finished_reconfs_by_reconf_name["update"].values())
     )
 
     # Save expe metadata

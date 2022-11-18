@@ -26,11 +26,13 @@ def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
             # Create a dict results with all assemblies names
             details_assemblies_results = {
                 assembly_name: {"deploy": {}, "update": {}} for assembly_name in
-                ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
+                # ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
+                ["server"]
             }
 
             # For each reconfiguration name
-            for reconfiguration_name in ["deploy", "update"]:
+            # for reconfiguration_name in ["deploy", "update"]:
+            for reconfiguration_name in ["deploy"]:
                 # Call compute_execution_metrics for total of each metric
                 _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", reconfiguration_name, details_assemblies_results)
 
@@ -120,26 +122,26 @@ def _compute_global_results(details_assemblies_results):
     max_deploy_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"])
     max_deploy_time = max_deploy_values["deploy"]["total_event_deploy_duration"]
 
-    max_update_values = max(details_assemblies_results.values(), key=lambda values: values["update"]["total_event_update_duration"])
-    max_update_time = max_update_values["update"]["total_event_update_duration"]
+    # max_update_values = max(details_assemblies_results.values(), key=lambda values: values["update"]["total_event_update_duration"])
+    # max_update_time = max_update_values["update"]["total_event_update_duration"]
 
-    max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"] + values["update"]["total_event_update_duration"])
-    max_reconf_time = max_reconf_values["deploy"]["total_event_deploy_duration"] + max_reconf_values["update"]["total_event_update_duration"]
+    # max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"] + values["update"]["total_event_update_duration"])
+    # max_reconf_time = max_reconf_values["deploy"]["total_event_deploy_duration"] + max_reconf_values["update"]["total_event_update_duration"]
 
-    max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"])
-    max_sleeping_time = max_sleeping_values["deploy"]["total_event_sleeping_duration"] + max_sleeping_values["update"]["total_event_sleeping_duration"]
+    # max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"])
+    # max_sleeping_time = max_sleeping_values["deploy"]["total_event_sleeping_duration"] + max_sleeping_values["update"]["total_event_sleeping_duration"]
 
-    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"]
-                                                                                       + values["deploy"]["total_event_uptime_duration"] + values["update"]["total_event_uptime_duration"])
-    max_execution_time = (max_execution_values["deploy"]["total_event_sleeping_duration"] + max_execution_values["update"]["total_event_sleeping_duration"]
-                         + max_execution_values["deploy"]["total_event_uptime_duration"] + max_execution_values["update"]["total_event_uptime_duration"])
+    # max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"]
+    #                                                                                    + values["deploy"]["total_event_uptime_duration"] + values["update"]["total_event_uptime_duration"])
+    # max_execution_time = (max_execution_values["deploy"]["total_event_sleeping_duration"] + max_execution_values["update"]["total_event_sleeping_duration"]
+    #                      + max_execution_values["deploy"]["total_event_uptime_duration"] + max_execution_values["update"]["total_event_uptime_duration"])
 
     global_results.update({
         "max_deploy_time": round(max_deploy_time, 2),
-        "max_update_time": round(max_update_time, 2),
-        "max_reconf_time": round(max_reconf_time, 2),
-        "max_sleeping_time": round(max_sleeping_time, 2),
-        "max_execution_time": round(max_execution_time, 2),
+        # "max_update_time": round(max_update_time, 2),
+        # "max_reconf_time": round(max_reconf_time, 2),
+        # "max_sleeping_time": round(max_sleeping_time, 2),
+        # "max_execution_time": round(max_execution_time, 2),
     })
 
     return global_results
