@@ -361,21 +361,21 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
         shutil.copy(src, dst)
 
 
-def clean_previous_mjuz_environment(role_node, environment):
+def clean_previous_mjuz_environment(roles_concerto_d, environment):
     """
     Delete and recreate ~/.pulumi dir (containing state of deployed infrastructure) + kill all running
     ts-node processes
     """
     kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node)"
-    reset_pulumi_dir_cmd = "rm -rf /home/aomond/.pulumi &&"
+    reset_pulumi_dir_cmd = "rm -rf ~/.pulumi &&"
     trailing = ";" if environment == "remote" else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
     reset_pulumi_dir_cmd += " PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing
     reset_pulumi_dir_cmd += " /opt/pulumi/bin/pulumi login --local"
 
     if environment == "remote":
-        subprocess.Popen(f"ssh anomond@{role_node[0].address} '{kill_ts_node_cmd}'", shell=True).wait()
-        subprocess.Popen(f"ssh anomond@{role_node[0].address} '{reset_pulumi_dir_cmd}'", shell=True).wait()
+        en.run_command(kill_ts_node_cmd, roles=roles_concerto_d, on_error_continue=True)
+        en.run_command(reset_pulumi_dir_cmd, roles=roles_concerto_d["server"])
 
     else:
         subprocess.Popen(kill_ts_node_cmd, shell=True).wait()

@@ -156,9 +156,11 @@ def _schedule_and_run_uptimes_from_config(
                     "rounds_reconf": rounds_reconf,
                 }
             except Exception as e:
-                log.error(future.exception())
+                exc = future.exception()
+                log.error(exc)
+                print(exc)
                 # TODO: Cancel all the futures and reset the pulumi dirs, etc if Mjuz
-                raise e
+                raise exc
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs
