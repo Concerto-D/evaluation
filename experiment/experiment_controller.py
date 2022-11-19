@@ -209,7 +209,7 @@ def _launch_experiment_with_params(
     if version_concerto_d == "mjuz":
         log.debug("-------- Clean previous environment -------")
         log.debug("Clean running mjuz processes and reset previous pulumi dir")
-        concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d["server"], environment)
+        concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d, environment)
 
     # Run experiment
     log.debug("------- Run experiment ----------")
