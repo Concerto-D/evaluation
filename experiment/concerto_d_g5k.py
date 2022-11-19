@@ -150,9 +150,9 @@ def initialize_expe_repositories(version_concerto_d, role_controller):
             a.pip(chdir=f"{home_dir}/concerto-decentralized",
                   requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
                   virtualenv=f"{home_dir}/concerto-decentralized/venv")
-        a.git(dest=f"{home_dir}/evaluation",
-              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
-              accept_hostkey=True)
+        # a.git(dest=f"{home_dir}/evaluation",
+        #       repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
+        #       accept_hostkey=True)
         a.git(dest=f"{home_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
               accept_hostkey=True)
