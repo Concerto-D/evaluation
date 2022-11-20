@@ -247,6 +247,7 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     assembly_name = "server" if dep_num is None else "dep"
 
     command_args.append(f"cd {home_dir}/mjuz-concerto-d/synthetic-use-case/{assembly_name};")
+    command_args.append("/opt/pulumi/bin/pulumi login --local;")
     trailing = ";" if environment == "remote" else ""
     command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
@@ -367,7 +368,8 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     ts-node processes
     """
     kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node)"
-    reset_pulumi_dir_cmd = "rm -rf ~/.pulumi &&"
+    homedir = "/home/anomond" if environment == "remote" else "/home/aomond"
+    reset_pulumi_dir_cmd = f"rm -rf {homedir}/.pulumi &&"
     trailing = ";" if environment == "remote" else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
     reset_pulumi_dir_cmd += " PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing
