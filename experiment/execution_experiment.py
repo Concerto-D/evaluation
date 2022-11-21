@@ -35,7 +35,8 @@ if __name__ == '__main__':
         log.debug(f"Start {expe_name}")
         roles_concerto_d = infrastructure_reservation.create_reservation_for_concerto_d(
             version_concerto_d,
-            expe_parameters["reservation_parameters"]
+            expe_parameters["reservation_parameters"],
+            environment
         )
     else:
         roles_concerto_d = {

@@ -19,7 +19,7 @@ CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
 MJUZ_INVENTORY_PATH = "mjuz-concerto-d/inventory.yaml"
 
 
-def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters):
+def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters, environment):
     (
         job_name_concerto,
         walltime,
@@ -59,6 +59,10 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")
         inventory_path = CONCERTO_D_INVENTORY_PATH if version_concerto_d == "synchronous" else MJUZ_INVENTORY_PATH
+        if environment == "remote":
+            inventory_path = f"/{inventory_path}"
+        else:
+            inventory_path = f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d/{inventory_path}"
         concerto_d_g5k.put_file(roles_concerto_d["server"], CREATED_INVENTORY_PATH, inventory_path)
 
     return roles_concerto_d

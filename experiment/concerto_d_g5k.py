@@ -129,9 +129,9 @@ def add_host_keys_to_know_hosts(roles_concerto_d, cluster):
                 log.debug("Added")
 
 
-def put_file(role_controller, uptimes_src: str, uptimes_dst: str):
+def put_file(role_controller, src: str, dst: str):
     with en.actions(roles=role_controller) as a:
-        a.copy(src=f"{uptimes_src}", dest=f"{globals_variables.g5k_executions_expe_logs_dir}/{uptimes_dst}")
+        a.copy(src=src, dest=dst)
         log_experiment.log.debug(a.results)
 
 
@@ -188,9 +188,13 @@ def initialize_deps_mjuz(roles_concerto_d):
     en.run_command(
         f"cd {home_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d[0]
     )
-    en.run_command(
-        "/opt/pulumi/bin/pulumi login --local", roles=roles_concerto_d[0]
-    )
+
+    with en.actions(roles=roles_concerto_d) as a:
+        a.copy(
+            src=f"{home_dir}/mjuz-concerto-d",
+            dest="/",
+            remote_src="yes"
+        )
 
 
 def install_zenoh_router(roles_zenoh_router: List):
@@ -243,12 +247,11 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
 
 def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
     command_args = []
-    home_dir = globals_variables.g5k_executions_expe_logs_dir
     assembly_name = "server" if dep_num is None else "dep"
 
-    command_args.append(f"cd {home_dir}/mjuz-concerto-d/synthetic-use-case/{assembly_name};")
-    command_args.append("/opt/pulumi/bin/pulumi login --local;")
-    trailing = ";" if environment == "remote" else ""
+    command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
+    command_args.append(f"cd /mjuz-concerto-d/synthetic-use-case/{assembly_name};")
+    trailing = "" if environment == "remote" else ""
     command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
     command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
@@ -264,29 +267,10 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
 
     command_str = " ".join(command_args)
     if environment == "remote":
-        process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
+        process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
         process = subprocess.Popen(command_str, shell=True)
-
     exit_code = process.wait()
-
-    # try:
-    #     exit_code, errs = process.communicate(timeout=duration)
-    # except subprocess.TimeoutExpired:
-    #     log_experiment.log.debug("terminate process")
-    #     if environment == "remote":
-    #         sigint_process = subprocess.Popen(
-    #             f"ssh anomond@{role_node[0].address} 'kill -3 $(ps -aux | pgrep -f \"ts-node . -v trace\")'",
-    #             shell=True
-    #         )
-    #     else:
-    #         sigint_process = subprocess.Popen(
-    #             "kill -3 $(ps -aux | pgrep -f \"ts-node . -v trace\")",
-    #             shell=True
-    #         )
-    #     exit_code = sigint_process.wait()
-    #     log_experiment.log.debug("Process terminated")
-    #     log_experiment.log.debug(f"Exit code received by controller for {assembly_name}: {exit_code}")
 
     if exit_code not in [0, 5, 50]:
         raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
@@ -368,16 +352,15 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     ts-node processes
     """
     kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node)"
-    homedir = "/home/anomond" if environment == "remote" else "/home/aomond"
-    reset_pulumi_dir_cmd = f"rm -rf {homedir}/.pulumi &&"
+    reset_pulumi_dir_cmd = f"rm -rf /tmp/.pulumi &&"
     trailing = ";" if environment == "remote" else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
     reset_pulumi_dir_cmd += " PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing
-    reset_pulumi_dir_cmd += " /opt/pulumi/bin/pulumi login --local"
+    reset_pulumi_dir_cmd += " /opt/pulumi/bin/pulumi login file:///tmp"
 
     if environment == "remote":
         en.run_command(kill_ts_node_cmd, roles=roles_concerto_d, on_error_continue=True)
-        en.run_command(reset_pulumi_dir_cmd, roles=roles_concerto_d["server"])
+        en.run_command(reset_pulumi_dir_cmd, roles=roles_concerto_d)
 
     else:
         subprocess.Popen(kill_ts_node_cmd, shell=True).wait()
