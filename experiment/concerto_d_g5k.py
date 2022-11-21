@@ -249,8 +249,9 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     command_args = []
     assembly_name = "server" if dep_num is None else "dep"
 
+    mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
-    command_args.append(f"cd /mjuz-concerto-d/synthetic-use-case/{assembly_name};")
+    command_args.append(f"cd {mjuz_dir}/synthetic-use-case/{assembly_name};")
     trailing = "" if environment == "remote" else ""
     command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
