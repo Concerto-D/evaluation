@@ -63,7 +63,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
             inventory_path = f"/{inventory_path}"
         else:
             inventory_path = f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d/{inventory_path}"
-        concerto_d_g5k.put_file(roles_concerto_d["server"], CREATED_INVENTORY_PATH, inventory_path)
+        concerto_d_g5k.put_file(roles_concerto_d, CREATED_INVENTORY_PATH, inventory_path)
 
     return roles_concerto_d
 
