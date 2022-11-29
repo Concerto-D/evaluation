@@ -217,7 +217,7 @@ def _launch_experiment_with_params(
     finished_reconfs_by_reconf_name = {}
     start_round_reconf = 0
     execution_start_time = time.time()
-    for reconfiguration_name in ["deploy"]:
+    for reconfiguration_name in ["deploy", "update"]:
         finished_reconfs = _schedule_and_run_uptimes_from_config(
             roles_concerto_d,
             version_concerto_d,
@@ -236,7 +236,7 @@ def _launch_experiment_with_params(
     """TODO: fix algo not correct"""
     finished_reconf = (
             all(finished_reconfs_by_reconf_name["deploy"].values())
-            # and all(finished_reconfs_by_reconf_name["update"].values())
+            and all(finished_reconfs_by_reconf_name["update"].values())
     )
 
     # Save expe metadata
