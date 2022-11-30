@@ -271,7 +271,7 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
         process = subprocess.Popen(command_str, shell=True)
-    exit_code = process.wait()
+    exit_code = process.wait(timeout=180)  # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy)
 
     if exit_code not in [0, 5, 50]:
         raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
@@ -337,6 +337,7 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     src = f"{globals_variables.g5k_execution_params_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+
     if environment == "remote":
         process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
         exit_code = process.wait()
@@ -346,6 +347,22 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
         os.makedirs(dst_dir, exist_ok=True)
         shutil.copy(src, dst)
 
+
+def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
+    assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
+    file_name = f"logs_{assembly_name}"
+    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_debug"
+    src = f"{globals_variables.g5k_execution_params_dir}/logs/{file_name}"
+    dst = f"{dst_dir}/{file_name}"
+
+    if environment == "remote":
+        process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
+        exit_code = process.wait()
+        if exit_code != 0:
+            raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
+    else:
+        os.makedirs(dst_dir, exist_ok=True)
+        shutil.copy(src, dst)
 
 def clean_previous_mjuz_environment(roles_concerto_d, environment):
     """

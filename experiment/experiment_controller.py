@@ -78,6 +78,10 @@ def _execute_node_reconf_in_g5k(
         if version_concerto_d in ["synchronous" "synchronous"] or node_num == 0:
             concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
 
+        # TODO: à généraliser à synchronous et asynchronous
+        if version_concerto_d == "mjuz":
+            concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment)
+
         # Finish reconf for assembly name if its over
         global mjuz_server_finished
         if exit_code == 50 or (version_concerto_d == "mjuz" and mjuz_server_finished):
