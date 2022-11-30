@@ -354,6 +354,7 @@ def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
     dst_dir = f"{globals_variables.local_execution_params_dir}/logs_debug"
     src = f"{globals_variables.g5k_execution_params_dir}/logs/{file_name}"
     dst = f"{dst_dir}/{file_name}"
+    os.makedirs(dst_dir, exist_ok=True)
 
     if environment == "remote":
         process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
@@ -361,7 +362,6 @@ def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
         if exit_code != 0:
             raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
     else:
-        os.makedirs(dst_dir, exist_ok=True)
         shutil.copy(src, dst)
 
 def clean_previous_mjuz_environment(roles_concerto_d, environment):

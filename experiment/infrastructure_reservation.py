@@ -1,10 +1,4 @@
-import os
-import sys
-import traceback
-
-import yaml
-
-from experiment import concerto_d_g5k, experiment_controller, globals_variables, log_experiment, destroy_reservation
+from experiment import concerto_d_g5k, globals_variables
 
 
 # Reservation experiment
@@ -26,7 +20,8 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         reservation,
         nb_concerto_nodes,
         nb_zenoh_routers,
-        cluster
+        cluster,
+        destroy_reservation
     ) = reservation_parameters.values()
     log = log_experiment.log
 
