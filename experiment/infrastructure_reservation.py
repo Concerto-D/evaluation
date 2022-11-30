@@ -41,7 +41,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
 
     log.debug(f"Job should start at {reservation} and should last for {walltime}")
     log.debug(f"Reserve {nb_concerto_nodes} concerto_d and {nb_zenoh_routers} zenoh routers named {job_name_concerto}")
-    roles_concerto_d, networks = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
+    roles_concerto_d, networks, provider = concerto_d_g5k.reserve_nodes_for_concerto_d(job_name_concerto, nb_concerto_d_nodes=nb_concerto_nodes, nb_zenoh_routers=nb_zenoh_routers, cluster=cluster, walltime=walltime, reservation=reservation)
     concerto_d_g5k.add_host_keys_to_know_hosts(roles_concerto_d, cluster)
     log.debug(f"Reserved roles:")
     for k, v in roles_concerto_d.items():
@@ -65,7 +65,7 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
             inventory_path = f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d/{inventory_path}"
         concerto_d_g5k.put_file(roles_concerto_d, CREATED_INVENTORY_PATH, inventory_path)
 
-    return roles_concerto_d
+    return roles_concerto_d, provider
 
 
 def _create_inventory_from_roles(roles):

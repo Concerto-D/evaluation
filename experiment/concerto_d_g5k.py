@@ -90,7 +90,7 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
 
     provider = en.G5k(conf)
     roles, networks = provider.init()
-    return roles, networks
+    return roles, networks, provider
 
 
 # def install_apt_deps(roles_concerto_d: List):

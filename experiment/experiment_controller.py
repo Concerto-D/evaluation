@@ -274,7 +274,7 @@ def _parse_sweeper_parameters(params_to_sweep):
     return sweeps
 
 
-def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_nodes, params_to_sweep, environment, roles_concerto_d):
+def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_nodes, params_to_sweep, environment, roles_concerto_d, destroy_reservation, provider):
     log = log_experiment.log
     experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
     log.debug(f"Global expe dir: {experiment_results_dir}")
@@ -327,3 +327,6 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_n
             traceback.print_exc()
         finally:
             parameter = sweeper.get_next()
+
+    if destroy_reservation and environment == "remote":
+        provider.destroy()
