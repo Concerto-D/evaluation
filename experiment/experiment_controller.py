@@ -332,5 +332,7 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_n
         finally:
             parameter = sweeper.get_next()
 
+    log.debug("--------- All experiments dones ---------")
     if destroy_reservation and environment == "remote":
+        log.debug("Destroy reservation == True, destroy reserved infra")
         provider.destroy()
