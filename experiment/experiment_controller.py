@@ -41,7 +41,7 @@ def _execute_node_reconf_in_g5k(
         environment,
         start_round_reconf
 ):
-    logs_assemblies_file = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
+    logs_assemblies_file = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
     finished_reconfiguration = False
     round_reconf = start_round_reconf
@@ -67,7 +67,7 @@ def _execute_node_reconf_in_g5k(
 
         # Execute reconf
         timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        transitions_times_file = f"{globals_variables.g5k_executions_expe_logs_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
+        transitions_times_file = f"{globals_variables.all_executions_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
         if version_concerto_d in ["synchronous", "asynchronous"]:
             exit_code = concerto_d_g5k.execute_reconf(roles[assembly_name], version_concerto_d, transitions_times_file, duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate, reconfiguration_name, environment)
         else:
@@ -170,36 +170,8 @@ def _schedule_and_run_uptimes_from_config(
     return finished_reconfs
 
 
-def _compute_end_reconfiguration_time(uptimes_nodes):
-    max_uptime_value = 0
-    for uptimes_node in uptimes_nodes:
-        for uptime in uptimes_node:
-            if uptime[0] + uptime[1] > max_uptime_value:
-                max_uptime_value = uptime[0] + uptime[1]
-
-    return max_uptime_value
-
-
-def _launch_experiment_with_params(
-        expe_name,
-        cluster,
-        version_concerto_d,
-        nb_concerto_nodes,
-        uptimes_file_name,
-        transitions_times_file_name,
-        waiting_rate,
-        environment,
-        roles_concerto_d
-):
+def reset_environment(version_concerto_d: str, environment: str, roles_concerto_d, uptimes_nodes):
     log = log_experiment.log
-    with open(f"{globals_variables.all_experiments_results_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
-        uptimes_nodes = json.load(f)
-
-    # Initialize expe dirs and get uptimes nodes
-    globals_variables.initialize_remote_execution_expe_dir_name(expe_name)
-    os.makedirs(globals_variables.local_execution_params_dir, exist_ok=True)
-    log.debug(f"------------ Local execution expe dir on {globals_variables.local_execution_params_dir} ---------------------")
-    log.debug(f"------------ Remote execution expe dir on {globals_variables.g5k_execution_params_dir} ---------------------")
 
     # If asynchronous, deploy zenoh router
     if version_concerto_d == "asynchronous":
@@ -214,6 +186,54 @@ def _launch_experiment_with_params(
         log.debug("-------- Clean previous environment -------")
         log.debug("Clean running mjuz processes and reset previous pulumi dir")
         concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d, environment)
+
+
+def _compute_end_reconfiguration_time(uptimes_nodes):
+    max_uptime_value = 0
+    for uptimes_node in uptimes_nodes:
+        for uptime in uptimes_node:
+            if uptime[0] + uptime[1] > max_uptime_value:
+                max_uptime_value = uptime[0] + uptime[1]
+
+    return max_uptime_value
+
+
+def launch_experiment_with_params(
+        expe_name,
+        version_concerto_d,
+        nb_concerto_nodes,
+        uptimes_file_name,
+        transitions_times_file_name,
+        waiting_rate,
+        environment,
+        roles_concerto_d,
+        id_run
+):
+    log = log_experiment.log
+    log.debug("----- Launching experiment ---------")
+    log.debug("-- Expe parameters --")
+    log.debug(f"Uptimes: {uptimes_file_name}")
+    log.debug(f"Transitions times: {transitions_times_file_name}")
+    log.debug(f"Waiting rate: {waiting_rate}")
+    log.debug(f"Id: {id_run}")
+    log.debug("---------------------")
+
+    with open(f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
+        uptimes_nodes = json.load(f)
+
+    # Initialize expe dirs and get uptimes nodes
+    globals_variables.initialize_current_dirs(expe_name)
+    os.makedirs(globals_variables.current_expe_dir, exist_ok=True)
+    log.debug(f"------------ Expe dir: {globals_variables.current_expe_dir} ---------------------")
+    log.debug(f"------------ Execution dir: {globals_variables.current_execution_dir} ---------------------")
+
+    # Clean and restore environment from previous run
+    reset_environment(
+        version_concerto_d,
+        environment,
+        roles_concerto_d,
+        uptimes_nodes
+    )
 
     # Run experiment
     log.debug("------- Run experiment ----------")
@@ -237,32 +257,9 @@ def _launch_experiment_with_params(
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
         start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
 
-    """TODO: fix algo not correct"""
-    finished_reconf = (
-            all(finished_reconfs_by_reconf_name["deploy"].values())
-            and all(finished_reconfs_by_reconf_name["update"].values())
-    )
-
-    # Save expe metadata
-    metadata_expe = {
-        "expe_parameters": {
-            "version_concerto_name": version_concerto_d,
-            "transitions_times_file_name": transitions_times_file_name,
-            "uptimes_file_name": uptimes_file_name,
-            "waiting_rate": waiting_rate,
-            "cluster": cluster,
-        },
-        "expe_details": {
-            "global_finished_reconf": finished_reconf,
-            "details": finished_reconfs_by_reconf_name
-        }
-    }
-    with open(f"{globals_variables.local_execution_params_dir}/execution_metadata.yaml", "w") as f:
-        yaml.safe_dump(metadata_expe, f, sort_keys=False)
-
-    compute_results.compute_from_expe_dir(f"experiment-{expe_name}-dir", nb_concerto_nodes=nb_concerto_nodes)
-
     log.debug("------ End of experiment ---------")
+
+    return finished_reconfs_by_reconf_name
 
 
 def _parse_sweeper_parameters(params_to_sweep):
@@ -278,11 +275,11 @@ def _parse_sweeper_parameters(params_to_sweep):
     return sweeps
 
 
-def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_nodes, params_to_sweep, environment, roles_concerto_d, destroy_reservation, provider):
+def create_param_sweeper(expe_name: str, sweeper_params):
     log = log_experiment.log
-    experiment_results_dir = globals_variables.experiment_results_dir(expe_name)
+    experiment_results_dir = globals_variables.compute_current_expe_dir_from_name(expe_name)
     log.debug(f"Global expe dir: {experiment_results_dir}")
-    sweeps = _parse_sweeper_parameters(params_to_sweep)
+    sweeps = _parse_sweeper_parameters(sweeper_params)
     log.debug("------------------------ Execution of experiments start ------------------------")
     log.debug(f"Number of experiments: {len(sweeps)}")
     sweeper = ParamSweeper(
@@ -295,44 +292,10 @@ def create_and_run_sweeper(expe_name, cluster, version_concerto_d, nb_concerto_n
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{experiment_results_dir}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True
     )
-    parameter = sweeper.get_next()
+
     log.debug(sweeper)
     log.debug("----- All experiments parameters -----")
-    log.debug(params_to_sweep)
+    log.debug(sweeper_params)
     log.debug("--------------------------------------")
-    while parameter:
-        try:
-            log.debug("----- Launching experiment ---------")
-            log.debug("-- Expe parameters --")
-            log.debug(f"Uptimes: {parameter['uptimes']}")
-            log.debug(f"Transitions times: {parameter['transitions_times']}")
-            log.debug(f"Waiting rate: {parameter['waiting_rate']}")
-            log.debug(f"Id: {parameter['id']}")
-            log.debug("---------------------")
-            _launch_experiment_with_params(
-                expe_name,
-                cluster,
-                version_concerto_d,
-                nb_concerto_nodes,
-                parameter["uptimes"],
-                parameter["transitions_times"],
-                parameter["waiting_rate"],
-                environment,
-                roles_concerto_d
-            )
-            sweeper.done(parameter)
-            log.debug(f"Parameter {parameter} done")
-            log.debug(f"State of the sweeper: {sweeper}")
-        except Exception as e:
-            sweeper.skip(parameter)
-            log.debug("Experiment FAILED")
-            log.debug(e)
-            log.debug(f"Skipping experiment with parameters {parameter}")
-            traceback.print_exc()
-        finally:
-            parameter = sweeper.get_next()
 
-    log.debug("--------- All experiments dones ---------")
-    if destroy_reservation and environment == "remote":
-        log.debug("Destroy reservation == True, destroy reserved infra")
-        provider.destroy()
+    return sweeper

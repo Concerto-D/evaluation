@@ -1,4 +1,5 @@
-from experiment import concerto_d_g5k, globals_variables
+from experiment import concerto_d_g5k
+from enoslib import Host
 
 
 # Reservation experiment
@@ -8,12 +9,24 @@ from experiment import concerto_d_g5k, globals_variables
 # TODO: à signaler: même avec verify_ssl ça ne suffit pas il faut mettre le user et le mdp sur le front-end
 from experiment import log_experiment
 
-CREATED_INVENTORY_PATH = "inventory.yaml"
-CONCERTO_D_INVENTORY_PATH = "concerto-decentralized/inventory.yaml"
-MJUZ_INVENTORY_PATH = "mjuz-concerto-d/inventory.yaml"
+
+def create_infrastructure_reservation(expe_name, environment, reservation_params):
+    log = log_experiment.log
+    if environment == "remote":
+        log.debug(f"Start {expe_name}")
+        roles_concerto_d, provider = create_reservation_for_concerto_d(reservation_params)
+    else:
+        roles_concerto_d = {
+            "server": Host("localhost"),
+            **{f"dep{dep_num}": Host("localhost") for dep_num in range(reservation_params["nb_concerto_nodes"] - 1)},
+            "zenoh_routers": Host("localhost")
+        }
+        provider = None
+
+    return roles_concerto_d, provider
 
 
-def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters, environment):
+def create_reservation_for_concerto_d(reservation_parameters):
     (
         job_name_concerto,
         walltime,
@@ -43,39 +56,5 @@ def create_reservation_for_concerto_d(version_concerto_d, reservation_parameters
         if k != "concerto_d":
             log.debug(f"{k}: {v[0].address}")
 
-    # Initialisation experiment repositories
-    log.debug("Initialise repositories")
-    concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d["server"])
-    if version_concerto_d == "mjuz":
-        concerto_d_g5k.initialize_deps_mjuz(roles_concerto_d["concerto_d"])
-
-    if version_concerto_d in ["synchronous", "mjuz"]:
-        log.debug("Synchronous version: creating inventory")
-        _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
-        log.debug("Put inventory file on frontend")
-        inventory_path = CONCERTO_D_INVENTORY_PATH if version_concerto_d == "synchronous" else MJUZ_INVENTORY_PATH
-        if environment == "remote":
-            inventory_path = f"/{inventory_path}"
-        else:
-            inventory_path = f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d/{inventory_path}"
-        concerto_d_g5k.put_file(roles_concerto_d, CREATED_INVENTORY_PATH, inventory_path)
-
     return roles_concerto_d, provider
 
-
-def _create_inventory_from_roles(roles):
-    with open(CREATED_INVENTORY_PATH, "w") as f:
-        host = roles["server"][0].address
-        f.write(f'server_assembly: "{host}:5000"')
-        f.write("\n")
-        f.write(f'server: "{host}:5000"')
-        f.write("\n")
-        for k, v in roles.items():
-            if k not in ["server", "concerto_d", "zenoh_routers"]:
-                dep_num = int(k.replace("dep", ""))
-                port = 5001 + dep_num
-                name_assembly = k.replace("dep", "dep_assembly_")
-                f.write(f'{name_assembly}: "{v[0].address}:{port}"')
-                f.write("\n")
-                f.write(f'{k}: "{v[0].address}:{port}"')
-                f.write("\n")

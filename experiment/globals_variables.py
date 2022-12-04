@@ -1,28 +1,37 @@
 import os
 from datetime import datetime
 
-all_experiments_results_dir = ""
-g5k_executions_expe_logs_dir = ""
+all_expes_dir = ""
+all_executions_dir = ""
 
-local_execution_params_dir = None
-g5k_execution_params_dir = None
-
-
-def experiment_results_dir(expe_name):
-    return f"{all_experiments_results_dir}/experiment-{expe_name}-dir"
+current_expe_dir = None
+current_execution_dir = None
 
 
-def initialize_remote_execution_expe_dir_name(expe_name):
+def compute_current_expe_dir_from_name(expe_name):
+    return f"{all_expes_dir}/experiment-{expe_name}-dir"
+
+
+def initialize_all_dirs(expe_name: str, all_expes_dir_str: str, all_executions_dir_str: str):
+    global all_expes_dir
+    global all_executions_dir
+    all_expes_dir = all_expes_dir_str
+    all_executions_dir = all_executions_dir_str
+    experiment_results_dir = compute_current_expe_dir_from_name(expe_name)
+    os.makedirs(f"{experiment_results_dir}/experiment_logs", exist_ok=True)
+
+
+def initialize_current_dirs(expe_name):
     """
     Initialization of the experiments directories.
-    <all_experiments_results_dir>: global dir on the host where all the executions of expe_name are executed.
-    <g5k_executions_expe_logs_dir>: global dir on the remote infrastructure where all the executions are executed (here on G5K)
-    <local_execution_params_dir>: specific local dir of the execution of parameters
-    <g5k_execution_params_dir>: specific remote dir of the execution of parameters
+    <all_expes_dir>: global dir on the host where all the executions of expe_name are executed.
+    <all_executions_dir>: global dir on the remote infrastructure where all the executions are executed (here on G5K)
+    <current_expe_dir>: specific local dir of the execution of parameters
+    <current_execution_dir>: specific remote dir of the execution of parameters
     """
-    global g5k_execution_params_dir
-    global local_execution_params_dir
+    global current_execution_dir
+    global current_expe_dir
     ref_execution_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     execution_expe_dir = f"execution-{expe_name}-{ref_execution_timestamp}"
-    g5k_execution_params_dir = f"{g5k_executions_expe_logs_dir}/{execution_expe_dir}"
-    local_execution_params_dir = f"{experiment_results_dir(expe_name)}/{execution_expe_dir}"
+    current_execution_dir = f"{all_executions_dir}/{execution_expe_dir}"
+    current_expe_dir = f"{compute_current_expe_dir_from_name(expe_name)}/{execution_expe_dir}"

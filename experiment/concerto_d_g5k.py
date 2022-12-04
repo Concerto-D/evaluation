@@ -136,7 +136,7 @@ def put_file(role_controller, src: str, dst: str):
 
 
 def initialize_expe_repositories(version_concerto_d, role_controller):
-    home_dir = globals_variables.g5k_executions_expe_logs_dir
+    home_dir = globals_variables.all_executions_dir
     with en.actions(roles=role_controller) as a:
         if version_concerto_d == "mjuz":
             a.git(dest=f"{home_dir}/mjuz-concerto-d",
@@ -160,7 +160,7 @@ def initialize_expe_repositories(version_concerto_d, role_controller):
 
 
 def initialize_deps_mjuz(roles_concerto_d):
-    home_dir = globals_variables.g5k_executions_expe_logs_dir
+    home_dir = globals_variables.all_executions_dir
     with en.actions(roles=roles_concerto_d) as a:
         a.apt(
             name="npm",
@@ -209,7 +209,7 @@ def install_zenoh_router(roles_zenoh_router: List):
 
 def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
     command_args = []
-    home_dir = globals_variables.g5k_executions_expe_logs_dir
+    home_dir = globals_variables.all_executions_dir
     if environment == "remote":
         command_args.append(f"cd {home_dir}/concerto-decentralized;")
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{home_dir}/evaluation;")
@@ -220,7 +220,7 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
     command_args.append(timestamp_log_file)
-    command_args.append(globals_variables.g5k_execution_params_dir)
+    command_args.append(globals_variables.current_execution_dir)
     command_args.append(version_concerto_d)
     command_args.append(reconfiguration_name)
     command_args.append(str(nb_concerto_nodes))
@@ -249,7 +249,7 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     command_args = []
     assembly_name = "server" if dep_num is None else "dep"
 
-    mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.g5k_executions_expe_logs_dir}/mjuz-concerto-d"
+    mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
     command_args.append(f"cd {mjuz_dir}/synthetic-use-case/{assembly_name};")
     trailing = "" if environment == "remote" else ""
@@ -260,7 +260,7 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     command_args.append(f"ts-node . -v trace")
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(timestamp_log_file)
-    command_args.append(globals_variables.g5k_execution_params_dir)
+    command_args.append(globals_variables.current_execution_dir)
     command_args.append(reconfiguration_name)
     command_args.append(str(nb_concerto_nodes))
     if dep_num is not None:
@@ -289,7 +289,7 @@ def kill_subprocess_on_exit(subproc):
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
     kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
-    concerto_d_projects_dir = globals_variables.g5k_executions_expe_logs_dir if environment == "remote" else globals_variables.all_experiments_results_dir
+    concerto_d_projects_dir = globals_variables.all_executions_dir if environment == "remote" else globals_variables.all_expes_dir
     launch_router_cmd = " ".join(["timeout", str(timeout), "zenohd", "-c", f"{concerto_d_projects_dir}/evaluation/experiment/zenohd-config.json5"])
 
     if environment == "remote":
@@ -314,14 +314,14 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
 
 
 def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num, environment):
-    src = f"{globals_variables.g5k_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
-    dst = f"{globals_variables.local_execution_params_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
+    src = f"{globals_variables.current_execution_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
+    dst = f"{globals_variables.current_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
     if environment == "remote":
         with en.actions(roles=role_node) as a:
             a.fetch(src=src, dest=dst, flat="yes", fail_on_missing="no")
     else:
         if exists(src):
-            os.makedirs(f"{globals_variables.local_execution_params_dir}/finished_reconfigurations", exist_ok=True)
+            os.makedirs(f"{globals_variables.current_expe_dir}/finished_reconfigurations", exist_ok=True)
             shutil.copy(src, dst)
 
 
@@ -334,8 +334,8 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
 
 
 def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, reconfiguration_name: str, environment):
-    src = f"{globals_variables.g5k_execution_params_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
-    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_files_assemblies/{reconfiguration_name}"
+    src = f"{globals_variables.current_execution_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
+    dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
 
     if environment == "remote":
@@ -351,8 +351,8 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
 def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
     assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
     file_name = f"logs_{assembly_name}"
-    dst_dir = f"{globals_variables.local_execution_params_dir}/logs_debug"
-    src = f"{globals_variables.g5k_execution_params_dir}/logs/{file_name}"
+    dst_dir = f"{globals_variables.current_expe_dir}/logs_debug"
+    src = f"{globals_variables.current_execution_dir}/logs/{file_name}"
     dst = f"{dst_dir}/{file_name}"
     os.makedirs(dst_dir, exist_ok=True)
 

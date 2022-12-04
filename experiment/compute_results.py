@@ -1,12 +1,45 @@
 import os
-import sys
 from os.path import exists
 from typing import Dict
 
 import yaml
 
+from experiment import globals_variables
+
 home_dir = f"{os.getenv('HOME')}/concerto-d-projects"
 target_dir = f"{os.getenv('HOME')}/experiments_results"
+
+
+def save_expe_metadata(
+        finished_reconfs_by_reconf_name,
+        version_concerto_d,
+        transitions_times,
+        uptimes,
+        waiting_rate,
+        cluster
+):
+    # TODO: fix algo not correct
+    finished_reconf = (
+            all(finished_reconfs_by_reconf_name["deploy"].values())
+            and all(finished_reconfs_by_reconf_name["update"].values())
+    )
+
+    # Save expe metadata
+    metadata_expe = {
+        "expe_parameters": {
+            "version_concerto_name": version_concerto_d,
+            "transitions_times_file_name": transitions_times,
+            "uptimes_file_name": uptimes,
+            "waiting_rate": waiting_rate,
+            "cluster": cluster,
+        },
+        "expe_details": {
+            "global_finished_reconf": finished_reconf,
+            "details": finished_reconfs_by_reconf_name
+        }
+    }
+    with open(f"{globals_variables.current_expe_dir}/execution_metadata.yaml", "w") as f:
+        yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
 def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
