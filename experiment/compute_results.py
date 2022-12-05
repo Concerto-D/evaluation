@@ -120,7 +120,7 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
             loaded_results = yaml.safe_load(f)
         assembly_name = file_name.split("_")[0]
 
-        if version_concerto_d != "mjuz" or assembly_name == "server":
+        if "mjuz" not in version_concerto_d or assembly_name == "server":
             for timestamp_name, timestamp_values in loaded_results.items():
                 timestamp_name_to_save = f"total_{timestamp_name}_duration"
                 if timestamp_name_to_save not in details_assemblies_results[assembly_name][reconfiguration_name]:

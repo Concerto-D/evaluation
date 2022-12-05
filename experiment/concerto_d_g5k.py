@@ -251,7 +251,10 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
 
     mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
-    command_args.append(f"cd {mjuz_dir}/synthetic-use-case/{assembly_name};")
+    dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_name}"
+    if "mjuz-2-comps":
+        dir_name += "-2-components"
+    command_args.append(dir_name + ";")
     trailing = "" if environment == "remote" else ""
     command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)

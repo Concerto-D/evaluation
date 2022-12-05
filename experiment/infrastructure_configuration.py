@@ -14,10 +14,10 @@ def configure_infrastructure(version_concerto_d: str, roles_concerto_d: Dict[str
     # Initialisation experiment repositories
     log.debug("Initialise repositories")
     concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d["server"])
-    if version_concerto_d == "mjuz":
+    if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
         concerto_d_g5k.initialize_deps_mjuz(roles_concerto_d["concerto_d"])
 
-    if version_concerto_d in ["synchronous", "mjuz"]:
+    if version_concerto_d in ["synchronous", "mjuz", "mjuz-2-comps"]:
         log.debug("Synchronous version: creating inventory")
         _create_inventory_from_roles(roles_concerto_d)  # TODO: put inventory on local dir
         log.debug("Put inventory file on frontend")

@@ -79,16 +79,16 @@ def _execute_node_reconf_in_g5k(
             concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir, reconfiguration_name, environment)
 
         # TODO: à généraliser à synchronous et asynchronous
-        if version_concerto_d == "mjuz":
+        if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment)
 
         # Finish reconf for assembly name if its over
         global mjuz_server_finished
-        if exit_code == 50 or (version_concerto_d == "mjuz" and mjuz_server_finished):
+        if exit_code == 50 or (version_concerto_d in ["mjuz", "mjuz-2-comps"] and mjuz_server_finished):
             log_experiment.log.debug(f"Node {node_num} finished")
             finished_reconfiguration = True
 
-            if node_num == 0 and version_concerto_d == "mjuz":
+            if node_num == 0 and version_concerto_d in ["mjuz", "mjuz-2-comps"]:
                 mjuz_server_finished = True
 
         round_reconf += 1
@@ -182,7 +182,7 @@ def reset_environment(version_concerto_d: str, environment: str, roles_concerto_
         concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
 
     # If Mjuz, clean the previous environment before running again
-    if version_concerto_d == "mjuz":
+    if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
         log.debug("-------- Clean previous environment -------")
         log.debug("Clean running mjuz processes and reset previous pulumi dir")
         concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d, environment)
