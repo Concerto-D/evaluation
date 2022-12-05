@@ -162,6 +162,7 @@ def _schedule_and_run_uptimes_from_config(
             except Exception as e:
                 exc = future.exception()
                 log.error(exc)
+                log.error(e)
                 print(exc)
                 # TODO: Cancel all the futures and reset the pulumi dirs, etc if Mjuz
                 raise exc
