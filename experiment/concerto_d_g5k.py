@@ -138,7 +138,7 @@ def put_file(role_controller, src: str, dst: str):
 def initialize_expe_repositories(version_concerto_d, role_controller):
     home_dir = globals_variables.all_executions_dir
     with en.actions(roles=role_controller) as a:
-        if version_concerto_d == "mjuz":
+        if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             a.git(dest=f"{home_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
                   version="custom_provider",
