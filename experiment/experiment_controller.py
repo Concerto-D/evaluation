@@ -222,12 +222,6 @@ def launch_experiment_with_params(
     with open(f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
 
-    # Initialize expe dirs and get uptimes nodes
-    globals_variables.initialize_current_dirs(expe_name)
-    os.makedirs(globals_variables.current_expe_dir, exist_ok=True)
-    log.debug(f"------------ Expe dir: {globals_variables.current_expe_dir} ---------------------")
-    log.debug(f"------------ Execution dir: {globals_variables.current_execution_dir} ---------------------")
-
     # Clean and restore environment from previous run
     reset_environment(
         version_concerto_d,

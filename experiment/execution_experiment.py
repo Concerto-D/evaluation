@@ -51,27 +51,38 @@ if __name__ == '__main__':
     parameter = sweeper.get_next()
     while parameter:
         try:
+            uptimes, transitions_times, waiting_rate, id_run = parameter.values()
+
+            # Initialize expe dirs and get uptimes nodes
+            execution_dir_name = globals_variables.initialize_current_dirs(
+                expe_name,
+                version_concerto_d,
+                transitions_times,
+                uptimes,
+                waiting_rate,
+            )
+
             finished_reconfs_by_reconf_name = experiment_controller.launch_experiment_with_params(
                 expe_name,
                 version_concerto_d,
                 reservation_params["nb_concerto_nodes"],
-                parameter["uptimes"],
-                parameter["transitions_times"],
-                parameter["waiting_rate"],
+                uptimes,
+                transitions_times,
+                waiting_rate,
                 environment,
                 roles_concerto_d,
-                parameter["id"]
+                id
             )
 
             compute_results.save_expe_metadata(
                 finished_reconfs_by_reconf_name,
                 version_concerto_d,
-                parameter["transitions_times"],
-                parameter["uptimes"],
-                parameter["waiting_rate"],
+                transitions_times,
+                uptimes,
+                waiting_rate,
                 reservation_params["cluster"],
             )
-            compute_results.compute_from_expe_dir(f"experiment-{expe_name}-dir", nb_concerto_nodes=reservation_params["nb_concerto_nodes"])
+            compute_results.compute_from_execution_dir(f"experiment-{expe_name}-dir", execution_dir_name)
 
             sweeper.done(parameter)
             log.debug(f"Parameter {parameter} done")

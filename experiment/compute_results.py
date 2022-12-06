@@ -1,4 +1,5 @@
 import os
+import shutil
 from os.path import exists
 from typing import Dict
 
@@ -42,72 +43,84 @@ def save_expe_metadata(
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
+def _compute_results_from_dir(expe_dir_path: str, execution_dir: str):
+    # Read metadata file and put it in results
+    metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
+
+    # If execution metadata file doesn't exists, it means the execution has been aborted, so don't compute the results
+    if exists(metadata_file_path):
+        results = {}
+        with open(metadata_file_path) as f:
+            loaded_metadata = yaml.safe_load(f)
+
+        # Create a dict results with all assemblies names
+        details_assemblies_results = {
+            assembly_name: {"deploy": {}, "update": {}} for assembly_name in
+            # ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
+            ["server"]
+        }
+
+        version_concerto_d = loaded_metadata["expe_parameters"]["version_concerto_name"]
+        # For each reconfiguration name
+        for reconfiguration_name in ["deploy", "update"]:
+            # Call compute_execution_metrics for total of each metric
+            _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name,
+                                       details_assemblies_results)
+
+        # Sort by descending order (highest values on top)
+        sorted_details_assemblies_results = {}
+        for assembly_name, reconf_dicts in details_assemblies_results.items():
+            sorted_details_assemblies_results[assembly_name] = reconf_dicts
+            for reconf_name, values in reconf_dicts.items():
+                sorted_details_assemblies_results[assembly_name][reconf_name] = {
+                    timestamp_name: timestamp_value
+                    for timestamp_name, timestamp_value in sorted(values.items(), key=lambda e: e[1], reverse=True)
+                }
+
+        # Compute metric of interest
+        global_results = _compute_global_results(sorted_details_assemblies_results)
+        global_results["global_finished_reconf"] = loaded_metadata["expe_details"]["global_finished_reconf"]
+        if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
+            global_synchronization_results = _compute_global_synchronization_results(sorted_details_assemblies_results)
+        else:
+            global_synchronization_results = {}
+
+        results["expe_parameters"] = loaded_metadata["expe_parameters"]
+        results["global_results"] = global_results
+        if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
+            results["global_synchronization_results"] = global_synchronization_results
+        results["details_assemblies_results"] = sorted_details_assemblies_results
+        results["expe_details"] = loaded_metadata["expe_details"]
+
+        os.makedirs(target_dir, exist_ok=True)
+        shutil.copytree(f"{expe_dir_path}/{execution_dir}", f"{target_dir}/{execution_dir}")
+        target_file = f"{target_dir}/{execution_dir}.yaml"
+
+        # Save computed results
+        print(f"Save computed results here: {target_file}")
+        with open(target_file, "w") as f:
+            yaml.dump(results, f, sort_keys=False)
+
+        # Save also in execution dir
+        print(f"Also save computed results here: {execution_dir}/{target_file}")
+        with open(f"{target_dir}/{execution_dir}/{execution_dir}.yaml", "w") as f:
+            yaml.dump(results, f, sort_keys=False)
+
+    else:
+        print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
+
+
+def compute_from_execution_dir(expe_dir: str, execution_dir: str):
+    expe_dir_path = f"{home_dir}/{expe_dir}"
+    _compute_results_from_dir(expe_dir_path, execution_dir)
+
+
 def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
     expe_dir_path = f"{home_dir}/{expe_dir}"
 
     # For each sub-dirs except experiment_logs and sweeps
     for execution_dir in [dir_name for dir_name in os.listdir(expe_dir_path) if dir_name not in ["experiment_logs", "sweeps"]]:
-        # Read metadata file and put it in results
-        metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
-
-        # If execution metadata file doesn't exists, it means the execution has been aborted, so don't compute the results
-        if exists(metadata_file_path):
-            results = {}
-            with open(metadata_file_path) as f:
-                loaded_metadata = yaml.safe_load(f)
-
-            # Create a dict results with all assemblies names
-            details_assemblies_results = {
-                assembly_name: {"deploy": {}, "update": {}} for assembly_name in
-                # ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
-                ["server"]
-            }
-
-            version_concerto_d = loaded_metadata["expe_parameters"]["version_concerto_name"]
-            # For each reconfiguration name
-            for reconfiguration_name in ["deploy", "update"]:
-                # Call compute_execution_metrics for total of each metric
-                _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results)
-
-            # Sort by descending order (highest values on top)
-            sorted_details_assemblies_results = {}
-            for assembly_name, reconf_dicts in details_assemblies_results.items():
-                sorted_details_assemblies_results[assembly_name] = reconf_dicts
-                for reconf_name, values in reconf_dicts.items():
-                    sorted_details_assemblies_results[assembly_name][reconf_name] = {timestamp_name: timestamp_value for timestamp_name, timestamp_value in sorted(values.items(), key=lambda e: e[1], reverse=True)}
-
-            # Compute metric of interest
-            global_results = _compute_global_results(sorted_details_assemblies_results)
-            global_results["global_finished_reconf"] = loaded_metadata["expe_details"]["global_finished_reconf"]
-            if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
-                global_synchronization_results = _compute_global_synchronization_results(sorted_details_assemblies_results)
-            else:
-                global_synchronization_results = {}
-
-            # Save file in target directory
-            experiment_results_file_name = _build_save_results_file_name(
-                loaded_metadata["expe_parameters"]["version_concerto_name"],
-                loaded_metadata["expe_parameters"]["transitions_times_file_name"],
-                loaded_metadata["expe_parameters"]["uptimes_file_name"],
-                loaded_metadata["expe_parameters"]["waiting_rate"],
-                execution_dir
-            )
-
-            results["expe_parameters"] = loaded_metadata["expe_parameters"]
-            results["global_results"] = global_results
-            if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
-                results["global_synchronization_results"] = global_synchronization_results
-            results["details_assemblies_results"] = sorted_details_assemblies_results
-            results["expe_details"] = loaded_metadata["expe_details"]
-
-            os.makedirs(target_dir, exist_ok=True)
-            target_file = f"{target_dir}/{experiment_results_file_name}"
-            print(f"Save computed results here: {target_file}")
-            with open(target_file, "w") as f:
-                yaml.dump(results, f, sort_keys=False)
-
-        else:
-            print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
+        _compute_results_from_dir(expe_dir_path, execution_dir)
 
 
 def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict):
@@ -128,7 +141,7 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
                 details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
 
 
-def _build_save_results_file_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, execution_dir):
+def build_save_results_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, timestamp_name):
     file_name = "results_"
     file_name += version_concerto_name
 
@@ -146,7 +159,7 @@ def _build_save_results_file_name(version_concerto_name, transitions_times_file_
     if "0_5-0_6" in uptimes_file_name:
         file_name += "_perc-50-60"
 
-    file_name += f"_waiting_rate-{waiting_rate}-{execution_dir}.yaml"
+    file_name += f"_waiting_rate-{waiting_rate}-{timestamp_name}"
 
     return file_name
 
