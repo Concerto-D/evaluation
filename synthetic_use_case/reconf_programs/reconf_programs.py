@@ -25,7 +25,14 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
 
 def initialize_reconfiguration():
     config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num = get_assembly_parameters(sys.argv)
-    assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
+
+    # Set assembly name
+    if version_concerto_d == "central":
+        assembly_name = "central_controller"
+    else:
+        assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
+
+    # Init log and dirs
     time_logger.init_time_log_dir(assembly_name, timestamp_log_dir=timestamp_log_dir)
     os.makedirs(f"{execution_expe_dir}/reprise_configs", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/communication_cache", exist_ok=True)
