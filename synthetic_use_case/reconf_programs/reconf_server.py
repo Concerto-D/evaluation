@@ -43,7 +43,7 @@ def execute_global_sync(sc):
 
 
 if __name__ == '__main__':
-    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num = reconf_programs.initialize_reconfiguration()
+    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, _ = reconf_programs.initialize_reconfiguration()
     sc = execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes)
     if not global_variables.is_concerto_d_asynchronous():
         execute_global_sync(sc)

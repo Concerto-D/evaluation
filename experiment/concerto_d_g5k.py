@@ -59,7 +59,7 @@ def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01
     return roles, networks, provider
 
 
-def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_servers: int, nb_dependencies: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
     # _ = en.init_logging()
     site = get_cluster_site(cluster)
     concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
@@ -70,10 +70,10 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
     conf = conf.add_machine(
         roles=["concerto_d", "server"],
         cluster=cluster,
-        nodes=1,
+        nodes=nb_servers,
         primary_network=concerto_d_network,
     )
-    for i in range(nb_concerto_d_nodes - 1):
+    for i in range(nb_dependencies):
         conf = conf.add_machine(
             roles=["concerto_d", f"dep{i}"],
             cluster=cluster,
@@ -84,6 +84,12 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_concerto_d_nodes: int, nb_zen
         roles=["zenoh_routers"],
         cluster=cluster,
         nodes=nb_zenoh_routers,
+        primary_network=concerto_d_network,
+    )
+    conf = conf.add_machine(
+        roles=["concerto_d", "server-clients"],
+        cluster=cluster,
+        nodes=nb_server_clients,
         primary_network=concerto_d_network,
     )
     conf = conf.finalize()
@@ -207,15 +213,27 @@ def install_zenoh_router(roles_zenoh_router: List):
         log_experiment.log.debug(a.results)
 
 
-def execute_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
+def execute_reconf(
+        role_node,
+        version_concerto_d,
+        config_file_path: str,
+        duration: float,
+        timestamp_log_file: str,
+        nb_concerto_nodes,
+        dep_num,
+        waiting_rate: float,
+        reconfiguration_name: str,
+        environment: str,
+        assembly_type: str,
+        uptimes_file_name: str
+):
     command_args = []
     home_dir = globals_variables.all_executions_dir
     if environment == "remote":
         command_args.append(f"cd {home_dir}/concerto-decentralized;")
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{home_dir}/evaluation;")
     command_args.append(f"{home_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
-    assembly_name = "server" if dep_num is None else "dep"
-    command_args.append(f"{home_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_name}.py")  # The reconf program to execute
+    command_args.append(f"{home_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
@@ -224,8 +242,13 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
     command_args.append(version_concerto_d)
     command_args.append(reconfiguration_name)
     command_args.append(str(nb_concerto_nodes))
-    if dep_num is not None:
-        command_args.append(str(dep_num))  # If it's a dependency
+    if dep_num is not None:  # If it's a dependency
+        command_args.append("--dep_num")
+        command_args.append(str(dep_num))
+
+    if assembly_type == "server-clients":
+        command_args.append("--uptimes_nodes_file_path")
+        command_args.append(uptimes_file_name)
 
     command_str = " ".join(command_args)
     if environment == "remote":
@@ -240,18 +263,17 @@ def execute_reconf(role_node, version_concerto_d, config_file_path: str, duratio
         exit_code = process.wait()
 
     if exit_code not in [0, 5, 50]:
-        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
+        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_type}{dep_num}): {exit_code}")
 
     return exit_code
 
 
-def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str):
+def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str, assembly_type: str):
     command_args = []
-    assembly_name = "server" if dep_num is None else "dep"
 
     mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
-    dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_name}"
+    dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
     if "mjuz-2-comps":
         dir_name += "-2-components"
     command_args.append(dir_name + ";")
@@ -277,7 +299,7 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     exit_code = process.wait(timeout=180)  # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy)
 
     if exit_code not in [0, 5, 50]:
-        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_name}{dep_num}): {exit_code}")
+        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_type}{dep_num}): {exit_code}")
 
     return exit_code
 

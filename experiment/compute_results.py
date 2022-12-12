@@ -1,11 +1,11 @@
 import os
 import shutil
 from os.path import exists
-from typing import Dict
+from typing import Dict, List
 
 import yaml
 
-from experiment import globals_variables
+from experiment import globals_variables, metric_experiment_functions
 
 home_dir = f"{os.getenv('HOME')}/concerto-d-projects"
 target_dir = f"{os.getenv('HOME')}/experiments_results"
@@ -43,7 +43,7 @@ def save_expe_metadata(
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
-def _compute_results_from_dir(expe_dir_path: str, execution_dir: str):
+def _compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
     # Read metadata file and put it in results
     metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
 
@@ -55,17 +55,14 @@ def _compute_results_from_dir(expe_dir_path: str, execution_dir: str):
 
         # Create a dict results with all assemblies names
         details_assemblies_results = {
-            assembly_name: {"deploy": {}, "update": {}} for assembly_name in
-            # ["server", *[f"dep{i}" for i in range(nb_concerto_nodes)]]
-            ["server"]
+            assembly_name: {"deploy": {}, "update": {}} for assembly_name in assemblies_names
         }
 
         version_concerto_d = loaded_metadata["expe_parameters"]["version_concerto_name"]
         # For each reconfiguration name
         for reconfiguration_name in ["deploy", "update"]:
             # Call compute_execution_metrics for total of each metric
-            _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name,
-                                       details_assemblies_results)
+            _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results)
 
         # Sort by descending order (highest values on top)
         sorted_details_assemblies_results = {}
@@ -110,17 +107,17 @@ def _compute_results_from_dir(expe_dir_path: str, execution_dir: str):
         print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
 
 
-def compute_from_execution_dir(expe_dir: str, execution_dir: str):
+def compute_from_execution_dir(expe_dir: str, execution_dir: str, assemblies_names: List[str]):
     expe_dir_path = f"{home_dir}/{expe_dir}"
-    _compute_results_from_dir(expe_dir_path, execution_dir)
+    _compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
 
 
-def compute_from_expe_dir(expe_dir: str, nb_concerto_nodes: int = 12):
+def compute_from_expe_dir(expe_dir: str, assemblies_names: List[str]):
     expe_dir_path = f"{home_dir}/{expe_dir}"
 
     # For each sub-dirs except experiment_logs and sweeps
     for execution_dir in [dir_name for dir_name in os.listdir(expe_dir_path) if dir_name not in ["experiment_logs", "sweeps"]]:
-        _compute_results_from_dir(expe_dir_path, execution_dir)
+        _compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
 
 
 def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict):
@@ -164,67 +161,36 @@ def build_save_results_name(version_concerto_name, transitions_times_file_name, 
     return file_name
 
 
+def _compute_max_value_from_func(details_assemblies_results, compute_func):
+    max_assembly_name, max_assembly_value = "", 0
+    for assembly_name, assembly_reconfs_values in details_assemblies_results.items():
+        assembly_value = compute_func(assembly_reconfs_values)
+        if compute_func(assembly_reconfs_values) > max_assembly_value:
+            max_assembly_name = assembly_name
+            max_assembly_value = assembly_value
+
+    return round(max_assembly_value, 2)
+
+
 def _compute_global_results(details_assemblies_results):
-    global_results = {}
-    max_deploy_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"])
-    max_deploy_time = max_deploy_values["deploy"]["total_event_deploy_duration"]
-
-    max_update_values = max(details_assemblies_results.values(), key=lambda values: values["update"]["total_event_update_duration"])
-    max_update_time = max_update_values["update"]["total_event_update_duration"]
-
-    max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_deploy_duration"] + values["update"]["total_event_update_duration"])
-    max_reconf_time = max_reconf_values["deploy"]["total_event_deploy_duration"] + max_reconf_values["update"]["total_event_update_duration"]
-
-    max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"])
-    max_sleeping_time = max_sleeping_values["deploy"]["total_event_sleeping_duration"] + max_sleeping_values["update"]["total_event_sleeping_duration"]
-
-    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"]["total_event_sleeping_duration"] + values["update"]["total_event_sleeping_duration"]
-                                                                                       + values["deploy"]["total_event_uptime_duration"] + values["update"]["total_event_uptime_duration"])
-    max_execution_time = (max_execution_values["deploy"]["total_event_sleeping_duration"] + max_execution_values["update"]["total_event_sleeping_duration"]
-                         + max_execution_values["deploy"]["total_event_uptime_duration"] + max_execution_values["update"]["total_event_uptime_duration"])
-
-    global_results.update({
-        "max_deploy_time": round(max_deploy_time, 2),
-        "max_update_time": round(max_update_time, 2),
-        "max_reconf_time": round(max_reconf_time, 2),
-        "max_sleeping_time": round(max_sleeping_time, 2),
-        "max_execution_time": round(max_execution_time, 2),
-    })
-
-    return global_results
+    return {
+        "max_deploy_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_deploy_duration_func),
+        "max_update_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_update_duration_func),
+        "max_reconf_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_reconf_duration_func),
+        "max_sleeping_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_sleeping_duration_func),
+        "max_execution_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_duration_func),
+    }
 
 
 def _compute_global_synchronization_results(details_assemblies_results):
-    global_results = {}
-    max_deploy_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_instruction_waitall_27_duration", 0) + values["deploy"].get("total_instruction_waitall_5_duration", 0))
-    max_deploy_sync_time = max_deploy_values["deploy"].get("total_instruction_waitall_27_duration", 0) + max_deploy_values["deploy"].get("total_instruction_waitall_5_duration", 0)
-
-    max_update_values = max(details_assemblies_results.values(), key=lambda values: values["update"].get("total_instruction_waitall_4_duration", 0) + values["update"].get("total_instruction_waitall_3_duration", 0))
-    max_update_sync_time = max_update_values["update"].get("total_instruction_waitall_4_duration", 0) + max_update_values["update"].get("total_instruction_waitall_3_duration", 0)
-
-    max_reconf_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_instruction_waitall_27_duration", 0) + values["deploy"].get("total_instruction_waitall_5_duration", 0)
-                                                                                  + values["update"].get("total_instruction_waitall_4_duration", 0) + values["update"].get("total_instruction_waitall_3_duration", 0))
-    max_reconf_sync_time = (max_reconf_values["deploy"].get("total_instruction_waitall_27_duration", 0) + max_reconf_values["deploy"].get("total_instruction_waitall_5_duration", 0)
-                          + max_reconf_values["update"].get("total_instruction_waitall_4_duration", 0) + max_reconf_values["update"].get("total_instruction_waitall_3_duration", 0))
-
-    max_sleeping_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + values["update"].get("total_event_sleeping_wait_all_duration", 0))
-    max_sleeping_sync_time = max_sleeping_values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + max_sleeping_values["update"].get("total_event_sleeping_wait_all_duration", 0)
-
-    max_execution_values = max(details_assemblies_results.values(), key=lambda values: values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + values["update"].get("total_event_sleeping_wait_all_duration", 0)
-                                                                                       + values["deploy"].get("total_event_uptime_wait_all_duration", 0) + values["update"].get("total_event_uptime_wait_all_duration", 0))
-    max_execution_sync_time = (max_execution_values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + max_execution_values["update"].get("total_event_sleeping_wait_all_duration", 0)
-                             + max_execution_values["deploy"].get("total_event_uptime_wait_all_duration", 0) + max_execution_values["update"].get("total_event_uptime_wait_all_duration", 0))
-
-    global_results.update({
-        "max_deploy_sync_time": round(max_deploy_sync_time, 2),
-        "max_update_sync_time": round(max_update_sync_time, 2),
-        "max_reconf_sync_time": round(max_reconf_sync_time, 2),
-        "max_sleeping_sync_time": round(max_sleeping_sync_time, 2),
-        "max_execution_sync_time": round(max_execution_sync_time, 2),
-    })
-
-    return global_results
+    return {
+        "max_deploy_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_deploy_sync_duration_func),
+        "max_update_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_update_sync_duration_func),
+        "max_reconf_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_reconf_sync_duration_func),
+        "max_sleeping_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_sleeping_sync_duration_func),
+        "max_execution_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_sync_duration_func),
+    }
 
 
 if __name__ == '__main__':
-    compute_from_expe_dir("experiment-test-mjuz-update-2-deps-dir", 2)
+    compute_from_execution_dir("experiment-test-central-dir", "results_central_T0_perc-1-1_waiting_rate-1-2022-12-12_11-25-34", ["server-clients"])

@@ -52,8 +52,16 @@ if __name__ == '__main__':
     while parameter:
         try:
             uptimes, transitions_times, waiting_rate, id_run = parameter.values()
+            log.debug("----- Starting experiment ---------")
+            log.debug("-- Expe parameters --")
+            log.debug(f"Uptimes: {uptimes}")
+            log.debug(f"Transitions times: {transitions_times}")
+            log.debug(f"Waiting rate: {waiting_rate}")
+            log.debug(f"Id: {id_run}")
+            log.debug("---------------------")
 
             # Initialize expe dirs and get uptimes nodes
+            log.debug("-------------- Initialising dirs ---------------")
             execution_dir_name = globals_variables.initialize_current_dirs(
                 expe_name,
                 version_concerto_d,
@@ -62,18 +70,20 @@ if __name__ == '__main__':
                 waiting_rate,
             )
 
+            log.debug("-------------------- Launching experiment -----------------------")
             finished_reconfs_by_reconf_name = experiment_controller.launch_experiment_with_params(
                 expe_name,
                 version_concerto_d,
-                reservation_params["nb_concerto_nodes"],
+                reservation_params["nb_dependencies"] + reservation_params["nb_servers"] + reservation_params["nb_server_clients"],
                 uptimes,
                 transitions_times,
                 waiting_rate,
                 environment,
                 roles_concerto_d,
-                id
+                id_run
             )
 
+            log.debug("------------------ Saving expe metadata --------------------------")
             compute_results.save_expe_metadata(
                 finished_reconfs_by_reconf_name,
                 version_concerto_d,
@@ -82,7 +92,22 @@ if __name__ == '__main__':
                 waiting_rate,
                 reservation_params["cluster"],
             )
-            compute_results.compute_from_execution_dir(f"experiment-{expe_name}-dir", execution_dir_name)
+
+            log.debug("----------------- Compute results from execution dir -----------")
+            experiment_dir = f"experiment-{expe_name}-dir"
+            log.debug(f"Experiment dir: {experiment_dir}")
+            log.debug(f"Execution dir name: {execution_dir_name}")
+
+            assemblies_names = []
+            if reservation_params["nb_servers"] == 1:
+                assemblies_names.append("server")
+            for i in range(reservation_params["nb_dependencies"]):
+                assemblies_names.append(f"dep{i}")
+            if reservation_params["nb_server_clients"] == 1:
+                assemblies_names.append("server-clients")
+
+            log.debug(f"List assemblies names to compute metrics from: {assemblies_names}")
+            compute_results.compute_from_execution_dir(experiment_dir, execution_dir_name, assemblies_names)
 
             sweeper.done(parameter)
             log.debug(f"Parameter {parameter} done")

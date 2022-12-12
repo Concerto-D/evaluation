@@ -1,5 +1,6 @@
 import sys
 
+from concerto import debug_logger
 from concerto.time_logger import TimestampType, create_timestamp_metric
 from synthetic_use_case.assemblies.server_clients_assembly import ServerClientsAssembly
 
@@ -39,8 +40,8 @@ def execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reco
 
 
 if __name__ == '__main__':
-    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num = reconf_programs.initialize_reconfiguration()
-    uptimes_nodes_file_path = sys.argv[9]
+    config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path = reconf_programs.initialize_reconfiguration()
+    debug_logger.log.debug(f"Central reconf, getting uptims_nodes_file_path: {uptimes_nodes_file_path}")
 
     sc = execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, uptimes_nodes_file_path)
     sc.finish_reconfiguration()
