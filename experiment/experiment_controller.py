@@ -50,8 +50,8 @@ def _execute_node_reconf_in_g5k(
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node):
         # Find next uptime
-        next_uptime, duration = uptimes_node[round_reconf]
-        sleeping_time = abs(execution_start_time + next_uptime - time.time())
+        current_time = time.time() - execution_start_time
+        sleeping_time, duration = _compute_sleeping_duration_uptime_duration(current_time, uptimes_node)
         log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
 
         key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
@@ -132,14 +132,17 @@ def execute_and_get_results(
     return exit_code, finished_reconfiguration
 
 
-def _find_next_uptime(uptimes_nodes):
-    min_uptime = (0, (math.inf, math.inf))
-    for node_num, uptimes_values in enumerate(uptimes_nodes):
-        for uptime in uptimes_values:
-            if uptime[0] < min_uptime[1][0]:
-                min_uptime = (node_num, uptime)
+def _compute_sleeping_duration_uptime_duration(time_to_check, uptimes_node):
+    for uptime_num, uptime_values in enumerate(uptimes_node):
+        uptime, duration = uptime_values
 
-    return min_uptime
+        # Si le uptime est à 0 pile, on autorise une approximation à 0.1 (notamment le dernier thread qui doit attendre
+        # que tous les autres threads soient créés)
+        if time_to_check <= uptime + 0.1:
+            return uptime - time_to_check, duration
+
+        # if uptime < time_to_check < uptime + duration//2:
+        #     return 0, uptime + duration//2 - time_to_check
 
 
 def _schedule_and_run_uptimes_from_config(
