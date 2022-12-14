@@ -139,7 +139,7 @@ def _compute_sleeping_duration_uptime_duration(time_to_check, uptimes_node):
         # Si le uptime est à 0 pile, on autorise une approximation à 0.1 (notamment le dernier thread qui doit attendre
         # que tous les autres threads soient créés)
         if time_to_check <= uptime + 0.1:
-            return uptime - time_to_check, duration
+            return uptime + 0.1 - time_to_check, duration
 
         # if uptime < time_to_check < uptime + duration//2:
         #     return 0, uptime + duration//2 - time_to_check
