@@ -213,13 +213,21 @@ def initialize_deps_mjuz(roles_concerto_d):
     )
 
 
+def _get_zenoh_install_dir():
+    return f"{globals_variables.all_executions_dir}/zenoh_install"
+
+
 def install_zenoh_router(roles_zenoh_router: List):
     """
     Install the 0.6 version of zenoh router
     """
+    # Installing zenoh in the executions dir
+    zenoh_install_dir = _get_zenoh_install_dir()
     with en.actions(roles=roles_zenoh_router) as a:
-        a.apt_repository(repo="deb [trusted=yes] https://download.eclipse.org/zenoh/debian-repo/ /", state="present")
-        a.apt(name="zenoh", update_cache="yes")
+        a.file(path=zenoh_install_dir, state="directory")
+        a.unarchive(remote_src="yes",
+                    src=f"https://download.eclipse.org/zenoh/zenoh/0.6.0-beta.1/x86_64-unknown-linux-gnu/zenoh-0.6.0-beta.1-x86_64-unknown-linux-gnu.zip",
+                    dest=zenoh_install_dir)
         log_experiment.log.debug(a.results)
 
 
@@ -333,7 +341,10 @@ def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
     kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
     concerto_d_projects_dir = globals_variables.all_executions_dir if environment == "remote" else globals_variables.all_expes_dir
-    launch_router_cmd = " ".join(["timeout", str(timeout), "zenohd", "-c", f"{concerto_d_projects_dir}/evaluation/experiment/zenohd-config.json5"])
+
+    # Need to specify the dirs to search libs (/usr/lib by default)
+    zenoh_install_dir = _get_zenoh_install_dir()
+    launch_router_cmd = " ".join(["timeout", str(timeout), f"{zenoh_install_dir}/zenohd", "-c", f"{concerto_d_projects_dir}/evaluation/experiment/zenohd-config.json5", "--cfg", f"'plugins_search_dirs:[\"{zenoh_install_dir}\"]'"])
 
     if environment == "remote":
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
