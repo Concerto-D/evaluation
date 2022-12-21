@@ -110,14 +110,17 @@ def execute_and_get_results(
 
     log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
+    # TODO: à généraliser à synchronous et asynchronous
+    concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment)
+
+    # Throw exception if exit_code is unexpected
+    if exit_code not in [0, 5, 50]:
+        raise Exception(f"Unexpected exit code for the the role: {roles[assembly_name][0].address} ({assembly_type}{dep_num}): {exit_code}")
+
     # Fetch results (mjuz reconf fetch only results of the server which is node 0)
     if version_concerto_d in ["synchronous", "asynchronous"] or node_num == 0:
         concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir,
                                             reconfiguration_name, environment)
-
-    # TODO: à généraliser à synchronous et asynchronous
-    if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-        concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment)
 
     # Finish reconf for assembly name if its over
     global mjuz_server_finished
@@ -270,6 +273,15 @@ def launch_experiment_with_params(
 
     with open(f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
+
+    # Create current execution dir and log_debug dir
+    current_execution_dir = globals_variables.current_execution_dir
+    concerto_d_g5k.create_dir(roles_concerto_d["concerto_d"], current_execution_dir, environment)
+
+    # Put inventory file on each node
+    log.debug("Put inventory file on each")
+    inventory_name = globals_variables.inventory_name
+    concerto_d_g5k.put_file(roles_concerto_d["concerto_d"], inventory_name, f"{current_execution_dir}/{inventory_name}", environment)
 
     # Clean and restore environment from previous run
     reset_environment(

@@ -193,4 +193,7 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    compute_from_execution_dir("experiment-test-central-dir", "results_central_T0_perc-1-1_waiting_rate-1-2022-12-12_11-25-34", ["server-clients"])
+    compute_from_execution_dir(
+        "experiment-test-new-dirs-dir", "results_synchronous_T0_perc-1-1_waiting_rate-1-2022-12-21_14-31-05",
+        ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
+    )

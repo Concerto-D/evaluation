@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from datetime import datetime
 
@@ -10,8 +11,10 @@ log = None
 def initialize_logging(expe_name, mock=False):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     experiment_results_dir = globals_variables.compute_current_expe_dir_from_name(expe_name)
+    os.makedirs(f"{experiment_results_dir}/experiment_logs", exist_ok=True)
     if not mock:
         logging.basicConfig(filename=f"{experiment_results_dir}/experiment_logs/experiment_logs_{timestamp}.txt", format='%(asctime)s %(message)s', filemode="a+")
+
     global log
     log = logging.getLogger(__name__)
     console = logging.StreamHandler(sys.stdout)

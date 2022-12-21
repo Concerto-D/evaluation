@@ -6,8 +6,10 @@ from experiment import log_experiment, compute_results
 all_expes_dir = ""
 all_executions_dir = ""
 
-current_expe_dir = None
+current_expe_dir = None  # TODO: change name as it is the results found in current_execution_dir
 current_execution_dir = None
+
+inventory_name = "inventory.yaml"
 
 
 def compute_current_expe_dir_from_name(expe_name):
@@ -20,7 +22,7 @@ def initialize_all_dirs(expe_name: str, all_expes_dir_str: str, all_executions_d
     all_expes_dir = all_expes_dir_str
     all_executions_dir = all_executions_dir_str
     experiment_results_dir = compute_current_expe_dir_from_name(expe_name)
-    os.makedirs(f"{experiment_results_dir}/experiment_logs", exist_ok=True)
+    os.makedirs(experiment_results_dir, exist_ok=True)
 
 
 def initialize_current_dirs(

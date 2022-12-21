@@ -60,7 +60,7 @@ def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01
 
 
 def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_servers: int, nb_dependencies: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
-    # _ = en.init_logging()
+    _ = en.init_logging()
     site = get_cluster_site(cluster)
     concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
     conf = (
@@ -135,38 +135,53 @@ def add_host_keys_to_know_hosts(roles_concerto_d, cluster):
                 log.debug("Added")
 
 
-def put_file(role_controller, src: str, dst: str):
-    with en.actions(roles=role_controller) as a:
-        a.copy(src=src, dest=dst)
-        log_experiment.log.debug(a.results)
+def put_file(roles, src: str, dst: str, environment: str):
+    if environment == "remote":
+        with en.actions(roles=roles) as a:
+            a.copy(src=src, dest=dst)
+            log_experiment.log.debug(a.results)
+    else:
+        shutil.copy(src, dst)
 
 
-def initialize_expe_repositories(version_concerto_d, role_controller):
-    home_dir = globals_variables.all_executions_dir
-    with en.actions(roles=role_controller) as a:
+def create_dir(roles, dir_path: str, environment: str):
+    """
+    Create all dir hierarchy if it doesn't exists
+    """
+    if environment == "remote":
+        with en.actions(roles=roles) as a:
+            a.file(path=dir_path, state="directory")
+    else:
+        os.makedirs(dir_path, exist_ok=True)
+
+
+def initialize_expe_repositories(version_concerto_d, roles):
+    all_executions_dir = globals_variables.all_executions_dir
+    with en.actions(roles=roles) as a:
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-            a.git(dest=f"{home_dir}/mjuz-concerto-d",
+            a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
                   version="custom_provider",
                   accept_hostkey=True)
         else:
-            a.git(dest=f"{home_dir}/concerto-decentralized",
+            a.git(dest=f"{all_executions_dir}/concerto-decentralized",
                   repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
                   accept_hostkey=True)
-            a.pip(chdir=f"{home_dir}/concerto-decentralized",
-                  requirements=f"{home_dir}/concerto-decentralized/requirements.txt",
-                  virtualenv=f"{home_dir}/concerto-decentralized/venv")
-        # a.git(dest=f"{home_dir}/evaluation",
-        #       repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
-        #       accept_hostkey=True)
-        a.git(dest=f"{home_dir}/experiment_files",
+            a.pip(chdir=f"{all_executions_dir}/concerto-decentralized",
+                  requirements=f"{all_executions_dir}/concerto-decentralized/requirements.txt",
+                  virtualenv=f"{all_executions_dir}/concerto-decentralized/venv")
+        a.git(dest=f"{all_executions_dir}/evaluation",
+              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
+              version="mjuz-controller",
+              accept_hostkey=True)
+        a.git(dest=f"{all_executions_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
               accept_hostkey=True)
         log_experiment.log.debug(a.results)
 
 
 def initialize_deps_mjuz(roles_concerto_d):
-    home_dir = globals_variables.all_executions_dir
+    all_executions_dir = globals_variables.all_executions_dir
     with en.actions(roles=roles_concerto_d) as a:
         a.apt(
             name="npm",
@@ -185,6 +200,8 @@ def initialize_deps_mjuz(roles_concerto_d):
                 "name": "ts-node",
             }
         )
+
+        # TODO: change pulumi-mjuz location (instead of /opt)
         a.copy(
             src="/home/anomond/pulumi-mjuz/pulumi",
             dest="/opt",
@@ -192,15 +209,8 @@ def initialize_deps_mjuz(roles_concerto_d):
         )
 
     en.run_command(
-        f"cd {home_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d[0]
+        f"cd {all_executions_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d[0]
     )
-
-    with en.actions(roles=roles_concerto_d) as a:
-        a.copy(
-            src=f"{home_dir}/mjuz-concerto-d",
-            dest="/",
-            remote_src="yes"
-        )
 
 
 def install_zenoh_router(roles_zenoh_router: List):
@@ -227,13 +237,14 @@ def execute_reconf(
         assembly_type: str,
         uptimes_file_name: str
 ):
+    log = log_experiment.log
     command_args = []
-    home_dir = globals_variables.all_executions_dir
+    all_executions_dir = globals_variables.all_executions_dir
     if environment == "remote":
-        command_args.append(f"cd {home_dir}/concerto-decentralized;")
-        command_args.append(f"export PYTHONPATH=$PYTHONPATH:{home_dir}/evaluation;")
-    command_args.append(f"{home_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
-    command_args.append(f"{home_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
+        command_args.append(f"cd {all_executions_dir}/concerto-decentralized;")
+        command_args.append(f"export PYTHONPATH=$PYTHONPATH:{all_executions_dir}/evaluation;")
+    command_args.append(f"{all_executions_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
+    command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
@@ -251,24 +262,34 @@ def execute_reconf(
         command_args.append(uptimes_file_name)
 
     command_str = " ".join(command_args)
+    log.debug(f"Start execution reconfiguration, command executed: {command_str}")
     if environment == "remote":
-        process = subprocess.Popen(f"ssh anomond@{role_node[0].address} '{command_str}'", shell=True)
+        process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
         exit_code = process.wait()
 
     else:
         cwd = os.getcwd()
         env_process = os.environ.copy()
         env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
-        process = subprocess.Popen(command_args, env=env_process, cwd=f"{home_dir}/concerto-decentralized")
+        process = subprocess.Popen(command_args, env=env_process, cwd=f"{all_executions_dir}/concerto-decentralized")
         exit_code = process.wait()
-
-    if exit_code not in [0, 5, 50]:
-        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_type}{dep_num}): {exit_code}")
 
     return exit_code
 
 
-def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, duration: float, timestamp_log_file: str, nb_concerto_nodes, dep_num, waiting_rate: float, reconfiguration_name: str, environment: str, assembly_type: str):
+def execute_mjuz_reconf(
+        role_node,
+        version_concerto_d,
+        config_file_path: str,
+        duration: float,
+        timestamp_log_file: str,
+        nb_concerto_nodes,
+        dep_num,
+        waiting_rate: float,
+        reconfiguration_name: str,
+        environment: str,
+        assembly_type: str
+):
     command_args = []
 
     mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
@@ -297,9 +318,6 @@ def execute_mjuz_reconf(role_node, version_concerto_d, config_file_path: str, du
     else:
         process = subprocess.Popen(command_str, shell=True)
     exit_code = process.wait(timeout=180)  # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy)
-
-    if exit_code not in [0, 5, 50]:
-        raise Exception(f"Unexpected exit code for the the role: {role_node[0].address} ({assembly_type}{dep_num}): {exit_code}")
 
     return exit_code
 
@@ -362,32 +380,29 @@ def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: 
     src = f"{globals_variables.current_execution_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
     dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
-
-    if environment == "remote":
-        process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
-        exit_code = process.wait()
-        if exit_code != 0:
-            raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
-    else:
-        os.makedirs(dst_dir, exist_ok=True)
-        shutil.copy(src, dst)
+    _fetch_file(role_node, src, dst, dst_dir, environment)
 
 
 def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
     assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
-    file_name = f"logs_{assembly_name}"
+    file_name = f"logs_{assembly_name}.txt"
     dst_dir = f"{globals_variables.current_expe_dir}/logs_debug"
     src = f"{globals_variables.current_execution_dir}/logs/{file_name}"
     dst = f"{dst_dir}/{file_name}"
+    _fetch_file(role_node, src, dst, dst_dir, environment)
+
+
+def _fetch_file(role_node, src, dst, dst_dir, environment):
     os.makedirs(dst_dir, exist_ok=True)
 
     if environment == "remote":
-        process = subprocess.Popen(f"scp {role_node[0].address}:{src} {dst}", shell=True)
+        process = subprocess.Popen(f"scp root@{role_node[0].address}:{src} {dst}", shell=True)
         exit_code = process.wait()
         if exit_code != 0:
-            raise Exception(f"Error while fetch log_file_assembly (src: {src}, dst: {dst})")
+            raise Exception(f"Error while fetch {role_node[0].address} (src: {src}, dst: {dst})")
     else:
         shutil.copy(src, dst)
+
 
 def clean_previous_mjuz_environment(roles_concerto_d, environment):
     """

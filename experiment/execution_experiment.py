@@ -40,8 +40,7 @@ if __name__ == '__main__':
     roles_concerto_d, provider = infrastructure_reservation.create_infrastructure_reservation(expe_name, environment, reservation_params)
 
     # Infrastructure configuration
-    if environment == "remote":
-        infrastructure_configuration.configure_infrastructure(version_concerto_d, roles_concerto_d, environment)
+    infrastructure_configuration.configure_infrastructure(version_concerto_d, roles_concerto_d, environment)
 
     # Create sweeper
     sweeper = experiment_controller.create_param_sweeper(expe_name, sweeper_params)
