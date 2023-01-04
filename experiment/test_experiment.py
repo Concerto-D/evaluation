@@ -6,7 +6,7 @@ from enoslib import Host
 from experiment import globals_variables, log_experiment, experiment_controller, concerto_d_g5k
 
 
-def test_fetch_times_log_file():
+def test_fetch_times_log_files():
         globals_variables.current_expe_dir = "/home/aomond/concerto-d-projects"
         globals_variables.current_execution_dir = "/home/anomond/concerto-d-projects"
         globals_variables.initialize_current_dirs("test")
@@ -26,7 +26,7 @@ def test_fetch_times_log_file():
                 "dep10": [Host(address="econome-6.nantes.grid5000.fr")],
                 "dep11": [Host(address="econome-8.nantes.grid5000.fr")]
         }
-        concerto_d_g5k.fetch_times_log_file(
+        concerto_d_g5k.fetch_times_log_files(
                 roles_nodes["server"],
                 assembly_name="server",
                 dep_num=None,
@@ -93,6 +93,6 @@ def test_execute_node_reconf_in_g5k():
         )
 
 
-# test_fetch_times_log_file()
+# test_fetch_times_log_files()
 # test_execute_reconf()
 test_execute_node_reconf_in_g5k()

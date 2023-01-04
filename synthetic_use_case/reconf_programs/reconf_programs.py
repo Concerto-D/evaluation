@@ -9,7 +9,7 @@ import yaml
 from concerto import time_logger, global_variables, debug_logger
 
 
-def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str, str, str, int, Optional[int], str]:
+def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str, str, str, int, Optional[int], str, float]:
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file_path")
     parser.add_argument("uptime_duration", type=float)
@@ -21,6 +21,7 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
     parser.add_argument("nb_concerto_nodes", type=int)
     parser.add_argument("--dep_num", type=int)
     parser.add_argument("--uptimes_nodes_file_path")
+    parser.add_argument("--execution_start_time", type=float)
     (
         config_file_path,
         uptime_duration,
@@ -31,17 +32,19 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
         reconfiguration_name,
         nb_concerto_nodes,
         dep_num,
-        uptimes_nodes_file_path
+        uptimes_nodes_file_path,
+        execution_start_time
      ) = parser.parse_args().__dict__.values()
 
     with open(config_file_path, "r") as f:
         loaded_config = yaml.safe_load(f)
 
-    return loaded_config, uptime_duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path
+    return loaded_config, uptime_duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time
 
 
 def initialize_reconfiguration():
-    config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path = get_assembly_parameters(sys.argv)
+    # TODO: remove timestamp_log_dir
+    config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time = get_assembly_parameters(sys.argv)
 
     # Set assembly name
     if version_concerto_d == "central":
@@ -50,7 +53,7 @@ def initialize_reconfiguration():
         assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
 
     # Init log and dirs
-    time_logger.init_time_log_dir(assembly_name, timestamp_log_dir=timestamp_log_dir)
+    time_logger.init_time_log_dir(assembly_name)
     os.makedirs(f"{execution_expe_dir}/reprise_configs", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/communication_cache", exist_ok=True)
     os.makedirs(f"{execution_expe_dir}/logs", exist_ok=True)
@@ -68,7 +71,9 @@ def initialize_reconfiguration():
         "version_concerto_d": version_concerto_d,
         "reconfiguration_name": reconfiguration_name,
         "nb_concerto_nodes": nb_concerto_nodes,
-        "dep_num": dep_num
+        "dep_num": dep_num,
+        "uptimes_nodes_file_path": uptimes_nodes_file_path,
+        "execution_start_time": execution_start_time
     }
     debug_logger.log.debug(f"Initialization complete, script parameters: {params_to_log}")
-    return config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path
+    return config_dict, duration, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time

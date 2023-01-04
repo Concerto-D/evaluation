@@ -5,7 +5,7 @@ from synthetic_use_case.assemblies.server import Server
 
 
 class ServerClientsAssembly(Assembly):
-    def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, uptimes_nodes_file_path):
+    def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes, uptimes_nodes_file_path, execution_start_time):
         remote_assemblies = {}
 
         # Add components types to instanciate for the add instruction
@@ -13,7 +13,7 @@ class ServerClientsAssembly(Assembly):
             "Server": Server,
             "Dep": Dep
         }
-        self.time_checker = TimeCheckerAssemblies(uptimes_nodes_file_path)
+        self.time_checker = TimeCheckerAssemblies(uptimes_nodes_file_path, execution_start_time)
         Assembly.__init__(
             self,
             "server_clients_assembly",

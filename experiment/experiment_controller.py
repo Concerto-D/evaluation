@@ -70,7 +70,7 @@ def _execute_node_reconf_in_g5k(
             assembly_name, dep_num, duration, environment,
             nb_concerto_nodes, node_num,
             reconf_config_file_path, reconfiguration_name,
-            roles, version_concerto_d, waiting_rate, uptimes_file_name
+            roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time
         )
 
         round_reconf += 1
@@ -81,7 +81,7 @@ def _execute_node_reconf_in_g5k(
 def execute_and_get_results(
         assembly_name, dep_num, duration, environment,
         nb_concerto_nodes, node_num, reconf_config_file_path, reconfiguration_name, roles,
-        version_concerto_d, waiting_rate, uptimes_file_name
+        version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time
 ):
     # Execute reconf
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -99,7 +99,7 @@ def execute_and_get_results(
         exit_code = concerto_d_g5k.execute_reconf(
             roles[assembly_name], version_concerto_d, transitions_times_file,
             duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate,
-            reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute
+            reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute, execution_start_time
         )
     else:
         exit_code = concerto_d_g5k.execute_mjuz_reconf(
@@ -116,11 +116,6 @@ def execute_and_get_results(
     # Throw exception if exit_code is unexpected
     if exit_code not in [0, 5, 50]:
         raise Exception(f"Unexpected exit code for the the role: {roles[assembly_name][0].address} ({assembly_type}{dep_num}): {exit_code}")
-
-    # Fetch results (mjuz reconf fetch only results of the server which is node 0)
-    if version_concerto_d in ["synchronous", "asynchronous"] or node_num == 0:
-        concerto_d_g5k.fetch_times_log_file(roles[assembly_name], assembly_name, dep_num, timestamp_log_dir,
-                                            reconfiguration_name, environment)
 
     # Finish reconf for assembly name if its over
     global mjuz_server_finished
@@ -325,7 +320,8 @@ def launch_experiment_with_params(
                 roles_concerto_d,
                 version_concerto_d,
                 waiting_rate,
-                uptimes_file_name
+                uptimes_file_name,
+                execution_start_time
             )
             finished_reconfs = {
                 "server-clients": {
@@ -333,8 +329,14 @@ def launch_experiment_with_params(
                     "rounds_reconf": 0,
                 }
             }
+        log.debug(f"Fetching all timestamps log files for {reconfiguration_name}")
+        dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
+        src_dir = f"{globals_variables.current_execution_dir}/{reconfiguration_name}"
+        concerto_d_g5k.fetch_dir(roles_concerto_d["concerto_d"], src_dir, dst_dir, environment)
+
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
         start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
+
 
     log.debug("------ End of experiment ---------")
 

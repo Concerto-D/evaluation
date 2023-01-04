@@ -39,3 +39,16 @@ def max_sleeping_sync_duration_func(assemblies_values):
 def max_execution_sync_duration_func(assemblies_values):
     return (assemblies_values["deploy"].get("total_event_sleeping_wait_all_duration", 0) + assemblies_values["update"].get("total_event_sleeping_wait_all_duration", 0)
           + assemblies_values["deploy"].get("total_event_uptime_wait_all_duration", 0) + assemblies_values["update"].get("total_event_uptime_wait_all_duration", 0))
+
+
+# Specific functions for central concerto-d
+def max_deploy_duration_func_central(assemblies_values):
+    return assemblies_values["deploy"].get("total_event_uptime_duration", 0)
+
+
+def max_update_duration_func_central(assemblies_values):
+    return assemblies_values["update"].get("total_event_uptime_duration", 0)
+
+
+def max_reconf_duration_func_central(assemblies_values):
+    return assemblies_values["deploy"].get("total_event_uptime_duration", 0) + assemblies_values["update"].get("total_event_uptime_duration", 0)

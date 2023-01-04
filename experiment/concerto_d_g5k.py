@@ -243,7 +243,8 @@ def execute_reconf(
         reconfiguration_name: str,
         environment: str,
         assembly_type: str,
-        uptimes_file_name: str
+        uptimes_file_name: str,
+        execution_start_time: float
 ):
     log = log_experiment.log
     command_args = []
@@ -268,6 +269,10 @@ def execute_reconf(
     if assembly_type == "server-clients":
         command_args.append("--uptimes_nodes_file_path")
         command_args.append(uptimes_file_name)
+
+    if assembly_type == "server-clients":
+        command_args.append("--execution_start_time")
+        command_args.append(str(execution_start_time))
 
     command_str = " ".join(command_args)
     log.debug(f"Start execution reconfiguration, command executed: {command_str}")
@@ -387,15 +392,40 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
         return f"dep{dep_num}_{timestamp_log_file}.yaml"
 
 
-def fetch_times_log_file(role_node, assembly_name, dep_num, timestamp_log_file: str, reconfiguration_name: str, environment):
-    src = f"{globals_variables.current_execution_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
-    dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
-    dst = f"{dst_dir}/{build_times_log_path(assembly_name, dep_num, timestamp_log_file)}"
-    _fetch_file(role_node, src, dst, dst_dir, environment)
+def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
+    if environment == "remote":
+        with en.actions(roles=roles) as a:
+            a.find(paths=src_dir)
+
+        for role_result in a.results:
+            for file_item in role_result.payload["files"]:
+                src = file_item["path"]
+                file_name = src.split("/")[-1]
+                dest = f"{dst_dir}/{file_name}"
+
+                with en.actions(roles=roles) as a:
+                    a.fetch(src=src, dest=dest)
+
+    else:
+        os.makedirs(dst_dir, exist_ok=True)
+        for file_path in os.listdir(src_dir):
+            shutil.copy(f"{src_dir}/{file_path}", f"{dst_dir}/{file_path}")
+
+# def fetch_times_log_files(roles, reconfiguration_name: str, environment):
+#     dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
+#     with en.actions(roles=roles) as a:
+#         a.find(paths=f"{globals_variables.current_execution_dir}/{reconfiguration_name}")
+#     for file_item in a.results[0].payload["files"]:
+#         file_name = file_item["path"].split("/")[-1]
+#         dst = f"{dst_dir}/{file_name}"
+#         _fetch_file(role_node, src, dst, dst_dir, environment)
 
 
 def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
-    assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
+    if assembly_type == "server-clients":
+        assembly_name = "server-clients"
+    else:
+        assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
     file_name = f"logs_{assembly_name}.txt"
     dst_dir = f"{globals_variables.current_expe_dir}/logs_debug"
     src = f"{globals_variables.current_execution_dir}/logs/{file_name}"

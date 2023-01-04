@@ -65,6 +65,8 @@ def _compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies
             _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results)
 
         # Sort by descending order (highest values on top)
+        if "server-clients" in details_assemblies_results.keys():
+            del details_assemblies_results["server-clients"]
         sorted_details_assemblies_results = {}
         for assembly_name, reconf_dicts in details_assemblies_results.items():
             sorted_details_assemblies_results[assembly_name] = reconf_dicts
@@ -75,7 +77,10 @@ def _compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies
                 }
 
         # Compute metric of interest
-        global_results = _compute_global_results(sorted_details_assemblies_results)
+        if loaded_metadata["expe_parameters"]["version_concerto_name"] == "central":
+            global_results = _compute_global_results_central(sorted_details_assemblies_results)
+        else:
+            global_results = _compute_global_results(sorted_details_assemblies_results)
         global_results["global_finished_reconf"] = loaded_metadata["expe_details"]["global_finished_reconf"]
         if loaded_metadata["expe_parameters"]["version_concerto_name"] == "synchronous":
             global_synchronization_results = _compute_global_synchronization_results(sorted_details_assemblies_results)
@@ -129,6 +134,8 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
         with open(f"{logs_files_assemblies_dir}/{file_name}") as f:
             loaded_results = yaml.safe_load(f)
         assembly_name = file_name.split("_")[0]
+        if assembly_name not in details_assemblies_results:
+            details_assemblies_results[assembly_name] = {"deploy": {}, "update": {}}
 
         if "mjuz" not in version_concerto_d or assembly_name == "server":
             for timestamp_name, timestamp_values in loaded_results.items():
@@ -182,6 +189,16 @@ def _compute_global_results(details_assemblies_results):
     }
 
 
+def _compute_global_results_central(details_assemblies_results):
+    return {
+        "max_deploy_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_deploy_duration_func_central),
+        "max_update_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_update_duration_func_central),
+        "max_reconf_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_reconf_duration_func_central),
+        "max_sleeping_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_sleeping_duration_func),
+        "max_execution_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_duration_func),
+    }
+
+
 def _compute_global_synchronization_results(details_assemblies_results):
     return {
         "max_deploy_sync_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_deploy_sync_duration_func),
@@ -194,6 +211,6 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 if __name__ == '__main__':
     compute_from_execution_dir(
-        "experiment-test-new-dirs-dir", "results_synchronous_T0_perc-1-1_waiting_rate-1-2022-12-21_14-31-05",
+        "experiment-test-central-correct-dir", "results_central_T0_perc-50-60_waiting_rate-1-2023-01-03_17-47-53",
         ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
     )
