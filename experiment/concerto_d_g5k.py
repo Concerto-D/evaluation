@@ -404,7 +404,7 @@ def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
                 dest = f"{dst_dir}/{file_name}"
 
                 with en.actions(roles=roles) as a:
-                    a.fetch(src=src, dest=dest)
+                    a.fetch(src=src, dest=dest, flat="yes")
 
     else:
         os.makedirs(dst_dir, exist_ok=True)
