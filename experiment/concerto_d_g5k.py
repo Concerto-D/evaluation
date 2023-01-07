@@ -158,6 +158,7 @@ def create_dir(roles, dir_path: str, environment: str):
 def initialize_expe_repositories(version_concerto_d, roles):
     all_executions_dir = globals_variables.all_executions_dir
     with en.actions(roles=roles) as a:
+        a.apt(name=["git", "python3-pip", "virtualenv"], state="present")
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
