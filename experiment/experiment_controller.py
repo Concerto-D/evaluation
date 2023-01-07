@@ -232,7 +232,7 @@ def reset_environment(version_concerto_d: str, environment: str, roles_concerto_
     if version_concerto_d == "asynchronous":
         log.debug("------- Deploy zenoh routers -------")
         if environment in ["remote", "raspberry"]:
-            concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"])
+            concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"], version_concerto_d, environment)
         max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
         concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
 
