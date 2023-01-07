@@ -142,9 +142,10 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
                 details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
 
 
-def build_save_results_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, timestamp_name):
+def build_save_results_name(version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, timestamp_name, cluster_name):
     file_name = "results_"
     file_name += version_concerto_name
+    file_name += f"_{cluster_name}"
 
     if "1-30-deps12-0" in transitions_times_file_name:
         file_name += "_T0"

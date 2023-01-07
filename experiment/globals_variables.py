@@ -30,7 +30,8 @@ def initialize_current_dirs(
     version_concerto_d,
     transitions_times,
     uptimes,
-    waiting_rate
+    waiting_rate,
+    cluster_name
 ):
     """
     Initialization of the experiments directories.
@@ -48,7 +49,8 @@ def initialize_current_dirs(
         transitions_times,
         uptimes,
         waiting_rate,
-        ref_execution_timestamp
+        ref_execution_timestamp,
+        cluster_name
     )
 
     current_execution_dir = f"{all_executions_dir}/{execution_dir_name}"

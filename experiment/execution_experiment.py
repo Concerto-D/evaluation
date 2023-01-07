@@ -61,12 +61,14 @@ if __name__ == '__main__':
 
             # Initialize expe dirs and get uptimes nodes
             log.debug("-------------- Initialising dirs ---------------")
+            cluster_name = reservation_params["cluster"] if environment == "remote" else environment
             execution_dir_name = globals_variables.initialize_current_dirs(
                 expe_name,
                 version_concerto_d,
                 transitions_times,
                 uptimes,
                 waiting_rate,
+                cluster_name
             )
 
             log.debug("-------------------- Launching experiment -----------------------")
