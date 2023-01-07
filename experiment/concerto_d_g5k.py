@@ -394,17 +394,18 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
 
 def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
     if environment == "remote":
-        with en.actions(roles=roles) as a:
-            a.find(paths=src_dir)
+        for role in roles:
+            with en.actions(roles=role) as a:
+                a.find(paths=src_dir)
 
-        for role_result in a.results:
-            for file_item in role_result.payload["files"]:
-                src = file_item["path"]
-                file_name = src.split("/")[-1]
-                dest = f"{dst_dir}/{file_name}"
+            for role_result in a.results:
+                for file_item in role_result.payload["files"]:
+                    src = file_item["path"]
+                    file_name = src.split("/")[-1]
+                    dest = f"{dst_dir}/{file_name}"
 
-                with en.actions(roles=roles) as a:
-                    a.fetch(src=src, dest=dest, flat="yes")
+                    with en.actions(roles=role) as a:
+                        a.fetch(src=src, dest=dest, flat="yes")
 
     else:
         os.makedirs(dst_dir, exist_ok=True)
