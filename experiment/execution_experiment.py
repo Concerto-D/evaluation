@@ -37,7 +37,7 @@ if __name__ == '__main__':
     log = log_experiment.log
 
     # Infrastructure reservation
-    roles_concerto_d, provider = infrastructure_reservation.create_infrastructure_reservation(expe_name, environment, reservation_params)
+    roles_concerto_d, provider = infrastructure_reservation.create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d)
 
     # Infrastructure configuration
     infrastructure_configuration.configure_infrastructure(version_concerto_d, roles_concerto_d, environment)

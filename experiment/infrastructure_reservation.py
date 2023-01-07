@@ -11,17 +11,37 @@ from enoslib.objects import Roles
 from experiment import log_experiment
 
 
-def create_infrastructure_reservation(expe_name, environment, reservation_params):
+def create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d):
     log = log_experiment.log
     if environment == "remote":
         log.debug(f"Start {expe_name}")
         roles_concerto_d, provider = create_reservation_for_concerto_d(reservation_params)
     elif environment == "raspberry":
-        raspberry_hosts = [Host("rpi-8.nantes.grid5000.fr", user="root")]
-        roles_concerto_d = Roles({
-            "server-clients": raspberry_hosts,
-            "concerto_d": raspberry_hosts
-        })
+        roles_dict = {}
+        if version_concerto_d == "central":
+            server_client_host = Host("rpi-8.nantes.grid5000.fr", user="root")
+            roles_concerto_d_list = [server_client_host]
+            roles_dict["server-clients"] = server_client_host
+        # elif version_concerto_d in ["synchronous", "asynchronous", "mjuz", "mjuz-2-comps"]:
+        else:
+            server_host = Host("rpi-8.nantes.grid5000.fr", user="root")
+            clients_hosts = [
+                Host("rpi-7.nantes.grid5000.fr", user="root"),
+                Host("rpi-6.nantes.grid5000.fr", user="root"),
+            ]
+            roles_concerto_d_list = [
+                server_host,
+                *clients_hosts
+            ]
+            roles_dict["server"] = server_host
+            for dep_num in range(reservation_params["nb_dependencies"]):
+                roles_dict[f"dep{dep_num}"] = clients_hosts[dep_num]
+
+            if version_concerto_d == "asynchronous":
+                zenoh_router = Host("rpi-5.nantes.grid5000.fr", user="root")
+                roles_dict["zenoh_routers"] = [zenoh_router]
+        roles_dict["concerto_d"] = roles_concerto_d_list
+        roles_concerto_d = Roles(roles_dict)
         provider = None
     else:
         local_host = Host("localhost")
