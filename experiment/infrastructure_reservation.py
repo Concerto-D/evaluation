@@ -21,7 +21,7 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
         if version_concerto_d == "central":
             server_client_host = Host("rpi-8.nantes.grid5000.fr", user="root")
             roles_concerto_d_list = [server_client_host]
-            roles_dict["server-clients"] = server_client_host
+            roles_dict["server-clients"] = [server_client_host]
         # elif version_concerto_d in ["synchronous", "asynchronous", "mjuz", "mjuz-2-comps"]:
         else:
             server_host = Host("rpi-8.nantes.grid5000.fr", user="root")
@@ -33,9 +33,9 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
                 server_host,
                 *clients_hosts
             ]
-            roles_dict["server"] = server_host
+            roles_dict["server"] = [server_host]
             for dep_num in range(reservation_params["nb_dependencies"]):
-                roles_dict[f"dep{dep_num}"] = clients_hosts[dep_num]
+                roles_dict[f"dep{dep_num}"] = [clients_hosts[dep_num]]
 
             if version_concerto_d == "asynchronous":
                 zenoh_router = Host("rpi-5.nantes.grid5000.fr", user="root")

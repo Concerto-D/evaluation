@@ -10,7 +10,7 @@ def configure_infrastructure(version_concerto_d: str, roles_concerto_d: Dict[str
     # Initialisation experiment repositories
     if environment in ["remote", "raspberry"]:
         log.debug("Initialise repositories")
-        concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d)
+        concerto_d_g5k.initialize_expe_repositories(version_concerto_d, roles_concerto_d["concerto_d"])
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             concerto_d_g5k.initialize_deps_mjuz(roles_concerto_d["concerto_d"])
 
