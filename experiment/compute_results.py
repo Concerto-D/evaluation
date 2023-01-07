@@ -5,7 +5,7 @@ from typing import Dict, List
 
 import yaml
 
-from experiment import globals_variables, metric_experiment_functions
+from experiment import globals_variables, metric_experiment_functions, log_experiment
 
 home_dir = f"{os.getenv('HOME')}/concerto-d-projects"
 target_dir = f"{os.getenv('HOME')}/experiments_results"
@@ -43,9 +43,11 @@ def save_expe_metadata(
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
-def _compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
+def compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
     # Read metadata file and put it in results
     metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
+    log = log_experiment.log
+    log.debug(f"Metadata file path: {metadata_file_path}")
 
     # If execution metadata file doesn't exists, it means the execution has been aborted, so don't compute the results
     if exists(metadata_file_path):
@@ -112,17 +114,12 @@ def _compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies
         print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
 
 
-def compute_from_execution_dir(expe_dir: str, execution_dir: str, assemblies_names: List[str]):
-    expe_dir_path = f"{home_dir}/{expe_dir}"
-    _compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
-
-
-def compute_from_expe_dir(expe_dir: str, assemblies_names: List[str]):
-    expe_dir_path = f"{home_dir}/{expe_dir}"
-
-    # For each sub-dirs except experiment_logs and sweeps
-    for execution_dir in [dir_name for dir_name in os.listdir(expe_dir_path) if dir_name not in ["experiment_logs", "sweeps"]]:
-        _compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
+# def compute_from_expe_dir(expe_dir: str, assemblies_names: List[str]):
+#     expe_dir_path = f"{home_dir}/{expe_dir}"
+#
+#     # For each sub-dirs except experiment_logs and sweeps
+#     for execution_dir in [dir_name for dir_name in os.listdir(expe_dir_path) if dir_name not in ["experiment_logs", "sweeps"]]:
+#         compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
 
 
 def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict):
@@ -210,7 +207,8 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    compute_from_execution_dir(
-        "experiment-test-central-correct-dir", "results_central_T0_perc-50-60_waiting_rate-1-2023-01-03_17-47-53",
+    expe_dir_path = f"{home_dir}/experiment-test-central-correct-dir"
+    compute_results_from_dir(
+        expe_dir_path, "results_central_T0_perc-50-60_waiting_rate-1-2023-01-03_17-47-53",
         ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
     )
