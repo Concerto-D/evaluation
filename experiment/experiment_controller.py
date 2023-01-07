@@ -266,7 +266,7 @@ def launch_experiment_with_params(
 ):
     log = log_experiment.log
 
-    with open(f"{globals_variables.all_executions_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
+    with open(f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}") as f:
         uptimes_nodes = json.load(f)
 
     # Create current execution dir and log_debug dir
