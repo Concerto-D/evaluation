@@ -1,5 +1,6 @@
 from experiment import concerto_d_g5k
 from enoslib import Host
+from enoslib.objects import Roles
 
 
 # Reservation experiment
