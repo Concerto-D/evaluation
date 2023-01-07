@@ -136,7 +136,7 @@ def add_host_keys_to_know_hosts(roles_concerto_d, cluster):
 
 
 def put_file(roles, src: str, dst: str, environment: str):
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         with en.actions(roles=roles) as a:
             a.copy(src=src, dest=dst)
             log_experiment.log.debug(a.results)
@@ -148,7 +148,7 @@ def create_dir(roles, dir_path: str, environment: str):
     """
     Create all dir hierarchy if it doesn't exists
     """
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         with en.actions(roles=roles) as a:
             a.file(path=dir_path, state="directory")
     else:
@@ -249,7 +249,7 @@ def execute_reconf(
     log = log_experiment.log
     command_args = []
     all_executions_dir = globals_variables.all_executions_dir
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         command_args.append(f"cd {all_executions_dir}/concerto-decentralized;")
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{all_executions_dir}/evaluation;")
     command_args.append(f"{all_executions_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
@@ -276,7 +276,7 @@ def execute_reconf(
 
     command_str = " ".join(command_args)
     log.debug(f"Start execution reconfiguration, command executed: {command_str}")
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
         exit_code = process.wait()
 
@@ -305,13 +305,13 @@ def execute_mjuz_reconf(
 ):
     command_args = []
 
-    mjuz_dir = "/mjuz-concerto-d" if environment == "remote" else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
+    mjuz_dir = "/mjuz-concerto-d" if environment in ["remote", "raspberry"] else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
     dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
     if "mjuz-2-comps":
         dir_name += "-2-components"
     command_args.append(dir_name + ";")
-    trailing = "" if environment == "remote" else ""
+    trailing = "" if environment in ["remote", "raspberry"] else ""
     command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
     command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
@@ -326,7 +326,7 @@ def execute_mjuz_reconf(
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
         process = subprocess.Popen(command_str, shell=True)
@@ -345,13 +345,13 @@ def kill_subprocess_on_exit(subproc):
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
     kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
-    concerto_d_projects_dir = globals_variables.all_executions_dir if environment == "remote" else globals_variables.all_expes_dir
+    concerto_d_projects_dir = globals_variables.all_executions_dir if environment in ["remote", "raspberry"] else globals_variables.all_expes_dir  # TODO condition inutile
 
     # Need to specify the dirs to search libs (/usr/lib by default)
     zenoh_install_dir = _get_zenoh_install_dir()
     launch_router_cmd = " ".join(["timeout", str(timeout), f"{zenoh_install_dir}/zenohd", "-c", f"{concerto_d_projects_dir}/evaluation/experiment/zenohd-config.json5", "--cfg", f"'plugins_search_dirs:[\"{zenoh_install_dir}\"]'"])
 
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
         time.sleep(1)
         en.run_command(launch_router_cmd, roles=roles_zenoh_router, background=True)
@@ -375,7 +375,7 @@ def build_finished_reconfiguration_path(assembly_name, dep_num):
 def fetch_finished_reconfiguration_file(role_node, assembly_name, dep_num, environment):
     src = f"{globals_variables.current_execution_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
     dst = f"{globals_variables.current_expe_dir}/{build_finished_reconfiguration_path(assembly_name, dep_num)}"
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         with en.actions(roles=role_node) as a:
             a.fetch(src=src, dest=dst, flat="yes", fail_on_missing="no")
     else:
@@ -393,7 +393,7 @@ def build_times_log_path(assembly_name, dep_num, timestamp_log_file: str):
 
 
 def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         for role in roles:
             with en.actions(roles=role) as a:
                 a.find(paths=src_dir)
@@ -437,7 +437,7 @@ def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
 def _fetch_file(role_node, src, dst, dst_dir, environment):
     os.makedirs(dst_dir, exist_ok=True)
 
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"scp root@{role_node[0].address}:{src} {dst}", shell=True)
         exit_code = process.wait()
         if exit_code != 0:
@@ -453,12 +453,12 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     """
     kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node)"
     reset_pulumi_dir_cmd = f"rm -rf /tmp/.pulumi &&"
-    trailing = ";" if environment == "remote" else ""
+    trailing = ";" if environment in ["remote", "raspberry"] else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
     reset_pulumi_dir_cmd += " PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing
     reset_pulumi_dir_cmd += " /opt/pulumi/bin/pulumi login file:///tmp"
 
-    if environment == "remote":
+    if environment in ["remote", "raspberry"]:
         en.run_command(kill_ts_node_cmd, roles=roles_concerto_d, on_error_continue=True)
         en.run_command(reset_pulumi_dir_cmd, roles=roles_concerto_d)
 

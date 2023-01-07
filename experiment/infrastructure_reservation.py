@@ -15,6 +15,11 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
     if environment == "remote":
         log.debug(f"Start {expe_name}")
         roles_concerto_d, provider = create_reservation_for_concerto_d(reservation_params)
+    elif environment == "raspberry":
+        roles_concerto_d = {
+            "server-clients": [Host("rpi-8.nantes.grid5000.fr")]
+        }
+        provider = None
     else:
         local_host = Host("localhost")
         nb_concerto_d_nodes = 1 if reservation_params["nb_server_clients"] == 1 else 13
