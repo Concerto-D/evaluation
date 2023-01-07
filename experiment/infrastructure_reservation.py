@@ -16,20 +16,22 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
         log.debug(f"Start {expe_name}")
         roles_concerto_d, provider = create_reservation_for_concerto_d(reservation_params)
     elif environment == "raspberry":
-        roles_concerto_d = {
-            "server-clients": [Host("rpi-8.nantes.grid5000.fr")]
-        }
+        raspberry_hosts = [Host("rpi-8.nantes.grid5000.fr", user="root")]
+        roles_concerto_d = Roles({
+            "server-clients": raspberry_hosts,
+            "concerto_d": raspberry_hosts
+        })
         provider = None
     else:
         local_host = Host("localhost")
         nb_concerto_d_nodes = 1 if reservation_params["nb_server_clients"] == 1 else 13
-        roles_concerto_d = {
+        roles_concerto_d = Roles({
             "server-clients": [local_host],
             "server": [local_host],
             **{f"dep{dep_num}": [local_host] for dep_num in range(reservation_params["nb_dependencies"])},
             "concerto_d": [local_host] * nb_concerto_d_nodes,
             "zenoh_routers": [local_host]
-        }
+        })
         provider = None
 
     return roles_concerto_d, provider
