@@ -13,7 +13,6 @@ class ServerClientsAssembly(Assembly):
             "Server": Server,
             "Dep": Dep
         }
-        self.time_checker = TimeCheckerAssemblies(uptimes_nodes_file_path, execution_start_time)
         Assembly.__init__(
             self,
             "server_clients_assembly",
@@ -23,5 +22,6 @@ class ServerClientsAssembly(Assembly):
             waiting_rate,
             version_concerto_d,
             nb_concerto_nodes,
-            reconfiguration_name
+            reconfiguration_name,
+            uptimes_nodes_file_path
         )
