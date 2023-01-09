@@ -210,7 +210,7 @@ def initialize_deps_mjuz(roles_concerto_d):
         )
 
     en.run_command(
-        f"cd {all_executions_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d[0]
+        f"cd {all_executions_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d
     )
 
 
@@ -313,7 +313,7 @@ def execute_mjuz_reconf(
 ):
     command_args = []
 
-    mjuz_dir = "/mjuz-concerto-d" if environment in ["remote", "raspberry"] else f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
+    mjuz_dir = f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
     dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
     if "mjuz-2-comps":

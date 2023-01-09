@@ -332,7 +332,8 @@ def launch_experiment_with_params(
         log.debug(f"Fetching all timestamps log files for {reconfiguration_name}")
         dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
         src_dir = f"{globals_variables.current_execution_dir}/{reconfiguration_name}"
-        concerto_d_g5k.fetch_dir(roles_concerto_d["concerto_d"], src_dir, dst_dir, environment)
+        roles_to_fetch = "server" if version_concerto_d in ["mjuz", "mjuz-2-comps"] else "concerto_d"
+        concerto_d_g5k.fetch_dir(roles_concerto_d[roles_to_fetch], src_dir, dst_dir, environment)
 
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
         start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
