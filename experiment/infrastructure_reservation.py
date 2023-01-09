@@ -28,6 +28,9 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
             clients_hosts = [
                 Host("rpi-7.nantes.grid5000.fr", user="root"),
                 Host("rpi-6.nantes.grid5000.fr", user="root"),
+                Host("rpi-4.nantes.grid5000.fr", user="root"),
+                Host("rpi-3.nantes.grid5000.fr", user="root"),
+                Host("rpi-2.nantes.grid5000.fr", user="root"),
             ]
             roles_concerto_d_list = [
                 server_host,
