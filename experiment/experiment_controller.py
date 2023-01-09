@@ -10,6 +10,7 @@ from typing import List
 
 import yaml
 from execo_engine import sweep, ParamSweeper, HashableDict
+from pebble import concurrent
 
 from experiment import globals_variables, concerto_d_g5k, log_experiment, compute_results
 
@@ -26,6 +27,8 @@ class EndOfExperimentException(BaseException):
 mjuz_server_finished = False
 
 
+# daemon=True so that if an exception arises in one of the Thread, stop all the treads and go to the next experiment
+@concurrent.thread(daemon=True)
 def _execute_node_reconf_in_g5k(
         roles,
         version_concerto_d,
@@ -172,8 +175,7 @@ def _schedule_and_run_uptimes_from_config(
             uptimes_node = uptimes_nodes[node_num]
             dep_num = None if node_num == 0 else node_num - 1
             assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-            exec_future = executor.submit(
-                _execute_node_reconf_in_g5k,
+            exec_future = _execute_node_reconf_in_g5k(
                 roles,
                 version_concerto_d,
                 assembly_name,
@@ -201,28 +203,11 @@ def _schedule_and_run_uptimes_from_config(
             except Exception as e:
                 exc = future.exception()
                 log.error(exc)
-                log.error(e)
-                print(exc)
                 # TODO: Cancel all the futures and reset the pulumi dirs, etc if Mjuz
                 raise exc
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs
-
-
-# def run_central_assembly_from_config(
-#         roles_concerto_d,
-#         version_concerto_d,
-#         uptimes_nodes_list,
-#         transitions_times_file_name,
-#         waiting_rate,
-#         reconfiguration_name,
-#         nb_concerto_nodes,
-#         environment,
-#         start_round_reconf,
-#         execution_start_time
-# ):
-
 
 
 def reset_environment(version_concerto_d: str, environment: str, roles_concerto_d, uptimes_nodes):

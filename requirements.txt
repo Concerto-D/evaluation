@@ -1,3 +1,4 @@
 PyYAML==6.0
 enoslib==7.2.1
 execo==2.6.8
+pebble==5.0.3

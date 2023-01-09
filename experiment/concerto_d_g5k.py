@@ -334,6 +334,7 @@ def execute_mjuz_reconf(
         command_args.append(str(dep_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
+    log_experiment.log.debug(f"Command launched: {command_str}")
     if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
