@@ -5,6 +5,7 @@ concerto-decentralized/
 experiment_files/
 cachedir/
 __pycache__/
+test_divers/
 
 expe_parameters*.yaml
 local_expe_parameters*.yaml
