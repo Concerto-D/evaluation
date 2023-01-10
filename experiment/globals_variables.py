@@ -45,6 +45,7 @@ def initialize_current_dirs(
     global current_expe_dir
     ref_execution_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     execution_dir_name = compute_results.build_save_results_name(
+        expe_name,
         version_concerto_d,
         transitions_times,
         uptimes,
