@@ -49,6 +49,7 @@ if __name__ == '__main__':
     destroy_reservation = reservation_params.get("destroy_reservation", "True") == "True"
     parameter = sweeper.get_next()
     while parameter:
+        execution_dir_name = ""
         try:
             uptimes, transitions_times, waiting_rate, id_run = parameter.values()
             log.debug("----- Starting experiment ---------")
@@ -117,7 +118,7 @@ if __name__ == '__main__':
             sweeper.skip(parameter)
             log.debug("Experiment FAILED")
             log.debug(e)
-            log.debug(f"Skipping experiment with parameters {parameter}")
+            log.debug(f"Skipping experiment with parameters {parameter}, execution_dir_name: {execution_dir_name}")
             traceback.print_exc()
         finally:
             parameter = sweeper.get_next()
