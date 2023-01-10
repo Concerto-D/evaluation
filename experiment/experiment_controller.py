@@ -43,7 +43,8 @@ def _execute_node_reconf_in_g5k(
         execution_start_time,
         environment,
         start_round_reconf,
-        uptimes_file_name
+        uptimes_file_name,
+        min_uptime
 ):
     logs_assemblies_file = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
@@ -53,8 +54,11 @@ def _execute_node_reconf_in_g5k(
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node):
         # Find next uptime
-        current_time = time.time() - execution_start_time
-        sleeping_time, duration = _compute_sleeping_duration_uptime_duration(current_time, uptimes_node)
+        current_time = time.time() - execution_start_time + min_uptime
+        next_uptime, duration = uptimes_node[round_reconf]
+        sleeping_time = next_uptime - current_time
+        if 0 < abs(sleeping_time) < 0.1:
+            sleeping_time = 0
         log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
 
         key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
@@ -157,7 +161,8 @@ def _schedule_and_run_uptimes_from_config(
         environment,
         start_round_reconf,
         execution_start_time,
-        uptimes_file_name
+        uptimes_file_name,
+        min_uptime
 ):
     """
     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
@@ -189,7 +194,8 @@ def _schedule_and_run_uptimes_from_config(
                 execution_start_time,
                 environment,
                 start_round_reconf,
-                uptimes_file_name
+                uptimes_file_name,
+                min_uptime
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
@@ -276,8 +282,9 @@ def launch_experiment_with_params(
     uptimes_nodes_list = [list(uptimes) for uptimes in uptimes_nodes]
     finished_reconfs_by_reconf_name = {}
     start_round_reconf = 0
-    execution_start_time = time.time()
     for reconfiguration_name in ["deploy", "update"]:
+        min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0])[start_round_reconf][0]
+        execution_start_time = time.time()
         if version_concerto_d != "central":
             finished_reconfs = _schedule_and_run_uptimes_from_config(
                 roles_concerto_d,
@@ -290,7 +297,8 @@ def launch_experiment_with_params(
                 environment,
                 start_round_reconf,
                 execution_start_time,
-                uptimes_file_name
+                uptimes_file_name,
+                min_uptime
             )
         else:
             exit_code, finished_reconf = execute_and_get_results(
@@ -321,7 +329,7 @@ def launch_experiment_with_params(
         concerto_d_g5k.fetch_dir(roles_concerto_d[roles_to_fetch], src_dir, dst_dir, environment)
 
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
-        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
+        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"] + 1
 
 
     log.debug("------ End of experiment ---------")
