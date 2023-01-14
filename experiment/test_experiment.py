@@ -10,7 +10,7 @@ def test_fetch_times_log_files():
         globals_variables.current_expe_dir = "/home/aomond/concerto-d-projects"
         globals_variables.current_execution_dir = "/home/anomond/concerto-d-projects"
         globals_variables.initialize_current_dirs("test")
-        log_experiment.initialize_logging("test-de-ouf-mock", mock=True)
+        log_experiment.initialize_logging("test-de-ouf-mock", stdout_only=True)
         roles_nodes = {
                 "server": [Host(address="econome-1.nantes.grid5000.fr")],
                 "dep0": [Host(address="econome-10.nantes.grid5000.fr")],
@@ -57,7 +57,7 @@ def test_execute_reconf():
 def test_execute_node_reconf_in_g5k():
         globals_variables.all_executions_dir = "/home/anomond/concerto-d-projects"
         globals_variables.current_execution_dir = "/home/anomond/concerto-d-projects/execution-remote-test-failed-futures-test-subprocess-2022-10-20_13-23-53"
-        log_experiment.initialize_logging("test-de-ouf-mock", mock=True)
+        log_experiment.initialize_logging("test-de-ouf-mock", stdout_only=True)
         roles_nodes = {
                 "server": [Host(address="econome-1.nantes.grid5000.fr")],
                 "dep0": [Host(address="econome-10.nantes.grid5000.fr")],
