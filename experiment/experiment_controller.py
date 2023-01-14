@@ -356,7 +356,6 @@ def create_param_sweeper(expe_name: str, sweeper_params):
     experiment_results_dir = globals_variables.compute_current_expe_dir_from_name(expe_name)
     log.debug(f"Global expe dir: {experiment_results_dir}")
     sweeps = _parse_sweeper_parameters(sweeper_params)
-    log.debug("------------------------ Execution of experiments start ------------------------")
     log.debug(f"Number of experiments: {len(sweeps)}")
     sweeper = ParamSweeper(
         persistence_dir=str(Path(f"{experiment_results_dir}/sweeps").resolve()), sweeps=sweeps, save_sweeps=True

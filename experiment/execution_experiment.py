@@ -46,7 +46,7 @@ if __name__ == '__main__':
     sweeper = experiment_controller.create_param_sweeper(expe_name, sweeper_params)
 
     # Run sweeper
-    destroy_reservation = reservation_params.get("destroy_reservation", "True") == "True"
+    log.debug("------------------------ Execution of experiments start ------------------------")
     parameter = sweeper.get_next()
     while parameter:
         execution_dir_name = ""
@@ -125,6 +125,7 @@ if __name__ == '__main__':
 
     # Destroy infrastructure reservation after all experiments completed
     log.debug("--------- All experiments dones ---------")
+    destroy_reservation = reservation_params.get("destroy_reservation", "True") == "True"
     if destroy_reservation and environment == "remote":
         log.debug("Destroy reservation == True, destroy reserved infra")
         provider.destroy()
