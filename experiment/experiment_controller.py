@@ -17,6 +17,7 @@ from experiment import globals_variables, concerto_d_g5k, log_experiment, comput
 results = {}
 sleeping_times_nodes = {}
 DEFAULT_EVENT_PRIORITY = 0
+ALL_THREADS_CREATION_TIME = 0.5  # Upper bound for the time to create all 13 threads
 
 
 class EndOfExperimentException(BaseException):
@@ -56,8 +57,8 @@ def _execute_node_reconf_in_g5k(
         # Find next uptime
         current_time = time.time() - execution_start_time + min_uptime
         next_uptime, duration = uptimes_node[round_reconf]
-        sleeping_time = next_uptime - current_time
-        if 0 < abs(sleeping_time) < 0.1:
+        sleeping_time = next_uptime - current_time  # Might be negative if next_uptime is equal to 0, threads that are created lately have current_time slightly increasing (up to 0.2s)
+        if 0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME:
             sleeping_time = 0
         log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
 
