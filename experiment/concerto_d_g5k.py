@@ -218,7 +218,7 @@ def _get_zenoh_install_dir():
     return f"{globals_variables.all_executions_dir}/zenoh_install"
 
 
-def install_zenoh_router(roles_zenoh_router: List, version_concerto_d: str, environment: str):
+def install_zenoh_router(roles_zenoh_router: List, environment: str):
     """
     Install the 0.6 version of zenoh router
     """
@@ -232,7 +232,7 @@ def install_zenoh_router(roles_zenoh_router: List, version_concerto_d: str, envi
     # Installing zenoh in the executions dir
     with en.actions(roles=roles_zenoh_router) as a:
         a.apt(name="unzip", state="present")
-        arch = "aarch64" if version_concerto_d else "x86_64"
+        arch = "aarch64" if environment == "raspberry" else "x86_64"
         a.unarchive(remote_src="yes",
                     src=f"https://download.eclipse.org/zenoh/zenoh/0.6.0-beta.1/{arch}-unknown-linux-gnu/zenoh-0.6.0-beta.1-{arch}-unknown-linux-gnu.zip",
                     dest=zenoh_install_dir)
