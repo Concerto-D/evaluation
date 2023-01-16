@@ -82,6 +82,7 @@ def _execute_node_reconf_in_g5k(
         )
 
         round_reconf += 1
+        log_experiment.log.debug(f"Round reconf for {assembly_name}: {round_reconf}")
 
     return finished_reconfiguration, round_reconf, node_num
 
@@ -330,7 +331,7 @@ def launch_experiment_with_params(
         concerto_d_g5k.fetch_dir(roles_concerto_d[roles_to_fetch], src_dir, dst_dir, environment)
 
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
-        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"] + 1
+        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
 
 
     log.debug("------ End of experiment ---------")
