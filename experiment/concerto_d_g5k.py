@@ -231,6 +231,7 @@ def initialize_deps_mjuz(roles_concerto_d, environment):
                 dest=_get_ts_node_path(environment),
                 state="link"
             )
+    # TODO: check this solution: https://stackoverflow.com/questions/71420286/unable-to-install-grpc-tools-via-npm-or-yarn-on-mac-m1-chip
 
     # TODO: Need to add grpc-tools dependency again for g5k to build grpc deps instead of putting the prebuild binaries
     # Install dependencies

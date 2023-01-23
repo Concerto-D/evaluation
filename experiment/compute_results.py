@@ -43,7 +43,7 @@ def save_expe_metadata(
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
-def compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
+def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
     # Read metadata file and put it in results
     metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
     log = log_experiment.log
@@ -96,9 +96,10 @@ def compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_
         results["details_assemblies_results"] = sorted_details_assemblies_results
         results["expe_details"] = loaded_metadata["expe_details"]
 
-        os.makedirs(target_dir, exist_ok=True)
-        shutil.copytree(f"{expe_dir_path}/{execution_dir}", f"{target_dir}/{execution_dir}")
-        target_file = f"{target_dir}/{execution_dir}.yaml"
+        target_expe_dir = f"{target_dir}/{expe_name}"
+        os.makedirs(target_expe_dir, exist_ok=True)
+        shutil.copytree(f"{expe_dir_path}/{execution_dir}", f"{target_expe_dir}/{execution_dir}")
+        target_file = f"{target_expe_dir}/{execution_dir}.yaml"
 
         # Save computed results
         print(f"Save computed results here: {target_file}")
@@ -107,7 +108,7 @@ def compute_results_from_dir(expe_dir_path: str, execution_dir: str, assemblies_
 
         # Save also in execution dir
         print(f"Also save computed results here: {execution_dir}/{target_file}")
-        with open(f"{target_dir}/{execution_dir}/{execution_dir}.yaml", "w") as f:
+        with open(f"{target_expe_dir}/{execution_dir}/{execution_dir}.yaml", "w") as f:
             yaml.dump(results, f, sort_keys=False)
 
     else:
@@ -209,8 +210,10 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
+    expe_name = "expe_name"
     expe_dir_path = f"{home_dir}/experiment-test-central-correct-dir"
     compute_results_from_dir(
+        expe_name,
         expe_dir_path, "results_central_T0_perc-50-60_waiting_rate-1-2023-01-03_17-47-53",
         ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
     )

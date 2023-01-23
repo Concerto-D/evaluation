@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 assemblies_names.append("server-clients")
 
             log.debug(f"List assemblies names to compute metrics from: {assemblies_names}")
-            compute_results.compute_results_from_dir(experiment_dir, execution_dir_name, assemblies_names)
+            compute_results.compute_results_from_dir(expe_name, experiment_dir, execution_dir_name, assemblies_names)
 
             sweeper.done(parameter)
             log.debug(f"Parameter {parameter} done")
