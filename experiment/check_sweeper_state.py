@@ -3,6 +3,7 @@ import sys
 from experiment import globals_variables, execution_experiment, experiment_controller, log_experiment
 
 if __name__ == "__main__":
+    # Get the sweeper state according to the expe_name present in the expe_config_file
     configuration_expe_file_path = sys.argv[1]
     global_params, reservation_params, sweeper_params = execution_experiment.extract_parameters(configuration_expe_file_path)
     (

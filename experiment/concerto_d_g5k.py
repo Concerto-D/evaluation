@@ -181,41 +181,93 @@ def initialize_expe_repositories(version_concerto_d, roles):
         log_experiment.log.debug(a.results)
 
 
-def initialize_deps_mjuz(roles_concerto_d):
+def initialize_deps_mjuz(roles_concerto_d, environment):
     all_executions_dir = globals_variables.all_executions_dir
     with en.actions(roles=roles_concerto_d) as a:
         a.apt(
             name="npm",
             update_cache="yes"
         )
+        yarn_cmd = f"{globals_variables.all_executions_dir}/pulumi-bin/yarn"
         # Need to pass as dict due to reserved keyword: global
-        a.npm(
-            **{
-                "global": "yes",
-                "name": "yarn",
-            }
-        )
-        a.npm(
-            **{
-                "global": "yes",
-                "name": "ts-node",
-            }
-        )
+        if environment == "remote":
+            a.npm(
+                **{
+                    "global": "yes",
+                    "name": "yarn",
+                }
+            )
+            a.npm(
+                **{
+                    "global": "yes",
+                    "name": "ts-node",
+                }
+            )
 
-        # TODO: change pulumi-mjuz location (instead of /opt)
-        a.copy(
-            src="/home/anomond/pulumi-mjuz/pulumi",
-            dest="/opt",
-            remote_src="yes",
-        )
+            # TODO: change pulumi-mjuz location (instead of /opt)
+            a.copy(
+                src="/home/anomond/pulumi-mjuz/pulumi",
+                dest="/opt",
+                remote_src="yes",
+            )
+        else:
+            a.npm(
+                name="yarn",
+                path=f"{globals_variables.all_executions_dir}"
+            )
+            a.npm(
+                name="ts-node",
+                path=f"{globals_variables.all_executions_dir}"
+            )
+
+            # Put link to yarn and ts-node in pulumi-bin dir
+            a.file(
+                src=f"{globals_variables.all_executions_dir}/node_modules/yarn/bin/yarn",
+                dest=yarn_cmd,
+                state="link"
+            )
+            a.file(
+                src=f"{globals_variables.all_executions_dir}/node_modules/ts-node/dist/bin.js",
+                dest=_get_ts_node_path(environment),
+                state="link"
+            )
+
+    # TODO: Need to add grpc-tools dependency again for g5k to build grpc deps instead of putting the prebuild binaries
+    # Install dependencies
+    en.run_command(
+        f"cd {all_executions_dir}/mjuz-concerto-d && {yarn_cmd}", roles=roles_concerto_d
+    )
+
+    # TODO: check what is better: version dist/ folder or put dist/ on remote before execution
+    # if environment == "raspberry":
+    #     # Install pre-build grpc protos because grpc-tools not available on Raspberry (aarch64)
+    #     with en.actions(roles=roles_concerto_d) as a:
+    #         a.unarchive(
+    #             src=f"{globals_variables.all_expes_dir}/all-bin-files/prebuild-grpc-protos.tar",
+    #             dest=f"{globals_variables.all_executions_dir}/mjuz-concerto-d/node_modules/@mjuz/grpc-protos"
+    #         )
+
+    # Build project
+    if environment == "remote":
+        cmd_to_run = f"{yarn_cmd} build"
+    else:
+        # Don't build grpc-protos because grpc-tools not available on Raspberry (aarch64)
+        cmd_to_run = f"{yarn_cmd} build-raspberry"
 
     en.run_command(
-        f"cd {all_executions_dir}/mjuz-concerto-d && yarn && yarn build", roles=roles_concerto_d
+        f"cd {all_executions_dir}/mjuz-concerto-d && {cmd_to_run}", roles=roles_concerto_d
     )
 
 
 def _get_zenoh_install_dir():
     return f"{globals_variables.all_executions_dir}/zenoh_install"
+
+
+def _get_ts_node_path(environment: str):
+    if environment in ["local", "remote"]:
+        return "ts-node"  # Located in /usr/bin
+    else:
+        return f"{globals_variables.all_executions_dir}/pulumi-bin/ts-node"
 
 
 def install_zenoh_router(roles_zenoh_router: List, environment: str):
@@ -314,17 +366,18 @@ def execute_mjuz_reconf(
     command_args = []
 
     mjuz_dir = f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
-    command_args.append("/opt/pulumi/bin/pulumi login file:///tmp;")
+    path_pulumi_bin = _get_pulumi_bin_path(environment)
+    command_args.append(f"{path_pulumi_bin}/pulumi login file:///tmp;")
     dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
     if "mjuz-2-comps":
         dir_name += "-2-components"
     command_args.append(dir_name + ";")
     trailing = "" if environment in ["remote", "raspberry"] else ""
-    command_args.append("PATH=$PATH:/opt/pulumi:/opt/pulumi/bin" + trailing)
+    command_args.append(f"PATH=$PATH:{path_pulumi_bin}" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
     command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
     command_args.append("PULUMI_CONFIG_PASSPHRASE=0000" + trailing)
-    command_args.append(f"ts-node . -v trace")
+    command_args.append(f"{_get_ts_node_path(environment)} . -v trace")
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.current_execution_dir)
@@ -349,6 +402,13 @@ def kill_subprocess_on_exit(subproc):
         subproc.kill()
 
     return _kill_subprocess
+
+
+def _get_pulumi_bin_path(environment: str):
+    if environment in ["local", "remote"]:
+        return "/opt/pulumi/bin"
+    else:
+        return f"{globals_variables.all_executions_dir}/pulumi-bin"
 
 
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
@@ -465,7 +525,7 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     trailing = ";" if environment in ["remote", "raspberry"] else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
     reset_pulumi_dir_cmd += " PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing
-    reset_pulumi_dir_cmd += " /opt/pulumi/bin/pulumi login file:///tmp"
+    reset_pulumi_dir_cmd += f" {_get_pulumi_bin_path(environment)}/pulumi login file:///tmp"
 
     if environment in ["remote", "raspberry"]:
         en.run_command(kill_ts_node_cmd, roles=roles_concerto_d, on_error_continue=True)
