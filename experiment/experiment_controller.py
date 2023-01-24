@@ -26,6 +26,8 @@ class EndOfExperimentException(BaseException):
 
 
 mjuz_server_finished = False
+exception_raised = False
+exception_content = None
 
 
 # daemon=True so that if an exception arises in one of the Thread, stop all the treads and go to the next experiment
@@ -53,7 +55,7 @@ def _execute_node_reconf_in_g5k(
     round_reconf = start_round_reconf
     exit_code = 0  # Init exit code to 0 for algo
 
-    while not finished_reconfiguration and round_reconf < len(uptimes_node):
+    while not finished_reconfiguration and round_reconf < len(uptimes_node) and not exception_raised:
         # Find next uptime
         current_time = time.time() - execution_start_time + min_uptime
         next_uptime, duration = uptimes_node[round_reconf]
@@ -70,6 +72,11 @@ def _execute_node_reconf_in_g5k(
         time.sleep(sleeping_time)  # Wait until next execution
         sleep_times[key_sleep_time]["end"] = time.time()
 
+        # If an exception has been raised while it slept, stop the thread without launching the next execution
+        if exception_raised:
+            log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
+            break
+
         # Save metrics
         with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:
             yaml.dump(sleep_times, f)
@@ -83,6 +90,9 @@ def _execute_node_reconf_in_g5k(
 
         round_reconf += 1
         log_experiment.log.debug(f"Round reconf for {assembly_name}: {round_reconf}")
+
+    if exception_raised:
+        log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
 
     return finished_reconfiguration, round_reconf, node_num
 
@@ -177,7 +187,11 @@ def _schedule_and_run_uptimes_from_config(
         futures_to_proceed = []
         finished_reconfs = {}
         global mjuz_server_finished
+        global exception_raised
+        global exception_content
         mjuz_server_finished = False
+        exception_raised = False
+        exception_content = None
         for node_num in range(nb_concerto_nodes):
             uptimes_node = uptimes_nodes[node_num]
             dep_num = None if node_num == 0 else node_num - 1
@@ -209,10 +223,11 @@ def _schedule_and_run_uptimes_from_config(
                     "rounds_reconf": rounds_reconf,
                 }
             except Exception as e:
-                exc = future.exception()
-                log.error(exc)
-                # TODO: Cancel all the futures and reset the pulumi dirs, etc if Mjuz
-                raise exc
+                exception_raised = True
+                exception_content = future.exception()
+
+        if exception_raised:
+            raise exception_content
 
     log.debug("ALL UPTIMES HAVE BEEN PROCESSED")
     return finished_reconfs

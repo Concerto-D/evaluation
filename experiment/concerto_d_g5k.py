@@ -393,7 +393,10 @@ def execute_mjuz_reconf(
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
         process = subprocess.Popen(command_str, shell=True)
-    exit_code = process.wait(timeout=180)  # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy)
+
+    # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy
+    # but below 135 because it is the maximum sleeping time of the server)
+    exit_code = process.wait(timeout=125)
 
     return exit_code
 
