@@ -188,7 +188,10 @@ def initialize_deps_mjuz(roles_concerto_d, environment):
             name="npm",
             update_cache="yes"
         )
-        yarn_cmd = f"{globals_variables.all_executions_dir}/pulumi-bin/yarn"
+        if environment == "raspberry":
+            yarn_cmd = f"{globals_variables.all_executions_dir}/pulumi-bin/yarn"
+        else:
+            yarn_cmd = "yarn"
         # Need to pass as dict due to reserved keyword: global
         if environment == "remote":
             a.npm(
