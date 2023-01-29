@@ -396,7 +396,7 @@ def execute_mjuz_reconf(
 
     # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy
     # but below 135 because it is the maximum sleeping time of the server)
-    exit_code = process.wait(timeout=125)
+    exit_code = process.wait(timeout=130)
 
     return exit_code
 

@@ -117,9 +117,9 @@ if __name__ == '__main__':
         except Exception as e:
             sweeper.skip(parameter)
             log.debug("Experiment FAILED")
-            log.debug(e)
+            log.debug(traceback.format_exc())
             log.debug(f"Skipping experiment with parameters {parameter}, execution_dir_name: {execution_dir_name}")
-            traceback.print_exc()
+
         finally:
             parameter = sweeper.get_next()
 
