@@ -34,11 +34,11 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
             ]
             roles_concerto_d_list = [
                 server_host,
-                *clients_hosts
             ]
             roles_dict["server"] = [server_host]
             for dep_num in range(reservation_params["nb_dependencies"]):
                 roles_dict[f"dep{dep_num}"] = [clients_hosts[dep_num]]
+                roles_concerto_d_list.append(clients_hosts[dep_num])
 
             if version_concerto_d == "asynchronous":
                 zenoh_router = Host("rpi-5.nantes.grid5000.fr", user="root")
