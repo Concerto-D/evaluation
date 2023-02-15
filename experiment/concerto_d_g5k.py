@@ -340,7 +340,7 @@ def execute_reconf(
         command_args.append(str(execution_start_time))
 
     command_args.append("--debug_current_uptime_and_overlap")
-    command_args.append(debug_current_uptime_and_overlap)
+    command_args.append("\""+debug_current_uptime_and_overlap+"\"")
 
     command_str = " ".join(command_args)
     command_str_to_log = " ".join(command_args[:-2])  # do not put the big list of overlaps between nodes (last 2 arg) in the experiments_logs
