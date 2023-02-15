@@ -383,6 +383,7 @@ def execute_mjuz_reconf(
     command_args.append("PULUMI_CONFIG_PASSPHRASE=0000" + trailing)
     command_args.append(f"{_get_ts_node_path(environment)} . -v trace")
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
+    command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.current_execution_dir)
     command_args.append(reconfiguration_name)
