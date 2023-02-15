@@ -308,7 +308,8 @@ def execute_reconf(
         environment: str,
         assembly_type: str,
         uptimes_file_name: str,
-        execution_start_time: float
+        execution_start_time: float,
+        debug_current_uptime_and_overlap: str
 ):
     log = log_experiment.log
     command_args = []
@@ -338,7 +339,10 @@ def execute_reconf(
         command_args.append("--execution_start_time")
         command_args.append(str(execution_start_time))
 
-    command_str = " ".join(command_args)
+    command_args.append("--debug_current_uptime_and_overlap")
+    command_args.append(debug_current_uptime_and_overlap)
+
+    command_str = " ".join(command_args[:-1])  # TODO refacto: do not put the big list of overlaps between nodes in the experiments_logs
     log.debug(f"Start execution reconfiguration, command executed: {command_str}")
     if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)

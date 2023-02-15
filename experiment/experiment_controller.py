@@ -11,6 +11,9 @@ from typing import List
 import yaml
 from execo_engine import sweep, ParamSweeper, HashableDict
 from pebble import concurrent
+import sys
+sys.path.append(f"{os.path.dirname(__file__)}/../../experiment_files/parameters/uptimes/")
+from overlaps_server_deps_times import compute_overlap_for_round
 
 from experiment import globals_variables, concerto_d_g5k, log_experiment, compute_results
 
@@ -81,11 +84,14 @@ def _execute_node_reconf_in_g5k(
         with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:
             yaml.dump(sleep_times, f)
 
+        absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
+        debug_current_uptime_and_overlap, nb_appearance = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12)
         exit_code, finished_reconfiguration = execute_and_get_results(
             assembly_name, dep_num, duration, environment,
             nb_concerto_nodes, node_num,
             reconf_config_file_path, reconfiguration_name,
-            roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time
+            roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
+            debug_current_uptime_and_overlap
         )
 
         round_reconf += 1
@@ -100,7 +106,7 @@ def _execute_node_reconf_in_g5k(
 def execute_and_get_results(
         assembly_name, dep_num, duration, environment,
         nb_concerto_nodes, node_num, reconf_config_file_path, reconfiguration_name, roles,
-        version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time
+        version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time, debug_current_uptime_and_overlap
 ):
     # Execute reconf
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -118,7 +124,8 @@ def execute_and_get_results(
         exit_code = concerto_d_g5k.execute_reconf(
             roles[assembly_name], version_concerto_d, transitions_times_file,
             duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate,
-            reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute, execution_start_time
+            reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute, execution_start_time,
+            debug_current_uptime_and_overlap
         )
     else:
         exit_code = concerto_d_g5k.execute_mjuz_reconf(
@@ -331,7 +338,8 @@ def launch_experiment_with_params(
                 version_concerto_d,
                 waiting_rate,
                 uptimes_file_name,
-                execution_start_time
+                execution_start_time,
+                debug_current_uptime_and_overlap=""
             )
             finished_reconfs = {
                 "server-clients": {
