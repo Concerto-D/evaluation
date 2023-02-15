@@ -19,18 +19,18 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
     elif environment == "raspberry":
         roles_dict = {}
         if version_concerto_d == "central":
-            server_client_host = Host("rpi-8.nantes.grid5000.fr", user="root")
+            server_client_host = Host("rpi-8.nantes.g5k", user="root")
             roles_concerto_d_list = [server_client_host]
             roles_dict["server-clients"] = [server_client_host]
         # elif version_concerto_d in ["synchronous", "asynchronous", "mjuz", "mjuz-2-comps"]:
         else:
-            server_host = Host("rpi-8.nantes.grid5000.fr", user="root")
+            server_host = Host("rpi-8.nantes.g5k", user="root")
             clients_hosts = [
-                Host("rpi-7.nantes.grid5000.fr", user="root"),
-                Host("rpi-6.nantes.grid5000.fr", user="root"),
-                Host("rpi-4.nantes.grid5000.fr", user="root"),
-                Host("rpi-3.nantes.grid5000.fr", user="root"),
-                Host("rpi-2.nantes.grid5000.fr", user="root"),
+                Host("rpi-7.nantes.g5k", user="root"),
+                Host("rpi-6.nantes.g5k", user="root"),
+                Host("rpi-4.nantes.g5k", user="root"),
+                Host("rpi-3.nantes.g5k", user="root"),
+                Host("rpi-2.nantes.g5k", user="root"),
             ]
             roles_concerto_d_list = [
                 server_host,
@@ -41,7 +41,7 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
                 roles_concerto_d_list.append(clients_hosts[dep_num])
 
             if version_concerto_d == "asynchronous":
-                zenoh_router = Host("rpi-5.nantes.grid5000.fr", user="root")
+                zenoh_router = Host("rpi-5.nantes.g5k", user="root")
                 roles_dict["zenoh_routers"] = [zenoh_router]
         roles_dict["concerto_d"] = roles_concerto_d_list
         roles_concerto_d = Roles(roles_dict)
