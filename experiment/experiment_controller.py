@@ -85,7 +85,7 @@ def _execute_node_reconf_in_g5k(
             yaml.dump(sleep_times, f)
 
         absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
-        debug_current_uptime_and_overlap, nb_appearance = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12)
+        debug_current_uptime_and_overlap, nb_appearance, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12)
         exit_code, finished_reconfiguration = execute_and_get_results(
             assembly_name, dep_num, duration, environment,
             nb_concerto_nodes, node_num,
