@@ -342,8 +342,9 @@ def execute_reconf(
     command_args.append("--debug_current_uptime_and_overlap")
     command_args.append(debug_current_uptime_and_overlap)
 
-    command_str = " ".join(command_args[:-1])  # TODO refacto: do not put the big list of overlaps between nodes in the experiments_logs
-    log.debug(f"Start execution reconfiguration, command executed: {command_str}")
+    command_str = " ".join(command_args)
+    command_str_to_log = " ".join(command_args[:-2])  # do not put the big list of overlaps between nodes (last 2 arg) in the experiments_logs
+    log.debug(f"Start execution reconfiguration, command executed: {command_str_to_log}")
     if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
         exit_code = process.wait()
