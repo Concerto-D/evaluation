@@ -399,9 +399,9 @@ def execute_mjuz_reconf(
     command_str = " ".join(command_args)
     log_experiment.log.debug(f"Command launched: {command_str}")
     if environment in ["remote", "raspberry"]:
-        process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
+        process = subprocess.Popen(f"ssh root@{role_node[0].address} 'timeout --preserve-status -s 3 {duration} {command_str}'", shell=True)
     else:
-        process = subprocess.Popen(command_str, shell=True)
+        process = subprocess.Popen(f"timeout --preserve-status -s 3 {duration} {command_str}", shell=True)
 
     # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy
     # but below 135 because it is the maximum sleeping time of the server)
