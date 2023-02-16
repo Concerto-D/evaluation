@@ -21,8 +21,8 @@ def save_expe_metadata(
 ):
     # TODO: fix algo not correct
     finished_reconf = (
-            all(finished_reconfs_by_reconf_name["deploy"].values())
-            and all(finished_reconfs_by_reconf_name["update"].values())
+            all(res["finished_reconfiguration"] for res in finished_reconfs_by_reconf_name["deploy"].values())
+            and all(res["finished_reconfiguration"] for res in finished_reconfs_by_reconf_name["update"].values())
     )
 
     # Save expe metadata
@@ -162,6 +162,12 @@ def build_save_results_name(expe_name, version_concerto_name, transitions_times_
         file_name += "_perc-20-30"
     if "0_5-0_6" in uptimes_file_name:
         file_name += "_perc-50-60"
+    if "0_02-0_02" in uptimes_file_name:
+        file_name += "_perc-2-2"
+    if "0_25-0_25" in uptimes_file_name:
+        file_name += "_perc-25-35"
+    if "0_5-0_5" in uptimes_file_name:
+        file_name += "_perc-50-50"
 
     file_name += f"_waiting_rate-{waiting_rate}-{timestamp_name}"
 
