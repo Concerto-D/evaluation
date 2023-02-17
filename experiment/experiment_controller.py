@@ -86,6 +86,9 @@ def _execute_node_reconf_in_g5k(
 
         absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
         debug_current_uptime_and_overlap, nb_appearance, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12)
+
+        up_times = {}
+        up_times["event_uptime"] = {"start": time.time()}
         exit_code, finished_reconfiguration = execute_and_get_results(
             assembly_name, dep_num, duration, environment,
             nb_concerto_nodes, node_num,
@@ -93,6 +96,12 @@ def _execute_node_reconf_in_g5k(
             roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
             debug_current_uptime_and_overlap
         )
+        up_times["event_uptime"] = {"end": time.time()}
+
+        # TODO: adhoc to mjuz Save uptime metrics
+        if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
+            with open(f"{logs_assemblies_file}/{assembly_name}-uptimes-{round_reconf}.yaml", "w") as f:
+                yaml.dump(up_times, f)
 
         round_reconf += 1
         log_experiment.log.debug(f"Round reconf for {assembly_name}: {round_reconf}")
