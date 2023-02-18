@@ -5,20 +5,20 @@ import yaml
 
 import infrastructure_reservation
 from experiment import globals_variables, log_experiment, experiment_controller, infrastructure_configuration, \
-    compute_results
+    compute_results, email_sender
 
 
 def extract_parameters(configuration_expe_file_path: str):
     with open(configuration_expe_file_path) as f:
         expe_params = yaml.safe_load(f)
 
-    return expe_params["global_parameters"], expe_params["reservation_parameters"], expe_params["sweeper_parameters"]
+    return expe_params["global_parameters"], expe_params["reservation_parameters"], expe_params["email_parameters"], expe_params["sweeper_parameters"]
 
 
 if __name__ == '__main__':
     # Extraction des paramètres
     configuration_expe_file_path = sys.argv[1]
-    global_params, reservation_params, sweeper_params = extract_parameters(configuration_expe_file_path)
+    global_params, reservation_params, email_parameters, sweeper_params = extract_parameters(configuration_expe_file_path)
 
     # Extract parametres globaux
     (
@@ -26,7 +26,10 @@ if __name__ == '__main__':
         environment,
         version_concerto_d,
         all_expes_dir,
-        all_executions_dir
+        all_executions_dir,
+        fetch_experiment_results,
+        local_expe_res_dir,
+        send_mail_after_all_expes
     ) = global_params.values()
 
     # Création du dossier de l'expérience et du dossier pour les logs
@@ -127,5 +130,13 @@ if __name__ == '__main__':
     log.debug("--------- All experiments dones ---------")
     destroy_reservation = reservation_params.get("destroy_reservation", "True") == "True"
     if destroy_reservation and environment == "remote":
-        log.debug("Destroy reservation == True, destroy reserved infra")
+        log.debug("------------ Destroy infra -------------")
         provider.destroy()
+    else:
+        log.debug("-------------Do not destroy infra ------")
+
+    if environment != "local" and send_mail_after_all_expes == "True":
+        log.debug("--------- Send mail --------------------------")
+        email_sender.send_email_expe_finished(expe_name, str(sweeper), sweeper_params, local_expe_res_dir, email_parameters)
+    else:
+        log.debug("--------- Do not send mail --------------------------")
