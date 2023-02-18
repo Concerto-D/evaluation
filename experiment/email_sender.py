@@ -13,7 +13,7 @@ def send_email_expe_finished(expe_name, sweeper_state_str, sweeper_params, local
     msg = EmailMessage()
     msg_content = f"Experiment {expe_name} finished:\n"
     msg_content += sweeper_state_str + "\n"
-    msg_content += sweeper_params + "\n"
+    msg_content += str(sweeper_params) + "\n"
     msg_content += f"Results saved directory: /home/aomond/experiments_results/{local_expe_res_dir}"
     msg.set_content(MIMEText(msg_content))
 
