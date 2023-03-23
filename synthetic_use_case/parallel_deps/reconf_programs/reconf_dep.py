@@ -1,7 +1,7 @@
 from concerto import global_variables
-from synthetic_use_case.assemblies.dep_assembly import DepAssembly
+from synthetic_use_case.parallel_deps.assemblies.dep_assembly import DepAssembly
 
-from synthetic_use_case.reconf_programs import reconf_programs
+from synthetic_use_case import reconf_programs
 from concerto.time_logger import TimestampType, create_timestamp_metric
 
 

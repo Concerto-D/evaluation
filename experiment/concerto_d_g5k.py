@@ -318,7 +318,7 @@ def execute_reconf(
         command_args.append(f"cd {all_executions_dir}/concerto-decentralized;")
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{all_executions_dir}/evaluation;")
     command_args.append(f"{all_executions_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
-    command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
+    command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/parallel_deps/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))

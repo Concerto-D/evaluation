@@ -1,8 +1,8 @@
 from concerto import global_variables
 from concerto.time_logger import TimestampType, create_timestamp_metric
-from synthetic_use_case.assemblies.server_assembly import ServerAssembly
+from synthetic_use_case.parallel_deps.assemblies.server_assembly import ServerAssembly
 
-from synthetic_use_case.reconf_programs import reconf_programs
+from synthetic_use_case import reconf_programs
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.DEPLOY)

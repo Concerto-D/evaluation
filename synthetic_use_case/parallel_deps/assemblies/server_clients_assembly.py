@@ -1,7 +1,6 @@
 from concerto.assembly import Assembly
-from concerto.time_checker_assemblies import TimeCheckerAssemblies
-from synthetic_use_case.assemblies.dep import Dep
-from synthetic_use_case.assemblies.server import Server
+from synthetic_use_case.parallel_deps.assemblies.dep import Dep
+from synthetic_use_case.parallel_deps.assemblies.server import Server
 
 
 class ServerClientsAssembly(Assembly):

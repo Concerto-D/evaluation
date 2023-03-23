@@ -1,5 +1,5 @@
 from concerto.assembly import Assembly
-from synthetic_use_case.assemblies.dep import Dep
+from synthetic_use_case.parallel_deps.assemblies.dep import Dep
 
 
 class DepAssembly(Assembly):

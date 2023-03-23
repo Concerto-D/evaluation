@@ -1,5 +1,5 @@
 from concerto.assembly import Assembly
-from synthetic_use_case.assemblies.server import Server
+from synthetic_use_case.parallel_deps.assemblies.server import Server
 
 
 class ServerAssembly(Assembly):
