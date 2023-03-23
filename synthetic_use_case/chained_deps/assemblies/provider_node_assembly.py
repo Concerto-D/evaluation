@@ -4,8 +4,10 @@ from synthetic_use_case.chained_deps.assemblies.provider_node import ProviderNod
 
 class ProviderNodeAssembly(Assembly):
     def __init__(self, reconf_config_dict, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes):
+        # L'ensemble assemblies présents sur les noeuds distants
         remote_assemblies = {}
 
+        # Le dict des types de composants utilisés au sein de l'assembly
         components_types = {
             "ProviderNode": ProviderNode
         }

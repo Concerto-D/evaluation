@@ -8,6 +8,7 @@ from synthetic_use_case.chained_deps.assemblies.provider_node_assembly import Pr
 
 @create_timestamp_metric(TimestampType.TimestampEvent.DEPLOY)
 def deploy(sc):
+    # Passer de l'état "undeployed" à l'état "running" et "installed"
     print("deploying")
     time.sleep(5)
     print("done")
@@ -16,6 +17,7 @@ def deploy(sc):
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPDATE)
 def update(sc):
+    # Passer de l'état "running" à "configured", puis de "configured" à "running"
     print("updating")
     time.sleep(3)
     print("done")
