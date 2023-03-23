@@ -25,6 +25,7 @@ if __name__ == '__main__':
         expe_name,
         environment,
         version_concerto_d,
+        use_case_name,
         all_expes_dir,
         all_executions_dir,
         fetch_experiment_results,
@@ -40,10 +41,10 @@ if __name__ == '__main__':
     log = log_experiment.log
 
     # Infrastructure reservation
-    roles_concerto_d, provider = infrastructure_reservation.create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d)
+    roles_concerto_d, provider = infrastructure_reservation.create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d, use_case_name)
 
     # Infrastructure configuration
-    infrastructure_configuration.configure_infrastructure(version_concerto_d, roles_concerto_d, environment)
+    infrastructure_configuration.configure_infrastructure(version_concerto_d, roles_concerto_d, environment, use_case_name)
 
     # Create sweeper
     sweeper = experiment_controller.create_param_sweeper(expe_name, sweeper_params)
@@ -79,12 +80,14 @@ if __name__ == '__main__':
             finished_reconfs_by_reconf_name = experiment_controller.launch_experiment_with_params(
                 expe_name,
                 version_concerto_d,
-                reservation_params["nb_dependencies"] + reservation_params["nb_servers"] + reservation_params["nb_server_clients"],
+                reservation_params["nb_dependencies"] + reservation_params["nb_servers"] + reservation_params["nb_server_clients"]
+                + reservation_params["nb_provider_nodes"] + reservation_params["nb_chained_nodes"],
                 uptimes,
                 transitions_times,
                 waiting_rate,
                 environment,
                 roles_concerto_d,
+                use_case_name,
                 id_run
             )
 
@@ -110,6 +113,10 @@ if __name__ == '__main__':
                 assemblies_names.append(f"dep{i}")
             if reservation_params["nb_server_clients"] == 1:
                 assemblies_names.append("server-clients")
+            if reservation_params["nb_provider_nodes"] == 1:
+                assemblies_names.append("provider_node")
+            for i in range(reservation_params["nb_chained_nodes"]):
+                assemblies_names.append(f"chained_node{i}")
 
             log.debug(f"List assemblies names to compute metrics from: {assemblies_names}")
             compute_results.compute_results_from_dir(expe_name, experiment_dir, execution_dir_name, assemblies_names)

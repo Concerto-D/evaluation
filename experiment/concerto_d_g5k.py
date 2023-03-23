@@ -60,6 +60,7 @@ def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01
 
 
 def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_servers: int, nb_dependencies: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+    # TODO: refacto assembly_name
     _ = en.init_logging()
     site = get_cluster_site(cluster)
     concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
@@ -309,7 +310,8 @@ def execute_reconf(
         assembly_type: str,
         uptimes_file_name: str,
         execution_start_time: float,
-        debug_current_uptime_and_overlap: str
+        debug_current_uptime_and_overlap: str,
+        use_case_name: str
 ):
     log = log_experiment.log
     command_args = []
@@ -318,7 +320,7 @@ def execute_reconf(
         command_args.append(f"cd {all_executions_dir}/concerto-decentralized;")
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{all_executions_dir}/evaluation;")
     command_args.append(f"{all_executions_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
-    command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/parallel_deps/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
+    command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/{use_case_name}/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
@@ -341,6 +343,9 @@ def execute_reconf(
 
     command_args.append("--debug_current_uptime_and_overlap")
     command_args.append("\""+debug_current_uptime_and_overlap+"\"")
+
+    command_args.append("--use_case_name")
+    command_args.append(use_case_name)
 
     command_str = " ".join(command_args)
     command_str_to_log = " ".join(command_args[:-2])  # do not put the big list of overlaps between nodes (last 2 arg) in the experiments_logs
@@ -372,6 +377,7 @@ def execute_mjuz_reconf(
         environment: str,
         assembly_type: str
 ):
+    # TODO: Ajouter le use_case_name pour Mjuz
     command_args = []
 
     mjuz_dir = f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
@@ -504,11 +510,13 @@ def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
 #         _fetch_file(role_node, src, dst, dst_dir, environment)
 
 
-def fetch_debug_log_files(role_node, assembly_type, dep_num, environment):
+def fetch_debug_log_files(role_node, assembly_type, dep_num, environment, use_case_name):
     if assembly_type == "server-clients":
         assembly_name = "server-clients"
     else:
-        assembly_name = "server" if assembly_type == "server" else f"dep{dep_num}"
+        single_node_name = "server" if use_case_name == "parallel_deps" else "provider_node"
+        linked_node_name = "dep" if use_case_name == "parallel_deps" else "chained_node"
+        assembly_name = single_node_name if assembly_type == single_node_name else f"{linked_node_name}{dep_num}"
     file_name = f"logs_{assembly_name}.txt"
     dst_dir = f"{globals_variables.current_expe_dir}/logs_debug"
     src = f"{globals_variables.current_execution_dir}/logs/{file_name}"

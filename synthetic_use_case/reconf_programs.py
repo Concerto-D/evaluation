@@ -9,7 +9,7 @@ import yaml
 from concerto import time_logger, global_variables, debug_logger
 
 
-def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str, str, str, int, Optional[int], str, float, str]:
+def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str, str, str, int, Optional[int], str, float, str, str]:
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file_path")
     parser.add_argument("uptime_duration", type=float)
@@ -23,6 +23,7 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
     parser.add_argument("--uptimes_nodes_file_path")
     parser.add_argument("--execution_start_time", type=float)
     parser.add_argument("--debug_current_uptime_and_overlap")
+    parser.add_argument("--use_case_name")
     (
         config_file_path,
         uptime_duration,
@@ -35,24 +36,28 @@ def get_assembly_parameters(args) -> Tuple[Dict, float, bool, Optional[str], str
         dep_num,
         uptimes_nodes_file_path,
         execution_start_time,
-        debug_current_uptime_and_overlap
+        debug_current_uptime_and_overlap,
+        use_case_name
      ) = parser.parse_args().__dict__.values()
 
     with open(config_file_path, "r") as f:
         loaded_config = yaml.safe_load(f)
 
-    return loaded_config, uptime_duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time, debug_current_uptime_and_overlap
+    return loaded_config, uptime_duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time, debug_current_uptime_and_overlap, use_case_name
 
 
 def initialize_reconfiguration():
     # TODO: remove timestamp_log_dir
-    config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time, debug_current_uptime_and_overlap = get_assembly_parameters(sys.argv)
+    config_dict, duration, waiting_rate, timestamp_log_dir, execution_expe_dir, version_concerto_d, reconfiguration_name, nb_concerto_nodes, dep_num, uptimes_nodes_file_path, execution_start_time, debug_current_uptime_and_overlap, use_case_name = get_assembly_parameters(sys.argv)
 
     # Set assembly name
     if version_concerto_d == "central":
         assembly_name = "server-clients"
     else:
-        assembly_name = f"dep{dep_num}" if dep_num is not None else "server"
+        # TODO: refacto assembly_name
+        single_node_name = "server" if use_case_name == "parallel_deps" else "provider_node"
+        linked_node_name = "dep" if use_case_name == "parallel_deps" else "chained_node"
+        assembly_name = f"{linked_node_name}{dep_num}" if dep_num is not None else single_node_name
 
     # Init log and dirs
     time_logger.init_time_log_dir(assembly_name)

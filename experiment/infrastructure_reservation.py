@@ -11,7 +11,7 @@ from enoslib.objects import Roles
 from experiment import log_experiment
 
 
-def create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d):
+def create_infrastructure_reservation(expe_name, environment, reservation_params, version_concerto_d, use_case_name):
     log = log_experiment.log
     if environment == "remote":
         log.debug(f"Start {expe_name}")
@@ -24,6 +24,7 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
             roles_dict["server-clients"] = [server_client_host]
         # elif version_concerto_d in ["synchronous", "asynchronous", "mjuz", "mjuz-2-comps"]:
         else:
+            # TODO: refacto assembly_name
             server_host = Host("rpi-8.nantes.grid5000.fr", user="root")
             clients_hosts = [
                 Host("rpi-7.nantes.grid5000.fr", user="root"),
@@ -49,13 +50,22 @@ def create_infrastructure_reservation(expe_name, environment, reservation_params
     else:
         local_host = Host("localhost")
         nb_concerto_d_nodes = 1 if reservation_params["nb_server_clients"] == 1 else 13
-        roles_concerto_d = Roles({
+        roles_dict = {
             "server-clients": [local_host],
-            "server": [local_host],
-            **{f"dep{dep_num}": [local_host] for dep_num in range(reservation_params["nb_dependencies"])},
             "concerto_d": [local_host] * nb_concerto_d_nodes,
             "zenoh_routers": [local_host]
-        })
+        }
+        if use_case_name == "parallel_deps":
+            roles_dict.update({
+                "server": [local_host],
+                **{f"dep{dep_num}": [local_host] for dep_num in range(reservation_params["nb_dependencies"])},
+            })
+        else:
+            roles_dict.update({
+                "provider_node": [local_host],
+                **{f"chained_node{dep_num}": [local_host] for dep_num in range(reservation_params["nb_dependencies"])},
+            })
+        roles_concerto_d = Roles(roles_dict)
         provider = None
 
     return roles_concerto_d, provider

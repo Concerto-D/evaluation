@@ -50,7 +50,8 @@ def _execute_node_reconf_in_g5k(
         environment,
         start_round_reconf,
         uptimes_file_name,
-        min_uptime
+        min_uptime,
+        use_case_name
 ):
     logs_assemblies_file = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
@@ -94,7 +95,7 @@ def _execute_node_reconf_in_g5k(
             nb_concerto_nodes, node_num,
             reconf_config_file_path, reconfiguration_name,
             roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
-            debug_current_uptime_and_overlap
+            use_case_name, debug_current_uptime_and_overlap
         )
         up_times["event_uptime"] = {"end": time.time()}
 
@@ -115,7 +116,7 @@ def _execute_node_reconf_in_g5k(
 def execute_and_get_results(
         assembly_name, dep_num, duration, environment,
         nb_concerto_nodes, node_num, reconf_config_file_path, reconfiguration_name, roles,
-        version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time, debug_current_uptime_and_overlap
+        version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time, use_case_name, debug_current_uptime_and_overlap
 ):
     # Execute reconf
     timestamp_log_dir = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -126,15 +127,21 @@ def execute_and_get_results(
         assembly_type = "server-clients"
     elif "dep" in assembly_name:
         assembly_type = "dep"
-    else:
+    elif "server" in assembly_name:
         assembly_type = "server"
+    elif "provider_node" in assembly_name:
+        assembly_type = "provider_node"
+    elif "chained_node" in assembly_name:
+        assembly_type = "chained_node"
+    else:
+        raise Exception(f"Unknowed assembly_name: {assembly_name}")
 
     if version_concerto_d in ["synchronous", "asynchronous", "central"]:
         exit_code = concerto_d_g5k.execute_reconf(
             roles[assembly_name], version_concerto_d, transitions_times_file,
             duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate,
             reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute, execution_start_time,
-            debug_current_uptime_and_overlap
+            debug_current_uptime_and_overlap, use_case_name
         )
     else:
         exit_code = concerto_d_g5k.execute_mjuz_reconf(
@@ -146,7 +153,7 @@ def execute_and_get_results(
     log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
     # TODO: à généraliser à synchronous et asynchronous
-    concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment)
+    concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment, use_case_name)
 
     # Throw exception if exit_code is unexpected
     if exit_code not in [0, 5, 50]:
@@ -190,7 +197,8 @@ def _schedule_and_run_uptimes_from_config(
         start_round_reconf,
         execution_start_time,
         uptimes_file_name,
-        min_uptime
+        min_uptime,
+        use_case_name
 ):
     """
     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
@@ -210,8 +218,12 @@ def _schedule_and_run_uptimes_from_config(
         exception_content = None
         for node_num in range(nb_concerto_nodes):
             uptimes_node = uptimes_nodes[node_num]
+            # TODO: refacto assembly_name
             dep_num = None if node_num == 0 else node_num - 1
-            assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+            if use_case_name == "parallel_deps":
+                assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+            else:
+                assembly_name = "provider_node" if node_num == 0 else f"chained_node{node_num - 1}"
             exec_future = _execute_node_reconf_in_g5k(
                 roles,
                 version_concerto_d,
@@ -227,7 +239,8 @@ def _schedule_and_run_uptimes_from_config(
                 environment,
                 start_round_reconf,
                 uptimes_file_name,
-                min_uptime
+                min_uptime,
+                use_case_name
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
@@ -286,7 +299,8 @@ def launch_experiment_with_params(
         waiting_rate,
         environment,
         roles_concerto_d,
-        id_run
+        use_case_name,
+        id_run,
 ):
     log = log_experiment.log
 
@@ -331,7 +345,8 @@ def launch_experiment_with_params(
                 start_round_reconf,
                 execution_start_time,
                 uptimes_file_name,
-                min_uptime
+                min_uptime,
+                use_case_name
             )
         else:
             exit_code, finished_reconf = execute_and_get_results(
@@ -348,7 +363,8 @@ def launch_experiment_with_params(
                 waiting_rate,
                 uptimes_file_name,
                 execution_start_time,
-                debug_current_uptime_and_overlap=""
+                use_case_name,
+                debug_current_uptime_and_overlap="",
             )
             finished_reconfs = {
                 "server-clients": {
