@@ -51,7 +51,8 @@ def _execute_node_reconf_in_g5k(
         start_round_reconf,
         uptimes_file_name,
         min_uptime,
-        use_case_name
+        use_case_name,
+        duration
 ):
     logs_assemblies_file = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
@@ -62,7 +63,13 @@ def _execute_node_reconf_in_g5k(
     while not finished_reconfiguration and round_reconf < len(uptimes_node) and not exception_raised:
         # Find next uptime
         current_time = time.time() - execution_start_time + min_uptime
-        next_uptime, duration = uptimes_node[round_reconf]
+        next_uptime, _ = uptimes_node[round_reconf]
+
+        # Wait for the next round where there is an uptime
+        while next_uptime == -1:
+            log_experiment.log.debug(f"Controller {node_num} skip round {round_reconf}, no uptime")
+            round_reconf += 1
+            next_uptime, _ = uptimes_node[round_reconf]
         sleeping_time = next_uptime - current_time  # Might be negative if next_uptime is equal to 0, threads that are created lately have current_time slightly increasing (up to 0.2s)
         if 0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME:
             sleeping_time = 0
@@ -86,7 +93,7 @@ def _execute_node_reconf_in_g5k(
             yaml.dump(sleep_times, f)
 
         absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
-        debug_current_uptime_and_overlap, nb_appearance, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12)
+        debug_current_uptime_and_overlap, nb_appearance, _, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12, [0] * 12)
 
         up_times = {}
         up_times["event_uptime"] = {"start": time.time()}
@@ -198,7 +205,8 @@ def _schedule_and_run_uptimes_from_config(
         execution_start_time,
         uptimes_file_name,
         min_uptime,
-        use_case_name
+        use_case_name,
+        duration
 ):
     """
     Controller of the experiment, spawn a thread for each node that is present in the uptimes list. The thread
@@ -240,7 +248,8 @@ def _schedule_and_run_uptimes_from_config(
                 start_round_reconf,
                 uptimes_file_name,
                 min_uptime,
-                use_case_name
+                use_case_name,
+                duration
             )
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
@@ -346,7 +355,8 @@ def launch_experiment_with_params(
                 execution_start_time,
                 uptimes_file_name,
                 min_uptime,
-                use_case_name
+                use_case_name,
+                duration=50  # TODO: a changer, valeur temporaire pour le test MASCOTS
             )
         else:
             exit_code, finished_reconf = execute_and_get_results(

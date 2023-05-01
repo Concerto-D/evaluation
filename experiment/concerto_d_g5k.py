@@ -432,12 +432,12 @@ def _get_pulumi_bin_path(environment: str):
 
 def execute_zenoh_routers(roles_zenoh_router, timeout, environment):
     log_experiment.log.debug(f"launch zenoh routers with {timeout} timeout")
-    kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w zenohd | awk '{print $2}')"
     concerto_d_projects_dir = globals_variables.all_executions_dir if environment in ["remote", "raspberry"] else globals_variables.all_expes_dir  # TODO condition inutile
 
     # Need to specify the dirs to search libs (/usr/lib by default)
     zenoh_install_dir = _get_zenoh_install_dir()
     launch_router_cmd = " ".join(["timeout", str(timeout), f"{zenoh_install_dir}/zenohd", "-c", f"{zenoh_install_dir}/zenohd-config.json5", "--cfg", f"'plugins_search_dirs:[\"{zenoh_install_dir}\"]'"])
+    kill_previous_routers_cmd = "kill $(ps -ef | grep -v grep | grep -w '" + zenoh_install_dir + "/zenohd -c " + zenoh_install_dir + "/zenohd-config.json5' | awk '{print $2}')"
 
     if environment in ["remote", "raspberry"]:
         en.run_command(kill_previous_routers_cmd, roles=roles_zenoh_router, on_error_continue=True)
