@@ -11,7 +11,7 @@ if __name__ == "__main__":
     with en.actions(roles=role_frontend) as a:
         a.git(dest=f"{concerto_d_projects_dir}/evaluation",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
-              version="mjuz-controller",
+              version="main",
               accept_hostkey=True)
         a.git(dest=f"{concerto_d_projects_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",

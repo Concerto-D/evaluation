@@ -174,7 +174,7 @@ def initialize_expe_repositories(version_concerto_d, roles):
                   virtualenv=f"{all_executions_dir}/concerto-decentralized/venv")
         a.git(dest=f"{all_executions_dir}/evaluation",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
-              version="mjuz-controller",
+              version="main",
               accept_hostkey=True)
         a.git(dest=f"{all_executions_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
