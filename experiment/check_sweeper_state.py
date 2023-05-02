@@ -8,10 +8,11 @@ if __name__ == "__main__":
     global_params, reservation_params, email_params, sweeper_params = execution_experiment.extract_parameters(configuration_expe_file_path)
     (
         expe_name,
-        environment,
-        version_concerto_d,
+        _,
+        _,
+        _,
         all_expes_dir,
-        all_executions_dir,
+        _,
         _,
         _,
         _
