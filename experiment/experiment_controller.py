@@ -339,7 +339,7 @@ def launch_experiment_with_params(
     finished_reconfs_by_reconf_name = {}
     start_round_reconf = 0
     for reconfiguration_name in ["deploy", "update"]:
-        min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0])[start_round_reconf][0]
+        min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0] if uptimes_node[start_round_reconf][0] != -1 else math.inf)[start_round_reconf][0]
         execution_start_time = time.time()
         if version_concerto_d != "central":
             finished_reconfs = _schedule_and_run_uptimes_from_config(
