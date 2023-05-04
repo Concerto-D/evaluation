@@ -66,7 +66,7 @@ def _execute_node_reconf_in_g5k(
         next_uptime, _ = uptimes_node[round_reconf]
 
         # Wait for the next round where there is an uptime
-        while next_uptime == -1:
+        while next_uptime == -1 and round_reconf + 1 < len(uptimes_node):
             log_experiment.log.debug(f"Controller {node_num} skip round {round_reconf}, no uptime")
             round_reconf += 1
             next_uptime, _ = uptimes_node[round_reconf]
