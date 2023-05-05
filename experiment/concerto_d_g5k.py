@@ -163,7 +163,7 @@ def initialize_expe_repositories(version_concerto_d, roles):
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
-                  version="custom_provider",
+                  version="main",
                   accept_hostkey=True)
         else:
             a.git(dest=f"{all_executions_dir}/concerto-decentralized",
