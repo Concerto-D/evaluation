@@ -65,51 +65,49 @@ def _execute_node_reconf_in_g5k(
         current_time = time.time() - execution_start_time + min_uptime
         next_uptime, _ = uptimes_node[round_reconf]
 
-        # Wait for the next round where there is an uptime
-        while next_uptime == -1 and round_reconf + 1 < len(uptimes_node):
+        if next_uptime != -1:
+            sleeping_time = next_uptime - current_time  # Might be negative if next_uptime is equal to 0, threads that are created lately have current_time slightly increasing (up to 0.2s)
+            if 0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME:
+                sleeping_time = 0
+            log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
+
+            key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
+
+            # Sleep until the uptime
+            sleep_times = {}
+            sleep_times[key_sleep_time] = {"start": time.time()}
+            time.sleep(sleeping_time)  # Wait until next execution
+            sleep_times[key_sleep_time]["end"] = time.time()
+
+            # If an exception has been raised while it slept, stop the thread without launching the next execution
+            if exception_raised:
+                log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
+                break
+
+            # Save metrics
+            with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:
+                yaml.dump(sleep_times, f)
+
+            absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
+            debug_current_uptime_and_overlap, nb_appearance, _, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12, [0] * 12)
+
+            up_times = {}
+            up_times["event_uptime"] = {"start": time.time()}
+            exit_code, finished_reconfiguration = execute_and_get_results(
+                assembly_name, dep_num, duration, environment,
+                nb_concerto_nodes, node_num,
+                reconf_config_file_path, reconfiguration_name,
+                roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
+                use_case_name, debug_current_uptime_and_overlap
+            )
+            up_times["event_uptime"] = {"end": time.time()}
+
+            # TODO: adhoc to mjuz Save uptime metrics
+            if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
+                with open(f"{logs_assemblies_file}/{assembly_name}-uptimes-{round_reconf}.yaml", "w") as f:
+                    yaml.dump(up_times, f)
+        else:
             log_experiment.log.debug(f"Controller {node_num} skip round {round_reconf}, no uptime")
-            round_reconf += 1
-            next_uptime, _ = uptimes_node[round_reconf]
-        sleeping_time = next_uptime - current_time  # Might be negative if next_uptime is equal to 0, threads that are created lately have current_time slightly increasing (up to 0.2s)
-        if 0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME:
-            sleeping_time = 0
-        log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
-
-        key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
-
-        # Sleep until the uptime
-        sleep_times = {}
-        sleep_times[key_sleep_time] = {"start": time.time()}
-        time.sleep(sleeping_time)  # Wait until next execution
-        sleep_times[key_sleep_time]["end"] = time.time()
-
-        # If an exception has been raised while it slept, stop the thread without launching the next execution
-        if exception_raised:
-            log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
-            break
-
-        # Save metrics
-        with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:
-            yaml.dump(sleep_times, f)
-
-        absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
-        debug_current_uptime_and_overlap, nb_appearance, _, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12, [0] * 12)
-
-        up_times = {}
-        up_times["event_uptime"] = {"start": time.time()}
-        exit_code, finished_reconfiguration = execute_and_get_results(
-            assembly_name, dep_num, duration, environment,
-            nb_concerto_nodes, node_num,
-            reconf_config_file_path, reconfiguration_name,
-            roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
-            use_case_name, debug_current_uptime_and_overlap
-        )
-        up_times["event_uptime"] = {"end": time.time()}
-
-        # TODO: adhoc to mjuz Save uptime metrics
-        if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-            with open(f"{logs_assemblies_file}/{assembly_name}-uptimes-{round_reconf}.yaml", "w") as f:
-                yaml.dump(up_times, f)
 
         round_reconf += 1
         log_experiment.log.debug(f"Round reconf for {assembly_name}: {round_reconf}")
