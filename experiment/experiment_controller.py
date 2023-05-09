@@ -337,8 +337,8 @@ def launch_experiment_with_params(
     finished_reconfs_by_reconf_name = {}
     start_round_reconf = 0
     for reconfiguration_name in ["deploy", "update"]:
-        # TODO: à corriger
-        if start_round_reconf < len(uptimes_nodes):
+        # TODO: doesn't handle the case where all uptime are -1 in a round. For now it doesn't appear in ud0, ud1 and ud2 so it's ok
+        if start_round_reconf < len(uptimes_nodes[0]):
             min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0] if uptimes_node[start_round_reconf][0] != -1 else math.inf)[start_round_reconf][0]
         else:
             min_uptime = -1  # TODO: Reconfiguration ends anyways
