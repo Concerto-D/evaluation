@@ -382,16 +382,37 @@ def execute_mjuz_reconf(
 
     mjuz_dir = f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     path_pulumi_bin = _get_pulumi_bin_path(environment)
-    command_args.append(f"{path_pulumi_bin}/pulumi login file:///tmp;")
-    dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
+    # command_args.append(f"{path_pulumi_bin}/pulumi login file:///tmp;")
+    cd_dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
     if "mjuz-2-comps":
-        dir_name += "-2-components"
-    command_args.append(dir_name + ";")
+        cd_dir_name += "-2-components"
+
+    # Remove des operations pending pour le cas de l'update pour les deps
+    if reconfiguration_name == "update" and dep_num is not None:
+        duration_cmd = time.time()
+        remove_pending_operations_cmd = f"{cd_dir_name}; PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack export | PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack import"
+        if environment in ["remote", "raspberry"]:
+            process_rmv = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_pending_operations_cmd}'", shell=True)
+        else:
+            process_rmv = subprocess.Popen(f"{remove_pending_operations_cmd}", shell=True)  # TODO: correction pour l'exécution en locale
+        process_rmv.wait()
+        duration -= time.time() - duration_cmd  # Substract the time taken to reset from the up-time duration (as node has to pay this time)
+
+    # Hack pour permettre s'endormir avant d'avoir withdraw l'offer (sinon il reste up indéfinimenet): pour kill -9 le process, puis retirer manuellement le pending_operations
+    # via export/import de la stack (les pending_operations sont ignorées lors de l'import)
+    if reconfiguration_name == "update" and dep_num is not None:
+        signal = "1"
+    else:
+        signal = "3"
+
+    command_args.append(cd_dir_name + ";")
     trailing = "" if environment in ["remote", "raspberry"] else ""
     command_args.append(f"PATH=$PATH:{path_pulumi_bin}" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
     command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
     command_args.append("PULUMI_CONFIG_PASSPHRASE=0000" + trailing)
+    command_args.append(f"timeout --preserve-status -s {signal} {duration}")
+
     command_args.append(f"{_get_ts_node_path(environment)} . -v trace")
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
@@ -405,9 +426,9 @@ def execute_mjuz_reconf(
     command_str = " ".join(command_args)
     log_experiment.log.debug(f"Command launched: {command_str}")
     if environment in ["remote", "raspberry"]:
-        process = subprocess.Popen(f"ssh root@{role_node[0].address} 'timeout --preserve-status -s 3 {duration} {command_str}'", shell=True)
+        process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
     else:
-        process = subprocess.Popen(f"timeout --preserve-status -s 3 {duration} {command_str}", shell=True)
+        process = subprocess.Popen(command_str, shell=True)
 
     # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy
     # but below 135 because it is the maximum sleeping time of the server)
