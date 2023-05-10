@@ -391,11 +391,16 @@ def execute_mjuz_reconf(
     if reconfiguration_name == "update" and dep_num is not None:
         duration_cmd = time.time()
         remove_pending_operations_cmd = f"{cd_dir_name}; PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack export | PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack import"
+        remove_dangling_processes = "kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs) && kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
         if environment in ["remote", "raspberry"]:
             process_rmv = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_pending_operations_cmd}'", shell=True)
+            process_rmv_dangling_p = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_dangling_processes}'", shell=True)
+
         else:
-            process_rmv = subprocess.Popen(f"{remove_pending_operations_cmd}", shell=True)  # TODO: correction pour l'exécution en locale
+            process_rmv = subprocess.Popen(remove_pending_operations_cmd, shell=True)  # TODO: correction pour l'exécution en locale
+            process_rmv_dangling_p = subprocess.Popen(remove_dangling_processes, shell=True)
         process_rmv.wait()
+        process_rmv_dangling_p.wait()
         duration -= time.time() - duration_cmd  # Substract the time taken to reset from the up-time duration (as node has to pay this time)
 
     # Hack pour permettre s'endormir avant d'avoir withdraw l'offer (sinon il reste up indéfinimenet): pour kill -9 le process, puis retirer manuellement le pending_operations
@@ -562,7 +567,7 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     Delete and recreate ~/.pulumi dir (containing state of deployed infrastructure) + kill all running
     ts-node processes
     """
-    kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node)"
+    kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node) && kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs) && kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
     reset_pulumi_dir_cmd = f"rm -rf /tmp/.pulumi &&"
     trailing = ";" if environment in ["remote", "raspberry"] else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
