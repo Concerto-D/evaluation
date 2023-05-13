@@ -391,21 +391,16 @@ def execute_mjuz_reconf(
     if reconfiguration_name == "update" and dep_num is not None:
         duration_cmd = time.time()
         remove_pending_operations_cmd = f"{cd_dir_name}; PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack export | PULUMI_CONFIG_PASSPHRASE=0000 {path_pulumi_bin}/pulumi stack import"
-        remove_dangling_processes_1 = "kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs)"
-        remove_dangling_processes_2 = "kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
+        remove_dangling_processes = "kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs) && kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
         if environment in ["remote", "raspberry"]:
             process_rmv = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_pending_operations_cmd}'", shell=True)
-            process_rmv_dangling_p_1 = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_dangling_processes_1}'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            process_rmv_dangling_p_2 = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_dangling_processes_2}'", shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            process_rmv_dangling_p = subprocess.Popen(f"ssh root@{role_node[0].address} '{remove_dangling_processes}'", shell=True)
 
         else:
             process_rmv = subprocess.Popen(remove_pending_operations_cmd, shell=True)  # TODO: correction pour l'exécution en locale
-            process_rmv_dangling_p_1 = subprocess.Popen(remove_dangling_processes_1, shell=True)
-            process_rmv_dangling_p_2 = subprocess.Popen(remove_dangling_processes_2, shell=True)
+            process_rmv_dangling_p = subprocess.Popen(remove_dangling_processes, shell=True)
         process_rmv.wait()
-        process_rmv_dangling_p_1.wait()
-        process_rmv_dangling_p_2.wait()
-
+        process_rmv_dangling_p.wait()
         duration -= time.time() - duration_cmd  # Substract the time taken to reset from the up-time duration (as node has to pay this time)
 
     # Hack pour permettre s'endormir avant d'avoir withdraw l'offer (sinon il reste up indéfinimenet): pour kill -9 le process, puis retirer manuellement le pending_operations
@@ -562,8 +557,7 @@ def _fetch_file(role_node, src, dst, dst_dir, environment):
         process = subprocess.Popen(f"scp root@{role_node[0].address}:{src} {dst}", shell=True)
         exit_code = process.wait()
         if exit_code != 0:
-            # raise Exception(f"Error while fetch {role_node[0].address} (src: {src}, dst: {dst})")
-            log_experiment.log.warn(f"Fetching {src} to {dst} failed for node {role_node[0].address}")
+            raise Exception(f"Error while fetch {role_node[0].address} (src: {src}, dst: {dst})")
     else:
         shutil.copy(src, dst)
 
@@ -573,7 +567,7 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
     Delete and recreate ~/.pulumi dir (containing state of deployed infrastructure) + kill all running
     ts-node processes
     """
-    kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node); kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs); kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
+    kill_ts_node_cmd = "kill -9 $(ps -aux | pgrep -f ts-node) && kill -9 $(ps -aux | pgrep -f pulumi-resource-pulumi-nodejs) && kill -9 $(ps -aux | pgrep -f pulumi/pulumi/cmd/dynamic-provider/index.js)"
     reset_pulumi_dir_cmd = f"rm -rf /tmp/.pulumi &&"
     trailing = ";" if environment in ["remote", "raspberry"] else ""
     reset_pulumi_dir_cmd += " PULUMI_SKIP_UPDATE_CHECK=1" + trailing
