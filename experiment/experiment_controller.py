@@ -161,12 +161,8 @@ def execute_and_get_results(
     concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment, use_case_name)
 
     # Throw exception if exit_code is unexpected
-    # TODO: very very ad-hoc solution: ignore error_code 1 (which can leads to silents errors, but this is required to get results for MASCOTS 2023)
-    if exit_code not in [0, 1, 5, 50]:
+    if exit_code not in [0, 5, 50]:
         raise Exception(f"Unexpected exit code for the the role: {roles[assembly_name][0].address} ({assembly_type}{dep_num}): {exit_code}")
-
-    if exit_code == 1:
-        log_experiment.log.warn("Got an error code of 1, consider as a CALL CANCELLED, but require to check as it could be a silent error")
 
     # Finish reconf for assembly name if its over
     global mjuz_server_finished
