@@ -112,7 +112,10 @@ def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, 
             yaml.dump(results, f, sort_keys=False)
 
     else:
+        results = {}
         print(f"Metadata file doesn't exist for {execution_dir}, result not computed")
+
+    return results
 
 
 # def compute_from_expe_dir(expe_dir: str, assemblies_names: List[str]):

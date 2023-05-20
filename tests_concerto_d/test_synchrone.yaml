@@ -1,0 +1,47 @@
+# Parameters used during the whole execution
+global_parameters:
+  expe_name: "tests-fonctionnels-synchrone"            # The experiment name, has to be unique
+  environment: "local"
+  version_concerto_d: "synchronous"                       # synchronous or asynchronous
+  use_case_name: "parallel_deps"                          # parallel_deps ou chained_deps
+  all_expes_dir: "/home/aomond/concerto-d-projects"
+  all_executions_dir: "/home/aomond/concerto-d-projects"
+  fetch_experiment_results: "False"
+  local_expe_res_dir: "concerto-d/tests_fonctionnels"
+  send_mail_after_all_expes: "False"
+
+# Infrastructure reservation. The synthetic use-case is executed on Grid5000 nodes that need to be
+# reserved. The execution can happens either on a controller node or on the frontend directly.
+reservation_parameters:
+  job_name_concerto: "concerto-d-sync"    # Name of the reservation for concerto nodes
+  walltime: "1:00:00"                     # Duration of the reservation
+  reservation: ""                         # e.g.: "2022-09-08 19:00:00", to postpone the reservation to a future date
+  nb_server_clients: 0
+  nb_servers: 1
+  nb_dependencies: 12
+  nb_provider_nodes: 0
+  nb_chained_nodes: 0
+  nb_zenoh_routers: 1                     # 0 if synchronous version, 1 if asynchronous
+  cluster: "local"                          # Which g5k cluster to reserve nodes
+  destroy_reservation: "False"
+
+email_parameters:
+  smtp_server: "z.imt.fr"
+  smtp_port: 587
+  username: "antoine.omond@imt-atlantique.fr"
+  password: ""
+
+
+# Synthetic use case parameters:
+#   - <uptimes>: file containing a draw of nodes uptimes and their durations. The name of the file describes the uptimes, example:
+#     'uptimes-<nb_wakes_ups>-<wake_up_duration>-<nb_deps>-<min_overlap_percentage>-<max_overlap_percentage>.json'.
+#   - <transitions_times>: file containing a draw of transitions times for the deps and the server:
+#     'transitions_times-<min_transition_time>-<max_transition_time>-deps<nb_deps>-<id>.json'.
+#   - <waiting_rate>: either 0, 0.5 or 1, percentage of the initial wake_up_duration that a node has to wait when blocked
+#     before going back to sleep.
+# Below is an example of a list of experiments.
+sweeper_parameters:
+  uptimes: ["tests_fonctionnels/uptimes_tests_fonctionnels_100.json"]
+  transitions_times: ["tests_fonctionnels/transitions_times_test_fonctionnels_1_sec.json"]
+  waiting_rate: [1]
+  id: [1, 2]

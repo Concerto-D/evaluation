@@ -8,7 +8,7 @@ from experiment import globals_variables
 log = None
 
 
-def initialize_logging(expe_name, stdout_only=False):
+def initialize_logging(expe_name, stdout_only=False, file_only=False):
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     experiment_results_dir = globals_variables.compute_current_expe_dir_from_name(expe_name)
     if not stdout_only:
@@ -17,9 +17,12 @@ def initialize_logging(expe_name, stdout_only=False):
 
     global log
     log = logging.getLogger(__name__)
-    console = logging.StreamHandler(sys.stdout)
-    console.setLevel(logging.DEBUG)
-    log.addHandler(console)
+
+    if not file_only:
+        console = logging.StreamHandler(sys.stdout)
+        console.setLevel(logging.DEBUG)
+        log.addHandler(console)
+
     log.setLevel(logging.DEBUG)
 
     def handle_exception(exc_type, exc_value, exc_traceback):
