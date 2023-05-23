@@ -48,7 +48,6 @@ def _execute_node_reconf_in_g5k(
         nb_concerto_nodes,
         execution_start_time,
         environment,
-        start_round_reconf,
         uptimes_file_name,
         min_uptime,
         use_case_name,
@@ -57,7 +56,7 @@ def _execute_node_reconf_in_g5k(
     logs_assemblies_file = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
     os.makedirs(logs_assemblies_file, exist_ok=True)
     finished_reconfiguration = False
-    round_reconf = start_round_reconf
+    round_reconf = 0
     exit_code = 0  # Init exit code to 0 for algo
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node) and not exception_raised:
@@ -199,7 +198,6 @@ def _schedule_and_run_uptimes_from_config(
         reconfiguration_name,
         nb_concerto_nodes,
         environment,
-        start_round_reconf,
         execution_start_time,
         uptimes_file_name,
         min_uptime,
@@ -243,7 +241,6 @@ def _schedule_and_run_uptimes_from_config(
                 nb_concerto_nodes - 1,
                 execution_start_time,
                 environment,
-                start_round_reconf,
                 uptimes_file_name,
                 min_uptime,
                 use_case_name,
@@ -338,10 +335,7 @@ def launch_experiment_with_params(
     start_round_reconf = 0
     for reconfiguration_name in ["deploy", "update"]:
         # TODO: doesn't handle the case where all uptime are -1 in a round. For now it doesn't appear in ud0, ud1 and ud2 so it's ok
-        if start_round_reconf < len(uptimes_nodes[0]):
-            min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0] if uptimes_node[start_round_reconf][0] != -1 else math.inf)[start_round_reconf][0]
-        else:
-            min_uptime = -1  # TODO: Reconfiguration ends anyways
+        min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0] if uptimes_node[start_round_reconf][0] != -1 else math.inf)[start_round_reconf][0]
         execution_start_time = time.time()
         if version_concerto_d != "central":
             finished_reconfs = _schedule_and_run_uptimes_from_config(
@@ -353,7 +347,6 @@ def launch_experiment_with_params(
                 reconfiguration_name,
                 nb_concerto_nodes,
                 environment,
-                start_round_reconf,
                 execution_start_time,
                 uptimes_file_name,
                 min_uptime,
@@ -391,7 +384,6 @@ def launch_experiment_with_params(
         concerto_d_g5k.fetch_dir(roles_concerto_d[roles_to_fetch], src_dir, dst_dir, environment)
 
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs
-        start_round_reconf = max(finished_reconfs.values(), key=lambda ass_reconf: ass_reconf["rounds_reconf"])["rounds_reconf"]
 
 
     log.debug("------ End of experiment ---------")
