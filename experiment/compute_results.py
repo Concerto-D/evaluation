@@ -157,21 +157,21 @@ def build_save_results_name(expe_name, version_concerto_name, transitions_times_
     else:
         file_name += "_T1"
 
-    if "1-1" in uptimes_file_name:
-        file_name += "_perc-1-1"
-    if "0_02-0_05" in uptimes_file_name:
-        file_name += "_perc-2-5"
-    if "0_2-0_3" in uptimes_file_name:
-        file_name += "_perc-20-30"
-    if "0_5-0_6" in uptimes_file_name:
-        file_name += "_perc-50-60"
-    if "0_02-0_02" in uptimes_file_name:
-        file_name += "_perc-2-2"
-    if "0_25-0_25" in uptimes_file_name:
-        file_name += "_perc-25-35"
-    if "0_5-0_5" in uptimes_file_name:
-        file_name += "_perc-50-50"
-
+    # if "1-1" in uptimes_file_name:
+    #     file_name += "_perc-1-1"
+    # if "0_02-0_05" in uptimes_file_name:
+    #     file_name += "_perc-2-5"
+    # if "0_2-0_3" in uptimes_file_name:
+    #     file_name += "_perc-20-30"
+    # if "0_5-0_6" in uptimes_file_name:
+    #     file_name += "_perc-50-60"
+    # if "0_02-0_02" in uptimes_file_name:
+    #     file_name += "_perc-2-2"
+    # if "0_25-0_25" in uptimes_file_name:
+    #     file_name += "_perc-25-35"
+    # if "0_5-0_5" in uptimes_file_name:
+    #     file_name += "_perc-50-50"
+    file_name += f"_{uptimes_file_name}"
     file_name += f"_waiting_rate-{waiting_rate}-{timestamp_name}"
 
     return file_name
