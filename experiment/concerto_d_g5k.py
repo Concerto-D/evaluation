@@ -249,13 +249,14 @@ def initialize_expe_repositories(version_concerto_d, roles):
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
-                  version="main",
+                  version="icse",
                   depth=1,
                   force=True,  # TODO: tmp for openstack use case on g5k
                   accept_hostkey=True)
         else:
             a.git(dest=f"{all_executions_dir}/concerto-decentralized",
                   repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
+                  version="icse",
                   depth=1,
                   accept_hostkey=True)
             a.pip(chdir=f"{all_executions_dir}/concerto-decentralized",
@@ -264,11 +265,12 @@ def initialize_expe_repositories(version_concerto_d, roles):
         a.git(dest=f"{all_executions_dir}/evaluation",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
               depth=1,
-              version="main",
+              version="icse",
               accept_hostkey=True)
         a.git(dest=f"{all_executions_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
               depth=1,
+              version="icse",
               accept_hostkey=True)
         log_experiment.log.debug(a.results)
 
