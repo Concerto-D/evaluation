@@ -9,7 +9,7 @@ all_executions_dir = ""
 current_expe_dir = None  # TODO: change name as it is the results found in current_execution_dir
 current_execution_dir = None
 
-inventory_name = "inventory.yaml"
+inventory_name = None
 
 
 def compute_current_expe_dir_from_name(expe_name):
@@ -23,6 +23,8 @@ def initialize_all_dirs(expe_name: str, all_expes_dir_str: str, all_executions_d
     all_executions_dir = all_executions_dir_str
     experiment_results_dir = compute_current_expe_dir_from_name(expe_name)
     os.makedirs(experiment_results_dir, exist_ok=True)
+    global inventory_name
+    inventory_name = f"inventory-{expe_name}.yaml"
 
 
 def initialize_current_dirs(
@@ -30,7 +32,7 @@ def initialize_current_dirs(
     version_concerto_d,
     transitions_times,
     uptimes,
-    waiting_rate,
+    nb_scaling_sites,
     cluster_name
 ):
     """
@@ -49,7 +51,7 @@ def initialize_current_dirs(
         version_concerto_d,
         transitions_times,
         uptimes,
-        waiting_rate,
+        nb_scaling_sites,
         ref_execution_timestamp,
         cluster_name
     )

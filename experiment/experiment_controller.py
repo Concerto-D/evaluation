@@ -1,6 +1,7 @@
 import json
 import math
 import os
+import re
 import time
 import traceback
 from concurrent import futures
@@ -28,7 +29,7 @@ class EndOfExperimentException(BaseException):
         super().__init__()
 
 
-mjuz_server_finished = False
+# mjuz_server_finished = False  # TODO: parallel_deps
 exception_raised = False
 exception_content = None
 
@@ -40,12 +41,11 @@ def _execute_node_reconf_in_g5k(
         version_concerto_d,
         assembly_name,
         reconf_config_file_path,
-        dep_num,
-        node_num,
+        scaling_num,
         waiting_rate,
         reconfiguration_name,
         uptimes_node,
-        nb_concerto_nodes,
+        nb_scaling_nodes,
         execution_start_time,
         environment,
         uptimes_file_name,
@@ -61,14 +61,14 @@ def _execute_node_reconf_in_g5k(
 
     while not finished_reconfiguration and round_reconf < len(uptimes_node) and not exception_raised:
         # Find next uptime
-        current_time = time.time() - execution_start_time + min_uptime
+        current_time = time.time() - execution_start_time
         next_uptime, _ = uptimes_node[round_reconf]
 
         if next_uptime != -1:
             sleeping_time = next_uptime - current_time  # Might be negative if next_uptime is equal to 0, threads that are created lately have current_time slightly increasing (up to 0.2s)
-            if 0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME:
+            if next_uptime == 0 or (0 < abs(sleeping_time) < ALL_THREADS_CREATION_TIME):
                 sleeping_time = 0
-            log_experiment.log.debug(f"Controller {node_num} sleep for {sleeping_time}")
+            log_experiment.log.debug(f"Assembly {assembly_name} sleep for {sleeping_time}")
 
             key_sleep_time = "event_sleeping_wait_all" if exit_code == 5 else "event_sleeping"
 
@@ -80,46 +80,55 @@ def _execute_node_reconf_in_g5k(
 
             # If an exception has been raised while it slept, stop the thread without launching the next execution
             if exception_raised:
-                log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
+                log_experiment.log.debug(f"Exception was raised, assembly {assembly_name} stop")
                 break
 
             # Save metrics
             with open(f"{logs_assemblies_file}/{assembly_name}_sleeping_times-{round_reconf}.yaml", "w") as f:
                 yaml.dump(sleep_times, f)
 
-            absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
-            debug_current_uptime_and_overlap, nb_appearance, _, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12, [0] * 12)
+            # TODO: reprendre le debug_current_time_and_overlap pour parallel_deps
+            # absolute_uptimes_file_name = f"{globals_variables.all_expes_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
+            # debug_current_uptime_and_overlap, nb_appearance, _, _ = compute_overlap_for_round(round_reconf, json.load(open(absolute_uptimes_file_name)), [0] * 12, [0] * 12)
+            debug_current_uptime_and_overlap = ""
 
             up_times = {}
             up_times["event_uptime"] = {"start": time.time()}
             exit_code, finished_reconfiguration = execute_and_get_results(
-                assembly_name, dep_num, duration, environment,
-                nb_concerto_nodes, node_num,
+                assembly_name, duration, environment,
+                nb_scaling_nodes, scaling_num,
                 reconf_config_file_path, reconfiguration_name,
                 roles, version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time,
                 use_case_name, debug_current_uptime_and_overlap
             )
-            up_times["event_uptime"] = {"end": time.time()}
+            up_times["event_uptime"]["end"] = time.time()
 
             # TODO: adhoc to mjuz Save uptime metrics
             if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-                with open(f"{logs_assemblies_file}/{assembly_name}-uptimes-{round_reconf}.yaml", "w") as f:
+                with open(f"{logs_assemblies_file}/{assembly_name}_uptimes-{round_reconf}.yaml", "w") as f:
                     yaml.dump(up_times, f)
         else:
-            log_experiment.log.debug(f"Controller {node_num} skip round {round_reconf}, no uptime")
+            log_experiment.log.debug(f"Assembly {assembly_name}  skip round {round_reconf}, no uptime")
 
         round_reconf += 1
         log_experiment.log.debug(f"Round reconf for {assembly_name}: {round_reconf}")
 
     if exception_raised:
-        log_experiment.log.debug(f"Exception was raised, controller {node_num} stop")
+        log_experiment.log.debug(f"Exception was raised, assembly {assembly_name} stop")
 
-    return finished_reconfiguration, round_reconf, node_num
+    return finished_reconfiguration, round_reconf, assembly_name
+
+
+def _get_ass_name(comp: str):
+    """
+    Assuming digits are always at the end
+    """
+    return "".join(re.findall(r"[^\d]", comp))
 
 
 def execute_and_get_results(
-        assembly_name, dep_num, duration, environment,
-        nb_concerto_nodes, node_num, reconf_config_file_path, reconfiguration_name, roles,
+        assembly_name, duration, environment,
+        nb_scaling_nodes, scaling_num, reconf_config_file_path, reconfiguration_name, roles,
         version_concerto_d, waiting_rate, uptimes_file_name, execution_start_time, use_case_name, debug_current_uptime_and_overlap
 ):
     # Execute reconf
@@ -127,51 +136,42 @@ def execute_and_get_results(
     transitions_times_file = f"{globals_variables.all_executions_dir}/experiment_files/parameters/transitions_times/{reconf_config_file_path}"
     uptimes_file_name_absolute = f"{globals_variables.all_executions_dir}/experiment_files/parameters/uptimes/{uptimes_file_name}"
 
-    if "server-clients" in assembly_name:
-        assembly_type = "server-clients"
-    elif "dep" in assembly_name:
-        assembly_type = "dep"
-    elif "server" in assembly_name:
-        assembly_type = "server"
-    elif "provider_node" in assembly_name:
-        assembly_type = "provider_node"
-    elif "chained_node" in assembly_name:
-        assembly_type = "chained_node"
-    else:
-        raise Exception(f"Unknowed assembly_name: {assembly_name}")
+    assembly_type = _get_ass_name(assembly_name)  # TODO: check parallel_deps
 
+    # TODO: corriger le dep_num pour le use_case parallel_deps
     if version_concerto_d in ["synchronous", "asynchronous", "central"]:
         exit_code = concerto_d_g5k.execute_reconf(
             roles[assembly_name], version_concerto_d, transitions_times_file,
-            duration, timestamp_log_dir, nb_concerto_nodes, dep_num, waiting_rate,
+            duration, timestamp_log_dir, nb_scaling_nodes, scaling_num, waiting_rate,
             reconfiguration_name, environment, assembly_type, uptimes_file_name_absolute, execution_start_time,
             debug_current_uptime_and_overlap, use_case_name
         )
     else:
         exit_code = concerto_d_g5k.execute_mjuz_reconf(
             roles[assembly_name], version_concerto_d, transitions_times_file,
-            duration, timestamp_log_dir, nb_concerto_nodes, dep_num,
-            waiting_rate, reconfiguration_name, environment, assembly_type
+            duration, timestamp_log_dir, nb_scaling_nodes, scaling_num,
+            waiting_rate, reconfiguration_name, environment, assembly_type, use_case_name
         )
 
     log_experiment.log.debug(f"Exit code: {exit_code} for {assembly_name}")
 
     # TODO: à généraliser à synchronous et asynchronous
-    concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, dep_num, environment, use_case_name)
+    concerto_d_g5k.fetch_debug_log_files(roles[assembly_name], assembly_name, environment)
 
     # Throw exception if exit_code is unexpected
     if exit_code not in [0, 5, 50]:
-        raise Exception(f"Unexpected exit code for the the role: {roles[assembly_name][0].address} ({assembly_type}{dep_num}): {exit_code}")
+        raise Exception(f"Unexpected exit code for the the role: {roles[assembly_name][0].address} ({assembly_name}): {exit_code}")
 
     # Finish reconf for assembly name if its over
-    global mjuz_server_finished
+    # global mjuz_server_finished  # TODO: parallel_deps
     finished_reconfiguration = False
-    if exit_code == 50 or (version_concerto_d in ["mjuz", "mjuz-2-comps"] and mjuz_server_finished):
-        log_experiment.log.debug(f"Node {node_num} finished")
+    # if exit_code == 50 or (version_concerto_d in ["mjuz", "mjuz-2-comps"] and mjuz_server_finished):  # TODO: parallel_deps
+    if exit_code == 50:
+        log_experiment.log.debug(f"Assembly {assembly_name} finished")
         finished_reconfiguration = True
 
-        if node_num == 0 and version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-            mjuz_server_finished = True
+        # if node_num == 0 and version_concerto_d in ["mjuz", "mjuz-2-comps"]:  # TODO: parallel_deps
+        #     mjuz_server_finished = True
 
     return exit_code, finished_reconfiguration
 
@@ -189,6 +189,13 @@ def _compute_sleeping_duration_uptime_duration(time_to_check, uptimes_node):
         #     return 0, uptime + duration//2 - time_to_check
 
 
+def _get_scaling_num(comp: str):
+    scaling_num = re.findall(r"\d+", comp)
+    if len(scaling_num) > 0:
+        return int(scaling_num[0])
+    return None
+
+
 def _schedule_and_run_uptimes_from_config(
         roles,
         version_concerto_d,
@@ -196,7 +203,7 @@ def _schedule_and_run_uptimes_from_config(
         reconfig_config_file_path,
         waiting_rate,
         reconfiguration_name,
-        nb_concerto_nodes,
+        nb_scaling_nodes,
         environment,
         execution_start_time,
         uptimes_file_name,
@@ -211,34 +218,36 @@ def _schedule_and_run_uptimes_from_config(
     log = log_experiment.log
     log.debug("SCHEDULING START")
 
-    with futures.ThreadPoolExecutor(max_workers=nb_concerto_nodes) as executor:
+    with futures.ThreadPoolExecutor(max_workers=1 + 3*nb_scaling_nodes) as executor:
         futures_to_proceed = []
         finished_reconfs = {}
-        global mjuz_server_finished
+        # global mjuz_server_finished   # TODO: parallel_deps
         global exception_raised
         global exception_content
-        mjuz_server_finished = False
+        # mjuz_server_finished = False  # TODO: parallel_deps
         exception_raised = False
         exception_content = None
-        for node_num in range(nb_concerto_nodes):
-            uptimes_node = uptimes_nodes[node_num]
-            # TODO: refacto assembly_name
-            dep_num = None if node_num == 0 else node_num - 1
-            if use_case_name == "parallel_deps":
-                assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
-            else:
-                assembly_name = "provider_node" if node_num == 0 else f"chained_node{node_num - 1}"
+        # If _get_scaling_num(ass_name) is None, it means it's a non-scaling node
+        assemblies_list = [ass_name for ass_name in roles.keys() if ass_name != "reconfiguring" and (_get_scaling_num(ass_name) is None or _get_scaling_num(ass_name) < nb_scaling_nodes)]  # TODO: refacto parallel_deps
+        for assembly_name in assemblies_list:
+            uptimes_node = [[0, 0]]
+            scaling_num = _get_scaling_num(assembly_name)
+            # TODO: reinclure expe parallel_deps
+            # dep_num = None if node_num == 0 else node_num - 1
+            # if use_case_name == "parallel_deps":
+            #     assembly_name = "server" if node_num == 0 else f"dep{node_num - 1}"
+            # else:
+            #     assembly_name = "provider_node" if node_num == 0 else f"chained_node{node_num - 1}"
             exec_future = _execute_node_reconf_in_g5k(
                 roles,
                 version_concerto_d,
                 assembly_name,
                 reconfig_config_file_path,
-                dep_num,
-                node_num,
+                scaling_num,
                 waiting_rate,
                 reconfiguration_name,
                 uptimes_node,
-                nb_concerto_nodes - 1,
+                nb_scaling_nodes,
                 execution_start_time,
                 environment,
                 uptimes_file_name,
@@ -249,8 +258,7 @@ def _schedule_and_run_uptimes_from_config(
             futures_to_proceed.append(exec_future)
         for future in futures.as_completed(futures_to_proceed):
             try:
-                finished_reconf, rounds_reconf, future_node_num = future.result()
-                future_assembly_name = "server" if future_node_num == 0 else f"dep{future_node_num - 1}"
+                finished_reconf, rounds_reconf, future_assembly_name = future.result()
                 finished_reconfs[future_assembly_name] = {
                     "finished_reconfiguration": finished_reconf,
                     "rounds_reconf": rounds_reconf,
@@ -269,6 +277,14 @@ def _schedule_and_run_uptimes_from_config(
 def reset_environment(version_concerto_d: str, environment: str, roles_concerto_d, uptimes_nodes):
     log = log_experiment.log
 
+    # If Mjuz, clean the previous environment before running again
+    if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
+        log.debug("-------- Clean previous environment -------")
+        log.debug("Clean running mjuz processes and reset previous pulumi dir")
+        concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d["reconfiguring"], environment)
+    else:
+        concerto_d_g5k.clean_previous_concerto_d_environment(roles_concerto_d["reconfiguring"], environment)
+
     # If asynchronous, deploy zenoh router
     if version_concerto_d == "asynchronous":
         log.debug("------- Deploy zenoh routers -------")
@@ -276,13 +292,6 @@ def reset_environment(version_concerto_d: str, environment: str, roles_concerto_
             concerto_d_g5k.install_zenoh_router(roles_concerto_d["zenoh_routers"], environment)
         max_uptime_value = _compute_end_reconfiguration_time(uptimes_nodes)
         concerto_d_g5k.execute_zenoh_routers(roles_concerto_d["zenoh_routers"], max_uptime_value, environment)
-
-    # If Mjuz, clean the previous environment before running again
-    if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
-        log.debug("-------- Clean previous environment -------")
-        log.debug("Clean running mjuz processes and reset previous pulumi dir")
-        concerto_d_g5k.clean_previous_mjuz_environment(roles_concerto_d, environment)
-
 
 def _compute_end_reconfiguration_time(uptimes_nodes):
     max_uptime_value = 0
@@ -297,13 +306,13 @@ def _compute_end_reconfiguration_time(uptimes_nodes):
 def launch_experiment_with_params(
         expe_name,
         version_concerto_d,
-        nb_concerto_nodes,
+        nb_scaling_nodes,
         uptimes_file_name,
-        transitions_times_file_name,
-        waiting_rate,
+        transitions_times_file_name,  # TODO: Refacto parallel_deps (removed waiting rate)
         environment,
         roles_concerto_d,
         use_case_name,
+        duration,
         id_run,
 ):
     log = log_experiment.log
@@ -313,12 +322,12 @@ def launch_experiment_with_params(
 
     # Create current execution dir and log_debug dir
     current_execution_dir = globals_variables.current_execution_dir
-    concerto_d_g5k.create_dir(roles_concerto_d["concerto_d"], current_execution_dir, environment)
+    concerto_d_g5k.create_dir(roles_concerto_d["reconfiguring"], current_execution_dir, environment)
 
     # Put inventory file on each node
     log.debug("Put inventory file on each")
     inventory_name = globals_variables.inventory_name
-    concerto_d_g5k.put_file(roles_concerto_d["concerto_d"], inventory_name, f"{current_execution_dir}/{inventory_name}", environment)
+    concerto_d_g5k.put_file(roles_concerto_d["reconfiguring"], inventory_name, f"{current_execution_dir}/{inventory_name}", environment)
 
     # Clean and restore environment from previous run
     reset_environment(
@@ -336,22 +345,22 @@ def launch_experiment_with_params(
     for reconfiguration_name in ["deploy", "update"]:
         # TODO: doesn't handle the case where all uptime are -1 in a round. For now it doesn't appear in ud0, ud1 and ud2 so it's ok
         min_uptime = min(uptimes_nodes, key=lambda uptimes_node: uptimes_node[start_round_reconf][0] if uptimes_node[start_round_reconf][0] != -1 else math.inf)[start_round_reconf][0]
-        execution_start_time = time.time()
+        execution_start_time = time.time() + min_uptime
         if version_concerto_d != "central":
             finished_reconfs = _schedule_and_run_uptimes_from_config(
                 roles_concerto_d,
                 version_concerto_d,
                 uptimes_nodes_list,
                 transitions_times_file_name,
-                waiting_rate,
+                1,  # TODO: refacto parallel_deps put waiting_rate to 1
                 reconfiguration_name,
-                nb_concerto_nodes,
+                nb_scaling_nodes,
                 environment,
                 execution_start_time,
                 uptimes_file_name,
                 min_uptime,
                 use_case_name,
-                duration=50  # TODO: a changer, valeur temporaire pour le test MASCOTS
+                duration=duration
             )
         else:
             exit_code, finished_reconf = execute_and_get_results(
@@ -365,7 +374,7 @@ def launch_experiment_with_params(
                 reconfiguration_name,
                 roles_concerto_d,
                 version_concerto_d,
-                waiting_rate,
+                1,
                 uptimes_file_name,
                 execution_start_time,
                 use_case_name,
@@ -380,7 +389,10 @@ def launch_experiment_with_params(
         log.debug(f"Fetching all timestamps log files for {reconfiguration_name}")
         dst_dir = f"{globals_variables.current_expe_dir}/logs_files_assemblies/{reconfiguration_name}"
         src_dir = f"{globals_variables.current_execution_dir}/{reconfiguration_name}"
-        roles_to_fetch = "server" if version_concerto_d in ["mjuz", "mjuz-2-comps"] else "concerto_d"
+        if use_case_name in ["openstack", "str_cps"]:
+            roles_to_fetch = "reconfiguring"
+        else:
+            roles_to_fetch = "server" if version_concerto_d in ["mjuz", "mjuz-2-comps"] else "reconfiguring"
         concerto_d_g5k.fetch_dir(roles_concerto_d[roles_to_fetch], src_dir, dst_dir, environment)
 
         finished_reconfs_by_reconf_name[reconfiguration_name] = finished_reconfs

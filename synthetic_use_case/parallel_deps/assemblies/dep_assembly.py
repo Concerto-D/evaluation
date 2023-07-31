@@ -4,7 +4,7 @@ from synthetic_use_case.parallel_deps.assemblies.dep import Dep
 
 class DepAssembly(Assembly):
     def __init__(self, p, reconf_config_dict, waiting_rate, version_concerto_d, reconfiguration_name, nb_concerto_nodes):
-        remote_assemblies = {"server_assembly": "server"}
+        remote_assemblies = {"server_assembly": "server"}  # TODO: refacto keep only list
 
         # # Adding remote components and assemblies
         # for i in range(nb_concerto_nodes):

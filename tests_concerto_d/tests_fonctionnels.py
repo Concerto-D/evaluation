@@ -38,6 +38,7 @@ def execute_test(
     version_concerto_d,
     expected_results_values,
     expected_synchronization_results_values,
+    duration,
 ):
     reservation_params = {
         "cluster": "local",
@@ -62,7 +63,8 @@ def execute_test(
         reservation_params=reservation_params,
         roles_concerto_d=roles_concerto_d,
         use_case_name="parallel_deps",
-        version_concerto_d=version_concerto_d
+        version_concerto_d=version_concerto_d,
+        duration=duration
     )
 
     (
@@ -98,7 +100,7 @@ def execute_test(
         }
     }
 
-    check_and_print_diffs(results, expected_results)
+    return results, expected_results
 
 
 if __name__ == "__main__":
@@ -115,25 +117,54 @@ if __name__ == "__main__":
         _,
         _,
         _,
+        _,
         _
     ) = execution_experiment.initialize_expe(config_file_path, testing=True)
 
-    execute_test(
+    res_1, expected_res_1 = execute_test(
         nb_dependencies=1,
         nb_servers=1,
         uptimes="tests_fonctionnels/uptimes_tests_fonctionnels_100.json",
         transitions_times="tests_fonctionnels/transitions_times_test_fonctionnels_1_sec.json",
         version_concerto_d="synchronous",
         expected_results_values=[3, 4, 7, 0, 7],
-        expected_synchronization_results_values=[1, 1, 2, 0, 2]
+        expected_synchronization_results_values=[1, 1, 2, 0, 2],
+        duration=50
     )
 
-    execute_test(
+    res_2, expected_res_2 = execute_test(
         nb_dependencies=3,
         nb_servers=1,
         uptimes="tests_fonctionnels/uptimes_tests_fonctionnels_100.json",
         transitions_times="tests_fonctionnels/transitions_times_test_fonctionnels_server_first.json",
         version_concerto_d="synchronous",
         expected_results_values=[10, 14.5, 24.5, 0, 24.5],
-        expected_synchronization_results_values=[7, 10.5, 17.5, 0, 17.5]
+        expected_synchronization_results_values=[7, 10.5, 17.5, 0, 17.5],
+        duration=50
     )
+    print("RES 1")
+    check_and_print_diffs(res_1, expected_res_1)
+
+    print("RES 2")
+    check_and_print_diffs(res_2, expected_res_2)
+
+    # execute_test(
+    #     nb_dependencies=2,
+    #     nb_servers=1,
+    #     uptimes="tests_fonctionnels/test_wait_all_true.json",
+    #     transitions_times="tests_fonctionnels/transitions_times_wait_all_true.json",
+    #     version_concerto_d="synchronous",
+    #     expected_results_values=[4, 12, 16, 6.5, 20.5],
+    #     expected_synchronization_results_values=[0, 0, 0, 0, 0],
+    #     duration=10
+    # )
+
+    # execute_test(
+    #     nb_dependencies=3,
+    #     nb_servers=1,
+    #     uptimes="tests_fonctionnels/uptimes_tests_fonctionnels_100.json",
+    #     transitions_times="tests_fonctionnels/transitions_times_test_fonctionnels_server_first.json",
+    #     version_concerto_d="mjuz-2-comps",
+    #     expected_results_values=[10, 14.5, 24.5, 0, 24.5],
+    #     expected_synchronization_results_values=[7, 10.5, 17.5, 0, 17.5]
+    # )

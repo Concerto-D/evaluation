@@ -16,7 +16,7 @@ def save_expe_metadata(
         version_concerto_d,
         transitions_times,
         uptimes,
-        waiting_rate,
+        nb_scaling_sites,
         cluster
 ):
     # TODO: fix algo not correct
@@ -31,7 +31,7 @@ def save_expe_metadata(
             "version_concerto_name": version_concerto_d,
             "transitions_times_file_name": transitions_times,
             "uptimes_file_name": uptimes,
-            "waiting_rate": waiting_rate,
+            "nb_scaling_sites": nb_scaling_sites,  # TODO: refacto parallel_deps
             "cluster": cluster,
         },
         "expe_details": {
@@ -43,11 +43,9 @@ def save_expe_metadata(
         yaml.safe_dump(metadata_expe, f, sort_keys=False)
 
 
-def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, assemblies_names: List[str]):
+def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, assemblies_names: List[str], use_case_name: str):
     # Read metadata file and put it in results
     metadata_file_path = f"{expe_dir_path}/{execution_dir}/execution_metadata.yaml"
-    log = log_experiment.log
-    log.debug(f"Metadata file path: {metadata_file_path}")
 
     # If execution metadata file doesn't exists, it means the execution has been aborted, so don't compute the results
     if exists(metadata_file_path):
@@ -64,7 +62,7 @@ def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, 
         # For each reconfiguration name
         for reconfiguration_name in ["deploy", "update"]:
             # Call compute_execution_metrics for total of each metric
-            _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results)
+            _compute_execution_metrics(f"{expe_dir_path}/{execution_dir}", version_concerto_d, reconfiguration_name, details_assemblies_results, use_case_name)
 
         # Sort by descending order (highest values on top)
         if "server-clients" in details_assemblies_results.keys():
@@ -126,7 +124,7 @@ def compute_results_from_dir(expe_name, expe_dir_path: str, execution_dir: str, 
 #         compute_results_from_dir(expe_dir_path, execution_dir, assemblies_names)
 
 
-def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict):
+def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconfiguration_name: str, details_assemblies_results: Dict, use_case_name: str):
     """
     Fill the param details_assemblies_results with metrics for the given reconfiguration name
     """
@@ -138,7 +136,7 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
         if assembly_name not in details_assemblies_results:
             details_assemblies_results[assembly_name] = {"deploy": {}, "update": {}}
 
-        if "mjuz" not in version_concerto_d or assembly_name == "server":
+        if "mjuz" not in version_concerto_d or assembly_name == "server" or use_case_name in ["openstack", "str_cps"]:
             for timestamp_name, timestamp_values in loaded_results.items():
                 timestamp_name_to_save = f"total_{timestamp_name}_duration"
                 if timestamp_name_to_save not in details_assemblies_results[assembly_name][reconfiguration_name]:
@@ -146,7 +144,7 @@ def _compute_execution_metrics(current_dir: str, version_concerto_d: str, reconf
                 details_assemblies_results[assembly_name][reconfiguration_name][timestamp_name_to_save] += timestamp_values["end"] - timestamp_values["start"]
 
 
-def build_save_results_name(expe_name, version_concerto_name, transitions_times_file_name, uptimes_file_name, waiting_rate, timestamp_name, cluster_name):
+def build_save_results_name(expe_name, version_concerto_name, transitions_times_file_name, uptimes_file_name, nb_scaling_sites, timestamp_name, cluster_name):
     file_name = "results_"
     file_name += expe_name
     file_name += f"_{version_concerto_name}"
@@ -171,8 +169,8 @@ def build_save_results_name(expe_name, version_concerto_name, transitions_times_
     #     file_name += "_perc-25-35"
     # if "0_5-0_5" in uptimes_file_name:
     #     file_name += "_perc-50-50"
-    file_name += f"_{uptimes_file_name}"
-    file_name += f"_waiting_rate-{waiting_rate}-{timestamp_name}"
+    file_name += f"_{uptimes_file_name.split('/')[-1]}"
+    file_name += f"nb_scaling_sites-{nb_scaling_sites}-{timestamp_name}"  # TODO: refacto parallel_deps
 
     return file_name
 
@@ -195,6 +193,8 @@ def _compute_global_results(details_assemblies_results):
         "max_reconf_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_reconf_duration_func),
         "max_sleeping_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_sleeping_duration_func),
         "max_execution_time": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_duration_func),
+        "max_execution_time_deploy": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_duration_deploy_func),
+        "max_execution_time_update": _compute_max_value_from_func(details_assemblies_results, metric_experiment_functions.max_execution_duration_update_func),
     }
 
 
@@ -219,10 +219,11 @@ def _compute_global_synchronization_results(details_assemblies_results):
 
 
 if __name__ == '__main__':
-    expe_name = "expe_name"
-    expe_dir_path = f"{home_dir}/experiment-test-central-correct-dir"
+    expe_name = "experiment-test-openstack-local-dir"
+    expe_dir_path = f"{home_dir}/experiment-test-openstack-local-dir"
     compute_results_from_dir(
         expe_name,
-        expe_dir_path, "results_central_T0_perc-50-60_waiting_rate-1-2023-01-03_17-47-53",
-        ["server", "dep0", "dep1", "dep2", "dep3", "dep4", "dep5", "dep6", "dep7", "dep8", "dep9", "dep10", "dep11"]
+        expe_dir_path, "results_test-openstack-local_mjuz-2-comps_local_T0_mascots_uptimes-60-50-5-ud0_od0_15_25_perc.json_waiting_rate-1-2023-07-11_16-48-11",
+        ["mariadbmaster", "keystone0", "nova0", "neutron0"],
+        "openstack"
     )

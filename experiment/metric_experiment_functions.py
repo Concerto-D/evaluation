@@ -19,6 +19,14 @@ def max_execution_duration_func(assemblies_values):
           + assemblies_values["deploy"].get("total_event_uptime_duration", 0) + assemblies_values["update"].get("total_event_uptime_duration", 0))
 
 
+def max_execution_duration_deploy_func(assemblies_values):
+    return assemblies_values["deploy"].get("total_event_sleeping_duration", 0) + assemblies_values["deploy"].get("total_event_uptime_duration", 0)
+
+
+def max_execution_duration_update_func(assemblies_values):
+    return assemblies_values["update"].get("total_event_sleeping_duration", 0) + assemblies_values["update"].get("total_event_uptime_duration", 0)
+
+
 def max_deploy_sync_duration_func(assemblies_values):
     return assemblies_values["deploy"].get("total_instruction_waitall_27_duration", 0) + assemblies_values["deploy"].get("total_instruction_waitall_5_duration", 0)
 

@@ -1,7 +1,9 @@
+import copy
 import os
 import shutil
 import subprocess
 import time
+from datetime import datetime
 from os.path import exists
 from typing import List, Optional
 
@@ -9,7 +11,7 @@ import enoslib as en
 from enoslib.infra.enos_g5k.g5k_api_utils import get_cluster_site
 
 from experiment import globals_variables, log_experiment
-
+import importlib
 
 def destroy_provider_from_job_name(job_name: str):
     conf = en.G5kConf.from_settings(job_name=job_name).finalize()
@@ -59,7 +61,91 @@ def reserve_node_for_controller(job_name: str, cluster: str, walltime: str = '01
     return roles, networks, provider
 
 
-def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_servers: int, nb_dependencies: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+def reserve_nodes_for_openstack(job_name: str, nb_scaled_sites: int, cluster: str, version_concerto_d: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+    _ = en.init_logging()
+    site = get_cluster_site(cluster)
+    concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
+    conf = (
+        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name=job_name)
+                  .add_network_conf(concerto_d_network)
+    )
+    # TODO: complete the reservation with other nodes
+    conf = conf.add_machine(
+        roles=["reconfiguring", f"mariadbmaster"],
+        cluster=cluster,
+        nodes=1,
+        primary_network=concerto_d_network,
+    )
+    for i in range(nb_scaled_sites):
+        if "mjuz" in version_concerto_d:
+            roles_worker = ["reconfiguring", f"worker{i}"]
+        else:
+            roles_worker = ["reconfiguring", f"keystone{i}", f"glance{i}", f"mariadbworker{i}"]
+        conf = conf.add_machine(
+            roles=roles_worker,
+            cluster=cluster,
+            nodes=1,
+            primary_network=concerto_d_network,
+        )
+        conf = conf.add_machine(
+            roles=["reconfiguring", f"nova{i}"],
+            cluster=cluster,
+            nodes=1,
+            primary_network=concerto_d_network,
+        )
+        conf = conf.add_machine(
+            roles=["reconfiguring", f"neutron{i}"],
+            cluster=cluster,
+            nodes=1,
+            primary_network=concerto_d_network,
+        )
+    conf = conf.finalize()
+
+    provider = en.G5k(conf)
+    roles, networks = provider.init()
+    return roles, networks, provider
+
+
+def reserve_nodes_for_cps_str(job_name: str, nb_scaled_sites: int, cluster: str, version_concerto_d: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
+    _ = en.init_logging()
+    site = get_cluster_site(cluster)
+    concerto_d_network = en.G5kNetworkConf(type="prod", roles=["base_network"], site=site)
+    conf = (
+        en.G5kConf.from_settings(job_type="allow_classic_ssh", walltime=walltime, reservation=reservation, job_name=job_name)
+                  .add_network_conf(concerto_d_network)
+    )
+    # TODO: complete the reservation with other nodes
+    conf = conf.add_machine(
+        roles=["reconfiguring", f"database"],
+        cluster=cluster,
+        nodes=1,
+        primary_network=concerto_d_network,
+    )
+    conf = conf.add_machine(
+        roles=["reconfiguring", f"system"],
+        cluster=cluster,
+        nodes=1,
+        primary_network=concerto_d_network,
+    )
+    for i in range(nb_scaled_sites):
+        if "mjuz" in version_concerto_d:
+            roles_cps = ["reconfiguring", f"cps{i}"]
+        else:
+            roles_cps = ["reconfiguring", f"listener{i}", f"sensor{i}"]
+        conf = conf.add_machine(
+            roles=roles_cps,
+            cluster=cluster,
+            nodes=1,
+            primary_network=concerto_d_network,
+        )
+    conf = conf.finalize()
+
+    provider = en.G5k(conf)
+    roles, networks = provider.init()
+    return roles, networks, provider
+
+
+def reserve_nodes_for_parallel_deps(job_name: str, nb_server_clients: int, nb_servers: int, nb_dependencies: int, nb_zenoh_routers: int, cluster: str, walltime: str = '01:00:00', reservation: Optional[str] = None):
     # TODO: refacto assembly_name
     _ = en.init_logging()
     site = get_cluster_site(cluster)
@@ -69,14 +155,14 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_serve
                   .add_network_conf(concerto_d_network)
     )
     conf = conf.add_machine(
-        roles=["concerto_d", "server"],
+        roles=["reconfiguring", "server"],
         cluster=cluster,
         nodes=nb_servers,
         primary_network=concerto_d_network,
     )
     for i in range(nb_dependencies):
         conf = conf.add_machine(
-            roles=["concerto_d", f"dep{i}"],
+            roles=["reconfiguring", f"dep{i}"],
             cluster=cluster,
             nodes=1,
             primary_network=concerto_d_network,
@@ -88,7 +174,7 @@ def reserve_nodes_for_concerto_d(job_name: str, nb_server_clients: int, nb_serve
         primary_network=concerto_d_network,
     )
     conf = conf.add_machine(
-        roles=["concerto_d", "server-clients"],
+        roles=["reconfiguring", "server-clients"],
         cluster=cluster,
         nodes=nb_server_clients,
         primary_network=concerto_d_network,
@@ -117,7 +203,7 @@ def add_host_keys_to_know_hosts(roles_concerto_d, cluster):
     log = log_experiment.log
     log.debug(f"Check host keys for nodes in {site}")
     for k, v in roles_concerto_d.items():
-        if k != "concerto_d":
+        if k != "reconfiguring":
             log.debug(f"Check {v[0].address}")
             process = subprocess.Popen(
                 f"ssh-keygen -F {v[0].address}",
@@ -164,20 +250,25 @@ def initialize_expe_repositories(version_concerto_d, roles):
             a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
                   repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
                   version="main",
+                  depth=1,
+                  force=True,  # TODO: tmp for openstack use case on g5k
                   accept_hostkey=True)
         else:
             a.git(dest=f"{all_executions_dir}/concerto-decentralized",
                   repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
+                  depth=1,
                   accept_hostkey=True)
             a.pip(chdir=f"{all_executions_dir}/concerto-decentralized",
                   requirements=f"{all_executions_dir}/concerto-decentralized/requirements.txt",
                   virtualenv=f"{all_executions_dir}/concerto-decentralized/venv")
         a.git(dest=f"{all_executions_dir}/evaluation",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
+              depth=1,
               version="main",
               accept_hostkey=True)
         a.git(dest=f"{all_executions_dir}/experiment_files",
               repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
+              depth=1,
               accept_hostkey=True)
         log_experiment.log.debug(a.results)
 
@@ -193,8 +284,8 @@ def initialize_deps_mjuz(roles_concerto_d, environment):
             yarn_cmd = f"{globals_variables.all_executions_dir}/pulumi-bin/yarn"
         else:
             yarn_cmd = "yarn"
-        # Need to pass as dict due to reserved keyword: global
         if environment == "remote":
+            # Need to pass as dict due to reserved keyword: global
             a.npm(
                 **{
                     "global": "yes",
@@ -236,12 +327,19 @@ def initialize_deps_mjuz(roles_concerto_d, environment):
                 state="link"
             )
     # TODO: check this solution: https://stackoverflow.com/questions/71420286/unable-to-install-grpc-tools-via-npm-or-yarn-on-mac-m1-chip
-
-    # TODO: Need to add grpc-tools dependency again for g5k to build grpc deps instead of putting the prebuild binaries
     # Install dependencies
     en.run_command(
         f"cd {all_executions_dir}/mjuz-concerto-d && {yarn_cmd}", roles=roles_concerto_d
     )
+
+    # Manually install the dependency using yarn add then install, then restore git tracked files (no --save option to prevent writing on the file: https://github.com/yarnpkg/yarn/issues/1743)
+    if environment == "remote":
+        en.run_command(
+            f"cd {all_executions_dir}/mjuz-concerto-d/mjuz-grpc-protos && yarn add grpc-tools@1.11.1 && yarn install && git restore package.json ../yarn.lock", roles=roles_concerto_d
+        )
+        en.run_command(
+            f"cd {all_executions_dir}/mjuz-concerto-d; yarn postinstall-all", roles=roles_concerto_d
+        )
 
     # TODO: check what is better: version dist/ folder or put dist/ on remote before execution
     # if environment == "raspberry":
@@ -302,8 +400,8 @@ def execute_reconf(
         config_file_path: str,
         duration: float,
         timestamp_log_file: str,
-        nb_concerto_nodes,
-        dep_num,
+        nb_scaling_nodes,
+        scaling_num,
         waiting_rate: float,
         reconfiguration_name: str,
         environment: str,
@@ -321,6 +419,8 @@ def execute_reconf(
         command_args.append(f"export PYTHONPATH=$PYTHONPATH:{all_executions_dir}/evaluation;")
     command_args.append(f"{all_executions_dir}/concerto-decentralized/venv/bin/python3")               # Execute inside the python virtualenv
     command_args.append(f"{all_executions_dir}/evaluation/synthetic_use_case/{use_case_name}/reconf_programs/reconf_{assembly_type}.py")  # The reconf program to execute
+    command_args.append(str(execution_start_time))
+    command_args.append(assembly_type)
     command_args.append(config_file_path)  # The path of the config file that the remote process will search to
     command_args.append(str(duration))     # The awakening time of the program, it goes to sleep afterwards (it exits)
     command_args.append(str(waiting_rate))
@@ -328,18 +428,14 @@ def execute_reconf(
     command_args.append(globals_variables.current_execution_dir)
     command_args.append(version_concerto_d)
     command_args.append(reconfiguration_name)
-    command_args.append(str(nb_concerto_nodes))
-    if dep_num is not None:  # If it's a dependency
-        command_args.append("--dep_num")
-        command_args.append(str(dep_num))
+    command_args.append(str(nb_scaling_nodes))
+    if scaling_num is not None:  # If it's a dependency
+        command_args.append("--scaling_num")
+        command_args.append(str(scaling_num))
 
     if assembly_type == "server-clients":
         command_args.append("--uptimes_nodes_file_path")
         command_args.append(uptimes_file_name)
-
-    if assembly_type == "server-clients":
-        command_args.append("--execution_start_time")
-        command_args.append(str(execution_start_time))
 
     command_args.append("--debug_current_uptime_and_overlap")
     command_args.append("\""+debug_current_uptime_and_overlap+"\"")
@@ -352,14 +448,14 @@ def execute_reconf(
     log.debug(f"Start execution reconfiguration, command executed: {command_str_to_log}")
     if environment in ["remote", "raspberry"]:
         process = subprocess.Popen(f"ssh root@{role_node[0].address} '{command_str}'", shell=True)
-        exit_code = process.wait()
+        exit_code = process.wait(timeout=1800)
 
     else:
         cwd = os.getcwd()
         env_process = os.environ.copy()
         env_process["PYTHONPATH"] += f":{cwd}:{cwd}/../evaluation"
         process = subprocess.Popen(command_args, env=env_process, cwd=f"{all_executions_dir}/concerto-decentralized")
-        exit_code = process.wait()
+        exit_code = process.wait(timeout=1800)
 
     return exit_code
 
@@ -370,12 +466,13 @@ def execute_mjuz_reconf(
         config_file_path: str,
         duration: float,
         timestamp_log_file: str,
-        nb_concerto_nodes,
-        dep_num,
+        nb_scaling_nodes,
+        scaling_num,
         waiting_rate: float,
         reconfiguration_name: str,
         environment: str,
-        assembly_type: str
+        assembly_type: str,
+        use_case_name: str
 ):
     # TODO: Ajouter le use_case_name pour Mjuz
     command_args = []
@@ -383,11 +480,17 @@ def execute_mjuz_reconf(
     mjuz_dir = f"{globals_variables.all_executions_dir}/mjuz-concerto-d"
     path_pulumi_bin = _get_pulumi_bin_path(environment)
     # command_args.append(f"{path_pulumi_bin}/pulumi login file:///tmp;")
-    dir_name = f"cd {mjuz_dir}/synthetic-use-case/{assembly_type}"
-    if "mjuz-2-comps":
+    dir_name = f"cd {mjuz_dir}/synthetic-use-case"
+    if use_case_name in ["openstack", "str_cps"]:
+        dir_name += f"/{use_case_name}/{assembly_type}"
+    else:
+        dir_name += f"/{assembly_type}"
+
+    if "mjuz-2-comps" and use_case_name not in ["openstack", "str_cps"]:
         dir_name += "-2-components"
     command_args.append(dir_name + ";")
-    trailing = "" if environment in ["remote", "raspberry"] else ""
+    # trailing = "" if environment in ["remote", "raspberry"] else ""
+    trailing = ""
     command_args.append(f"PATH=$PATH:{path_pulumi_bin}" + trailing)
     command_args.append("PULUMI_SKIP_UPDATE_CHECK=1" + trailing)
     command_args.append("PULUMI_AUTOMATION_API_SKIP_VERSION_CHECK=0" + trailing)
@@ -400,9 +503,9 @@ def execute_mjuz_reconf(
     command_args.append(timestamp_log_file)
     command_args.append(globals_variables.current_execution_dir)
     command_args.append(reconfiguration_name)
-    command_args.append(str(nb_concerto_nodes))
-    if dep_num is not None:
-        command_args.append(str(dep_num))  # If it's a dependency
+    command_args.append(str(nb_scaling_nodes))
+    if scaling_num is not None:
+        command_args.append(str(scaling_num))  # If it's a dependency
 
     command_str = " ".join(command_args)
     log_experiment.log.debug(f"Command launched: {command_str}")
@@ -413,7 +516,7 @@ def execute_mjuz_reconf(
 
     # Magic value (timeout need to be above 90s min cause 88s is the amount of time need for server to deploy
     # but below 135 because it is the maximum sleeping time of the server)
-    exit_code = process.wait(timeout=130)
+    exit_code = process.wait(timeout=1800)  # TODO: refacto parallel_deps
 
     return exit_code
 
@@ -512,13 +615,7 @@ def fetch_dir(roles, src_dir: str, dst_dir: str, environment):
 #         _fetch_file(role_node, src, dst, dst_dir, environment)
 
 
-def fetch_debug_log_files(role_node, assembly_type, dep_num, environment, use_case_name):
-    if assembly_type == "server-clients":
-        assembly_name = "server-clients"
-    else:
-        single_node_name = "server" if use_case_name == "parallel_deps" else "provider_node"
-        linked_node_name = "dep" if use_case_name == "parallel_deps" else "chained_node"
-        assembly_name = single_node_name if assembly_type == single_node_name else f"{linked_node_name}{dep_num}"
+def fetch_debug_log_files(role_node, assembly_name, environment):
     file_name = f"logs_{assembly_name}.txt"
     dst_dir = f"{globals_variables.current_expe_dir}/logs_debug"
     src = f"{globals_variables.current_execution_dir}/logs/{file_name}"
@@ -535,7 +632,8 @@ def _fetch_file(role_node, src, dst, dst_dir, environment):
         if exit_code != 0:
             raise Exception(f"Error while fetch {role_node[0].address} (src: {src}, dst: {dst})")
     else:
-        shutil.copy(src, dst)
+        if exists(src):
+            shutil.copy(src, dst)
 
 
 def clean_previous_mjuz_environment(roles_concerto_d, environment):
@@ -558,3 +656,79 @@ def clean_previous_mjuz_environment(roles_concerto_d, environment):
         subprocess.Popen(kill_ts_node_cmd, shell=True).wait()
         subprocess.Popen(reset_pulumi_dir_cmd, shell=True).wait()
 
+
+def clean_previous_concerto_d_environment(roles_concerto_d, environment):
+    """
+    Delete and recreate ~/.pulumi dir (containing state of deployed infrastructure) + kill all running
+    ts-node processes
+    """
+    kill_concerto_d_cmd = "kill $(ps -aux | pgrep -f concerto-d-projects/concerto-decentralized/venv/bin/python3)"
+    if environment in ["remote", "raspberry"]:
+        en.run_command(kill_concerto_d_cmd, roles=roles_concerto_d, on_error_continue=True)
+
+
+def execute_planner(roles_concerto_d, nb_scaled_sites, id_run, expe_name):
+    # To do manually before:
+    # clone cp-scheduling in $HOME locally
+    # clone cp-scheduling in $HOME on g5k (NFS)
+    # untar Minizinc installation in $HOME on g5k (NFS)
+    # install GLOBALLY minizinc, grpcio==1.47.0, grpcio-tools==1.47.0 on g5k (NFS)
+    planner_roles = copy.deepcopy(roles_concerto_d)
+    cp_scheduling_path = os.path.join(os.environ["HOME"], "cp-scheduling")  # Assume the repo is cloned
+    spec = importlib.util.spec_from_file_location("expe_galera_g5k", os.path.join(cp_scheduling_path, "expe_galera_g5k.py"))
+    expe_galera_g5k = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(expe_galera_g5k)
+
+    # Adapt roles to fit planner inventory
+    planner_roles["galera"] = copy.deepcopy(roles_concerto_d["reconfiguring"])
+    planner_roles["master"] = copy.deepcopy(roles_concerto_d["mariadbmaster"])
+    for i in range(nb_scaled_sites):
+        planner_roles[f"worker{i}"] = copy.deepcopy(roles_concerto_d[f"keystone{i}"])
+
+    # Launch planner
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    result_dir = f"/tmp/{timestamp}/"
+    inventory = f"/tmp/{timestamp}/addresses.txt"
+    content, address_ids = expe_galera_g5k.make_addresses_content(planner_roles, nb_scaled_sites)
+    expe_galera_g5k.init_address_file(planner_roles, content, inventory)
+    try:
+        expe_galera_g5k.run(nb_scaled_sites, 0, planner_roles, inventory, result_dir)  # Assume lantecy=0
+        expe_galera_g5k.get_results(nb_scaled_sites, planner_roles, result_dir)
+        expe_galera_g5k.merge_results(f"{os.environ['HOME']}/tmp/planner_results-sites-{nb_scaled_sites}-{expe_name}-{id_run}.csv", address_ids, result_dir)
+        expe_galera_g5k.clean(list(address_ids.keys()))
+    except Exception as e:
+        print(e)
+        expe_galera_g5k.get_errors(planner_roles, result_dir)
+        raise e
+
+
+def execute_planner_str_cps(roles_concerto_d, nb_scaled_sites, id_run, expe_name):
+    # To do manually before:
+    # clone cp-scheduling in $HOME locally
+    # clone cp-scheduling in $HOME on g5k (NFS)
+    # untar Minizinc installation in $HOME on g5k (NFS)
+    # install GLOBALLY minizinc, grpcio, grpcio-tools on g5k (NFS)
+    planner_roles = copy.deepcopy(roles_concerto_d)
+    cp_scheduling_path = os.path.join(os.environ["HOME"], "cp-scheduling")  # Assume the repo is cloned
+    spec = importlib.util.spec_from_file_location("expe_cps_g5k", os.path.join(cp_scheduling_path, "expe_cps_g5k.py"))
+    expe_str_cps_g5k = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(expe_str_cps_g5k)
+
+    # Adapt roles to fit planner inventory
+    planner_roles["cps"] = copy.deepcopy(roles_concerto_d["reconfiguring"])
+
+    # Launch planner
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    result_dir = f"/tmp/{timestamp}/"
+    inventory = f"/tmp/{timestamp}/addresses.txt"
+    content, address_ids = expe_str_cps_g5k.make_addresses_content(planner_roles, nb_scaled_sites)
+    expe_str_cps_g5k.init_address_file(planner_roles, content, inventory)
+    try:
+        expe_str_cps_g5k.run(nb_scaled_sites, 0, planner_roles, inventory, result_dir)  # Assume lantecy=0
+        expe_str_cps_g5k.get_results(planner_roles, result_dir)
+        expe_str_cps_g5k.merge_results(f"{os.environ['HOME']}/tmp-str-cps/planner_results-sites-{nb_scaled_sites}-{expe_name}-{id_run}.csv", address_ids, result_dir)
+        expe_str_cps_g5k.clean(list(address_ids.keys()))
+    except Exception as e:
+        print(e)
+        expe_str_cps_g5k.get_errors(planner_roles, result_dir)
+        raise e

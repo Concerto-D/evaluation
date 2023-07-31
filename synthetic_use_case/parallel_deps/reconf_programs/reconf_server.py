@@ -16,9 +16,9 @@ def deploy(sc, nb_deps_tot):
 
 
 @create_timestamp_metric(TimestampType.TimestampEvent.UPDATE)
-def update(sc):
+def update(sc, nb_deps_tot):
     sc.push_b("server", "suspend")
-    sc.wait_all(wait_for_refusing_provide=True)
+    sc.wait_all(wait_for_refusing_provide=True, deps_concerned=[(f"dep{dep_num}", "service") for dep_num in range(nb_deps_tot)])
     sc.push_b("server", "deploy")
     sc.wait("server")
 
@@ -31,7 +31,7 @@ def execute_reconf(config_dict, duration, waiting_rate, version_concerto_d, reco
     if reconfiguration_name == "deploy":
         deploy(sc, nb_concerto_nodes)
     else:
-        update(sc)
+        update(sc, nb_concerto_nodes)
 
     return sc
 
