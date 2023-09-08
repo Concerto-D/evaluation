@@ -1,1 +1,1 @@
-Cf https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized
+see https://github.com/Concerto-D/concerto-decentralized.git for details
