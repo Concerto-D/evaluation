@@ -119,8 +119,7 @@ def execute_expe(environment, expe_name, parameter, reservation_params, roles_co
         expe_name,
         version_concerto_d,
         reservation_params["nb_dependencies"] + reservation_params["nb_servers"] + reservation_params[
-            "nb_server_clients"]
-        + reservation_params["nb_provider_nodes"] + reservation_params["nb_chained_nodes"],
+            "nb_server_clients"],
         uptimes,
         transitions_times,
         waiting_rate,
@@ -149,10 +148,6 @@ def execute_expe(environment, expe_name, parameter, reservation_params, roles_co
         assemblies_names.append(f"dep{i}")
     if reservation_params["nb_server_clients"] == 1:
         assemblies_names.append("server-clients")
-    if reservation_params["nb_provider_nodes"] == 1:
-        assemblies_names.append("provider_node")
-    for i in range(reservation_params["nb_chained_nodes"]):
-        assemblies_names.append(f"chained_node{i}")
     log.debug(f"List assemblies names to compute metrics from: {assemblies_names}")
     results = compute_results.compute_results_from_dir(expe_name, experiment_dir, execution_dir_name, assemblies_names)
     return execution_dir_name, results
