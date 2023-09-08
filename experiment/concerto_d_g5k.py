@@ -162,22 +162,22 @@ def initialize_expe_repositories(version_concerto_d, roles):
         a.apt(name=["git", "python3-pip", "virtualenv"], state="present")
         if version_concerto_d in ["mjuz", "mjuz-2-comps"]:
             a.git(dest=f"{all_executions_dir}/mjuz-concerto-d",
-                  repo="https://gitlab.inria.fr/aomond/mjuz-concerto-d.git",
+                  repo="https://github.com/Concerto-D/mjuz-concerto-d.git",
                   version="main",
                   accept_hostkey=True)
         else:
             a.git(dest=f"{all_executions_dir}/concerto-decentralized",
-                  repo="https://gitlab.inria.fr/aomond-imt/concerto-d/concerto-decentralized.git",
+                  repo="https://github.com/Concerto-D/concerto-decentralized.git",
                   accept_hostkey=True)
             a.pip(chdir=f"{all_executions_dir}/concerto-decentralized",
                   requirements=f"{all_executions_dir}/concerto-decentralized/requirements.txt",
                   virtualenv=f"{all_executions_dir}/concerto-decentralized/venv")
         a.git(dest=f"{all_executions_dir}/evaluation",
-              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/evaluation.git",
+              repo="https://github.com/Concerto-D/evaluation.git",
               version="main",
               accept_hostkey=True)
         a.git(dest=f"{all_executions_dir}/experiment_files",
-              repo="https://gitlab.inria.fr/aomond-imt/concerto-d/experiment_files.git",
+              repo="https://github.com/Concerto-D/experiment_files.git",
               accept_hostkey=True)
         log_experiment.log.debug(a.results)
 
