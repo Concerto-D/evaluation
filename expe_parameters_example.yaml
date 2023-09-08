@@ -1,0 +1,51 @@
+# Parameters used during the whole execution
+global_parameters:
+  expe_name: "openstack-deployment"      # The experiment name, uniquely identify the experiment
+  environment: "remote"                  # Where the reconfiguration program are launched:
+                                            # local: on the host machine (each program is one process)
+                                            # remote: each program is assigned to a g5k node
+  version_concerto_d: "asynchronous"     # Which version to launch
+                                            # synchronous: without router
+                                            # asynchronous: with router
+  use_case_name: "parallel_deps"         # parallel_deps is the only available use_case to launch
+  all_expes_dir: "/home/dir/concerto-d-projects"     # Directory to store the files yielded by the experiment controller and aggregated from reconf programs + all the repo used by controller (evaluation, experiment_files)
+  all_executions_dir: "/root/concerto-d-projects"    # Directory to store files used by reconf programs while executing (e.g. state of programs before sleeping, etc) + repos used for execution (concerto-decentralized, evaluation, etc)
+
+  ### TODO: not used anymore, to remove
+  fetch_experiment_results: "True"
+  local_expe_res_dir: "concerto-d/prod/raspberry-5_deps-50-duration"
+  send_mail_after_all_expes: "False"
+  ###
+
+### TODO: not used anymore, to remove
+email_parameters:
+  smtp_server: ""
+  smtp_port: 587
+  username: ""
+  password: ""
+###
+
+# Infrastructure reservation on g5k. Used only if environment == remote, else ignored
+reservation_parameters:
+  job_name_concerto: "concerto-d"    # Name of the g5k reservation
+  walltime: "01:00:00"               # Duration of the reservation format HH:MM:SS
+  reservation: ""                    # e.g.: "2022-09-08 19:00:00", schedule the reservation, leave blank ("") for immediate runs
+  nb_server_clients: 0               # Not used
+  nb_servers: 1                      # Nb of servers reconfs programs, only exactly 1 is available
+  nb_dependencies: 1                 # Nb of dependencies reconfs programs
+  nb_zenoh_routers: 1                # Nb of routers running pub/sub service (Zenoh). 0 if synchronous, 1 or more if asynchronous (has been tested only with 1)
+  cluster: "grisou"                  # Which g5k cluster to reserve nodes
+  destroy_reservation: "False"       # Destroy reservation immediately after all experiments are done or failed
+
+
+# Synthetic use case parameters. Will be "swept" by ParamSweeper (https://mimbert.gitlabpages.inria.fr/execo/execo_engine.html?highlight=paramsweeper#execo_engine.sweep.sweep):
+#   - <uptimes>: schedules representing the uptimes and sleeping periods of the server and its dependencies
+#   - <transitions_times>: transitions time of the reconfiguration actions for each components
+#   - <waiting_rate>: for each reconf program, when reconf is blocked, percentage of mandatory time
+#                     to be up before going back to sleep.  (tested with 0, 0.5 and 1)
+#   - <id>: uniquely identify a combination of the previous parameters (used to repeat the same experiment multiple times)
+sweeper_parameters:
+  uptimes: ["uptimes-60-30-12-1-1-1.json", "uptimes-60-30-12-0_5-0_6.json", "uptimes-60-30-12-0_2-0_3.json", "uptimes-60-30-12-0_02-0_05.json"]
+  transitions_times: ["transitions_times-1-30-deps12-0.json", "transitions_times-1-30-deps12-1.json"]
+  waiting_rate: [0, 0.5, 1]
+  id: [1]
