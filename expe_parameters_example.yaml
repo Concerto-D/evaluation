@@ -45,7 +45,7 @@ reservation_parameters:
 #                     to be up before going back to sleep.  (tested with 0, 0.5 and 1)
 #   - <id>: uniquely identify a combination of the previous parameters (used to repeat the same experiment multiple times)
 sweeper_parameters:
-  uptimes: ["uptimes-60-30-12-1-1-1.json", "uptimes-60-30-12-0_5-0_6.json", "uptimes-60-30-12-0_2-0_3.json", "uptimes-60-30-12-0_02-0_05.json"]
+  uptimes: ["mascots_uptimes-60-50-5-ud0_od0_15_25_perc.json", "mascots_uptimes-60-50-5-ud1_od0_15_25_perc.json", "mascots_uptimes-60-50-5-ud2_od0_15_25_perc.json"]
   transitions_times: ["transitions_times-1-30-deps12-0.json", "transitions_times-1-30-deps12-1.json"]
-  waiting_rate: [0, 0.5, 1]
+  waiting_rate: [1]
   id: [1]
