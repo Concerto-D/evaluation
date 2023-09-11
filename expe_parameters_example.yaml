@@ -8,8 +8,8 @@ global_parameters:
                                             # synchronous: without router
                                             # asynchronous: with router
   use_case_name: "parallel_deps"         # parallel_deps is the only available use_case to launch
-  all_expes_dir: "/home/dir/concerto-d-projects"     # Directory to store the files yielded by the experiment controller and aggregated from reconf programs + all the repo used by controller (evaluation, experiment_files)
-  all_executions_dir: "/root/concerto-d-projects"    # Directory to store files used by reconf programs while executing (e.g. state of programs before sleeping, etc) + repos used for execution (concerto-decentralized, evaluation, etc)
+  all_expes_dir: "/home/dir/concerto-d-projects"     # Controller directory (on machine that runs the controller)
+  all_executions_dir: "/root/concerto-d-projects"    # Nodes directory (on machine that simulate node)
 
   ### TODO: not used anymore, to remove
   fetch_experiment_results: "True"
@@ -33,7 +33,7 @@ reservation_parameters:
   nb_server_clients: 0               # Not used
   nb_servers: 1                      # Nb of servers reconfs programs, only exactly 1 is available
   nb_dependencies: 1                 # Nb of dependencies reconfs programs
-  nb_zenoh_routers: 1                # Nb of routers running pub/sub service (Zenoh). 0 if synchronous, 1 or more if asynchronous (has been tested only with 1)
+  nb_zenoh_routers: 1                # Nb of routers running pub/sub service (Zenoh). 0 if synchronous, 1 or more if asynchronous (has been tested only with 0 and 1)
   cluster: "grisou"                  # Which g5k cluster to reserve nodes
   destroy_reservation: "False"       # Destroy reservation immediately after all experiments are done or failed
 
@@ -42,7 +42,7 @@ reservation_parameters:
 #   - <uptimes>: schedules representing the uptimes and sleeping periods of the server and its dependencies
 #   - <transitions_times>: transitions time of the reconfiguration actions for each components
 #   - <waiting_rate>: for each reconf program, when reconf is blocked, percentage of mandatory time
-#                     to be up before going back to sleep.  (tested with 0, 0.5 and 1)
+#                     to be up before going back to sleep.  (leave it at 1 for MASCOTS)
 #   - <id>: uniquely identify a combination of the previous parameters (used to repeat the same experiment multiple times)
 sweeper_parameters:
   uptimes: ["mascots_uptimes-60-50-5-ud0_od0_15_25_perc.json", "mascots_uptimes-60-50-5-ud1_od0_15_25_perc.json", "mascots_uptimes-60-50-5-ud2_od0_15_25_perc.json"]
