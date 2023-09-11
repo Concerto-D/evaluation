@@ -8,7 +8,7 @@ global_parameters:
                                             # synchronous: without router
                                             # asynchronous: with router
   use_case_name: "parallel_deps"         # parallel_deps is the only available use_case to launch
-  all_expes_dir: "/home/dir/concerto-d-projects"     # Controller directory (on machine that runs the controller)
+  all_expes_dir: "/home/user/concerto-d-projects"     # Controller directory (on machine that runs the controller)
   all_executions_dir: "/root/concerto-d-projects"    # Nodes directory (on machine that simulate node)
 
   ### TODO: not used anymore, to remove
